@@ -1,0 +1,35 @@
+// https://cdn.sparkfun.com/datasheets/Components/Switches/MX%20Series.pdf
+
+CHERRY_SWITCH_BASE_WIDTH = 15.6;
+CHERRY_SWITCH_BASE_LENGTH = 15.6;
+CHERRY_SWITCH_BASE_HEIGHT = 11.6;
+
+CHERRY_SWITCH_ACTUATOR_WIDTH = 5; // TODO: measure
+CHERRY_SWITCH_ACTUATOR_LENGTH = 5; // TODO: measure
+CHERRY_SWITCH_ACTUATOR_HEIGHT = 3.6;
+
+CHERRY_SWITCH_TRAVEL = 2; // TODO: measure
+
+CHERRY_SWITCH_ORIGIN = [-10.25, -12.85];
+
+module cherry_switch() {
+    e = .081;
+
+    cube([
+        CHERRY_SWITCH_BASE_WIDTH,
+        CHERRY_SWITCH_BASE_LENGTH,
+        CHERRY_SWITCH_BASE_HEIGHT
+    ]);
+
+    translate([
+        (CHERRY_SWITCH_BASE_WIDTH - CHERRY_SWITCH_ACTUATOR_WIDTH) / 2,
+        (CHERRY_SWITCH_BASE_LENGTH - CHERRY_SWITCH_ACTUATOR_LENGTH) / 2,
+        CHERRY_SWITCH_BASE_HEIGHT - e
+    ]) {
+        cube([
+            CHERRY_SWITCH_ACTUATOR_WIDTH,
+            CHERRY_SWITCH_ACTUATOR_LENGTH,
+            CHERRY_SWITCH_ACTUATOR_HEIGHT + e
+        ]);
+    }
+}
