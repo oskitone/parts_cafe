@@ -9,7 +9,7 @@ SWITCH_ACTUATOR_LENGTH = 2.1;
 SWITCH_ACTUATOR_HEIGHT = 3.8;
 SWITCH_ACTUATOR_TRAVEL = 1.5;
 
-SWITCH_ORIGIN = [SWITCH_BASE_WIDTH / 2, 6.36];
+SWITCH_ORIGIN = [SWITCH_BASE_WIDTH / -2, -6.36, 0];
 
 module switch(
     position = 0,
@@ -27,7 +27,7 @@ module switch(
 ) {
     e = .05234;
 
-    translate([-origin.x, -origin.y, 0]) {
+    translate([origin.x, origin.y, origin.z]) {
         cube([base_width, base_length, base_height]);
 
         translate([
