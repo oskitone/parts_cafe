@@ -1,6 +1,7 @@
 include <switch.scad>;
 
 module switch_clutch(
+    // TODO: base_width and base_length
     base_height = SWITCH_BASE_HEIGHT + 1,
 
     actuator_width = SWITCH_ACTUATOR_WIDTH + 2,
@@ -32,6 +33,7 @@ module switch_clutch(
 
     gutter = clearance + tolerance;
 
+    // TODO: use derivations if unprovided
     base_width = switch_base_width + gutter * 2 + wall * 2;
     base_length = switch_base_length + switch_actuator_travel + coverage * 2;
 
