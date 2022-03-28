@@ -46,6 +46,8 @@ module enclosure_engraving(
     placard = undef,
     chamfer_placard_top = false,
 
+    rotation = 0,
+
     bottom = false,
 
     quick_preview = true,
@@ -58,7 +60,7 @@ module enclosure_engraving(
         position.y,
         bottom ? depth : enclosure_height - depth
     ]) {
-        rotate([0, bottom ? 180 : 0, 0]) {
+        rotate([0, bottom ? 180 : 0, rotation]) {
             difference() {
                 if (placard) {
                     translate([
