@@ -1,3 +1,5 @@
+include <../../parts_cafe/openscad/rib_cavities.scad>;
+
 include <switch.scad>;
 
 module switch_clutch(
@@ -39,7 +41,7 @@ module switch_clutch(
 
     y = switch_actuator_travel / 2 - switch_actuator_travel * (1 - position);
 
-    function get_center_origin(
+    function get_absolute_origin(
         _base_width = base_width,
         _base_length = base_length,
         z = 0
@@ -72,7 +74,7 @@ module switch_clutch(
             actuator_height = actuator_height,
             actuator_travel = 0,
 
-            origin = get_center_origin(base_width, base_length, z)
+            origin = get_absolute_origin(base_width, base_length, z)
         );
     }
 
@@ -82,8 +84,8 @@ module switch_clutch(
             base_length = base_length,
             base_height = base_height,
 
-            actuator_width = actuator_width + gutter * 2,
-            actuator_length = actuator_length + gutter * 2,
+            actuator_width = actuator_width,
+            actuator_length = actuator_length,
             actuator_height = actuator_height
         );
     }
@@ -104,14 +106,35 @@ module switch_clutch(
         );
     }
 
+    module _rib_cavities(depth = DEFAULT_RIB_SIZE) {
+        origin = get_absolute_origin(
+            _base_width = actuator_width,
+            _base_length = actuator_length
+        );
+
+        translate([
+            origin.x,
+            origin.y,
+            base_height + actuator_height - depth
+        ]) {
+            rib_cavities(
+                width = actuator_width,
+                length = actuator_length,
+                depth = depth
+            );
+        }
+    }
+
     translate([0, y, 0]) {
         difference() {
             _outer();
 
             _cavity();
 
+            _rib_cavities();
+
             if (debug) {
-                translate([0, get_center_origin().y - e, -e]) {
+                translate([0, get_absolute_origin().y - e, -e]) {
                     cube([
                         base_width / 2 + e,
                         base_length + e * 2,
