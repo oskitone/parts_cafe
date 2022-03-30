@@ -38,6 +38,8 @@ module wheel(
     color = undef,
     cavity_color = undef,
 
+    debug = false,
+
     tolerance = 0
 ) {
     e = 0.043;
@@ -132,21 +134,25 @@ module wheel(
             );
         }
 
-        // Cavity is full available height, regardless of actual usage
-        pot_cavity_z = height - hub_ceiling
-            - PTV09A_POT_BASE_HEIGHT - PTV09A_POT_ACTUATOR_HEIGHT;
+        module _pot() {
+            // Cavity is full available height, regardless of actual usage
+            z = height - hub_ceiling
+                - PTV09A_POT_BASE_HEIGHT - PTV09A_POT_ACTUATOR_HEIGHT;
 
-        _chamfer();
-        difference() {
-            translate([0, 0, pot_cavity_z]) {
+            translate([0, 0, z]) {
                 pot(
-                    show_base = false,
+                    show_base = debug,
                     diameter_bleed = tolerance,
                     shaft_type = shaft_type,
                     $fn = $preview ? undef : 120
                 );
             }
+        }
 
+        _chamfer();
+
+        difference() {
+            if (debug) { # _pot(); } else { _pot(); }
             _grips();
         }
     }
@@ -246,6 +252,16 @@ module wheel(
                 _dimple_cavities();
             }
         }
+
+        if (debug) {
+            translate([0, diameter / -2 -e, -e]) {
+                cube([
+                    diameter / 2 + e,
+                    diameter + e * 2,
+                    height + brodie_knob_diameter / 2 + e * 2
+                ]);
+            }
+        }
     }
 }
 
@@ -282,3 +298,5 @@ for (i = [0 : len(shim_sizes) - 1]) {
         }
     }
 } */
+
+/* wheel(debug = true); */
