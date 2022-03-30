@@ -1,4 +1,5 @@
 PTV09A_POT_BASE_WIDTH = 10;
+PTV09A_POT_BASE_LENGTH = 11;
 PTV09A_POT_BASE_HEIGHT = 6.8;
 PTV09A_POT_ACTUATOR_DIAMETER = 6.1;
 PTV09A_POT_ACTUATOR_BASE_DIAMETER = 6.9;
@@ -17,6 +18,7 @@ module pot(
     show_actator = true,
 
     base_width = PTV09A_POT_BASE_WIDTH,
+    base_length = PTV09A_POT_BASE_LENGTH,
     base_height = PTV09A_POT_BASE_HEIGHT,
 
     actuator_diameter = PTV09A_POT_ACTUATOR_DIAMETER,
@@ -32,8 +34,8 @@ module pot(
     e = .0421;
 
     if (show_base) {
-        translate([-7.35 + 2.52, + 1.5 - 7, 0]) {
-            cube([base_width, 11, base_height]);
+        translate([base_width / -2, base_length / -2, 0]) {
+            cube([base_width, base_length, base_height]);
         }
     }
 
