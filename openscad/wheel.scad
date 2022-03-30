@@ -136,12 +136,12 @@ module wheel(
 
         module _pot() {
             // Cavity is full available height, regardless of actual usage
-            z = height - hub_ceiling
-                - PTV09A_POT_BASE_HEIGHT - PTV09A_POT_ACTUATOR_HEIGHT;
+            z = -(e + PTV09A_POT_BASE_HEIGHT);
 
             translate([0, 0, z]) {
                 pot(
                     show_base = debug,
+                    actuator_height = height - hub_ceiling + e,
                     diameter_bleed = tolerance,
                     shaft_type = shaft_type,
                     $fn = $preview ? undef : 120
