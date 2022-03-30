@@ -136,7 +136,7 @@ module wheel(
 
         module _pot() {
             // Cavity is full available height, regardless of actual usage
-            z = -(e + PTV09A_POT_BASE_HEIGHT);
+            z = -(e + PTV09A_POT_BASE_HEIGHT_FROM_PCB);
 
             translate([0, 0, z]) {
                 pot(
