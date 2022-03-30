@@ -40,27 +40,41 @@ module pot(
     }
 
     if (show_actator) {
-        translate([0, 0, base_height - e]) {
-            difference() {
+        height = actuator_height + actuator_height_bleed;
+        flat_cavity_height = actuator_d_shaft_height + actuator_height_bleed;
+
+        difference() {
+            translate([0, 0, base_height - e]) {
                 cylinder(
                     d = actuator_diameter + diameter_bleed * 2,
-                    h = actuator_height + actuator_height_bleed + e
+                    h = height + e
                 );
+            }
 
-                if (shaft_type == POT_SHAFT_TYPE_FLATTED) {
-                    translate([
-                        actuator_diameter / -2 - diameter_bleed,
-                        actuator_diameter / -2 - e - diameter_bleed,
-                        actuator_height - actuator_d_shaft_height
-                    ]) {
-                        cube([
-                            actuator_diameter + diameter_bleed * 2,
-                            actuator_d_shaft_depth + e,
-                            actuator_d_shaft_height + actuator_height_bleed + e
-                        ]);
-                    }
+            if (shaft_type == POT_SHAFT_TYPE_FLATTED) {
+                translate([
+                    actuator_diameter / -2 - diameter_bleed,
+                    actuator_diameter / -2 - e - diameter_bleed,
+                    base_height + actuator_height - flat_cavity_height
+                ]) {
+                    cube([
+                        actuator_diameter + diameter_bleed * 2,
+                        actuator_d_shaft_depth + e,
+                        flat_cavity_height + e
+                    ]);
                 }
             }
         }
     }
 }
+
+/* shaft_types = [
+    POT_SHAFT_TYPE_SPLINED,
+    POT_SHAFT_TYPE_PLAIN,
+    POT_SHAFT_TYPE_FLATTED,
+];
+
+shaft_i = round($t * len(shaft_types));
+pot(
+    shaft_type = shaft_types[shaft_i]
+); */
