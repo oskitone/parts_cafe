@@ -29,6 +29,8 @@ module wheel(
     shim_size = .6,
     shim_count = 5,
 
+    round_bottom = true,
+
     shaft_type = POT_SHAFT_TYPE_DEFAULT,
 
     grip_count = undef,
@@ -70,8 +72,8 @@ module wheel(
     }
 
     module _tire() {
-        module _donuts() {
-            for (z = [ring / 2, height - ring / 2]) {
+        module _ends() {
+            module _end(z) {
                 translate([0, 0, z]) {
                     donut(
                         diameter = diameter,
@@ -80,34 +82,48 @@ module wheel(
                     );
                 }
             }
+
+            if (round_bottom) {
+                _end(ring / 2);
+            } else {
+                ring(
+                    diameter = diameter,
+                    height = e,
+                    thickness = ring
+                );
+            }
+
+            _end(height - ring / 2);
         }
 
         difference() {
             union() {
                 if (spokes_count > 0) {
-                    _donuts();
+                    _ends();
                 } else {
                     hull() {
-                        _donuts();
+                        _ends();
                     }
                 }
 
-                translate([0, 0, ring / 2]) {
+                translate([0, 0, round_bottom ? ring / 2 : 0]) {
                     ring(
                         diameter = diameter,
-                        height = height - ring,
+                        height = round_bottom ? height - ring : height - ring / 2,
                         thickness = ring
                     );
                 }
             }
 
-            cylinder_grip(
-                diameter = diameter,
-                height = height,
-                count = grip_count,
-                size = .8,
-                $fn = 6
-            );
+            translate([0, 0, -e]) {
+                cylinder_grip(
+                    diameter = diameter,
+                    height = height + e * 2,
+                    count = grip_count,
+                    size = .8,
+                    $fn = 6
+                );
+            }
         }
     }
 
@@ -299,4 +315,10 @@ for (i = [0 : len(shim_sizes) - 1]) {
     }
 } */
 
-/* wheel(debug = true); */
+/* wheel(
+    // brodie_knob_count = 1, spokes_count = 1,
+    // dimple_count = 0,
+    round_bottom = false,
+    debug = false,
+    $fn = 24
+); */
