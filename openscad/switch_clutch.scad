@@ -90,15 +90,16 @@ module switch_clutch(
         );
     }
 
-    // TODO: DFM
     module _cavity() {
+        width = switch_base_width + gutter * 2;
+
         _switch(
-            base_width = switch_base_width + gutter * 2,
+            base_width = width,
             base_length = switch_base_length + switch_actuator_travel
                 + coverage * 2 + e * 2,
             base_height = switch_base_height + e,
 
-            actuator_width = switch_actuator_width + gutter * 2,
+            actuator_width = width,
             actuator_length = switch_actuator_length + gutter * 2,
             actuator_height = switch_actuator_height,
 
