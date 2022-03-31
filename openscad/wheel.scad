@@ -141,13 +141,20 @@ module wheel(
         }
 
         module _grips() {
-            cylinder_grip(
-                diameter = PTV09A_POT_ACTUATOR_DIAMETER + tolerance * 2,
-                height = height - hub_ceiling,
-                count = shim_count,
-                rotation_offset = 180,
-                size = shim_size
-            );
+            _height = height - hub_ceiling;
+            z = shaft_type == POT_SHAFT_TYPE_SPLINED
+                ? _height - PTV09A_POT_ACTUATOR_SPLINED_SHAFT_HEIGHT
+                : 0;
+
+            translate([0, 0, z]) {
+                cylinder_grip(
+                    diameter = PTV09A_POT_ACTUATOR_DIAMETER + tolerance * 2,
+                    height = _height - z,
+                    count = shim_count,
+                    rotation_offset = 180,
+                    size = shim_size
+                );
+            }
         }
 
         module _pot() {
