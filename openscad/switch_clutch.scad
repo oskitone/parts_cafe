@@ -1,5 +1,6 @@
 include <../../parts_cafe/openscad/rib_cavities.scad>;
 
+include <rounded_cube.scad>;
 include <switch.scad>;
 
 module switch_clutch(
@@ -22,6 +23,8 @@ module switch_clutch(
     switch_actuator_travel = SWITCH_ACTUATOR_TRAVEL,
 
     switch_origin = SWITCH_ORIGIN,
+
+    fillet = 0,
 
     coverage = 1,
     wall = 1,
@@ -79,15 +82,20 @@ module switch_clutch(
     }
 
     module _outer() {
-        _switch(
-            base_width = base_width,
-            base_length = base_length,
-            base_height = base_height,
+        translate(get_absolute_origin()) {
+            cube([base_width, base_length, base_height]);
+        }
 
-            actuator_width = actuator_width,
-            actuator_length = actuator_length,
-            actuator_height = actuator_height
-        );
+        translate(get_absolute_origin(
+            actuator_width,
+            actuator_length,
+            z = base_height - fillet - e
+        )) {
+            rounded_cube(
+                [actuator_width, actuator_length, actuator_height + fillet + e],
+                fillet
+            );
+        }
     }
 
     module _cavity() {
