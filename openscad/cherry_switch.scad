@@ -46,25 +46,14 @@ module cherry_switch(
 
     travel = CHERRY_SWITCH_TRAVEL,
 
+    show_base = true,
+    show_stem = true,
+
+    center = false,
+
     position = 0
 ) {
     e = .01;
-
-    # difference() {
-        cube([base_width, base_length, base_height]);
-
-        translate([
-            (base_width - actuator_plate_width) / 2,
-            (base_length - actuator_plate_length) / 2,
-            base_height - travel
-        ]) {
-            cube([
-                actuator_plate_width,
-                actuator_plate_length,
-                travel + e
-            ]);
-        }
-    }
 
     module _stem_web(rotation, depth, size, height) {
         translate([stem_width / 2, stem_length / 2, 0]) {
@@ -76,34 +65,54 @@ module cherry_switch(
         }
     }
 
-    translate([
-        (base_width - stem_width) / 2,
-        (base_length - stem_length) / 2,
-        base_height - position * travel - travel
-    ]) {
-        _stem_web(
-            0,
-            stem_horizontal_web_depth,
-            stem_width,
-            travel + stem_height - e
-        );
-        _stem_web(
-            90,
-            stem_vertical_web_depth,
-            stem_length,
-            travel + stem_height - e
-        );
+    module _base() {
+        # difference() {
+            cube([base_width, base_length, base_height]);
+
+            translate([
+                (base_width - actuator_plate_width) / 2,
+                (base_length - actuator_plate_length) / 2,
+                base_height - travel
+            ]) {
+                cube([
+                    actuator_plate_width,
+                    actuator_plate_length,
+                    travel + e
+                ]);
+            }
+        }
     }
 
-    * translate([
-        (base_width - actuator_plate_width) / 2,
-        (base_length - actuator_plate_length) / 2,
-        base_height - position * travel - 1
-    ]) {
-        cube([
-            actuator_plate_width,
-            actuator_plate_length,
-            1 + e
-        ]);
+    module _stem() {
+        translate([
+            (base_width - stem_width) / 2,
+            (base_length - stem_length) / 2,
+            base_height - position * travel - travel
+        ]) {
+            _stem_web(
+                0,
+                stem_horizontal_web_depth,
+                stem_width,
+                travel + stem_height - e
+            );
+            _stem_web(
+                90,
+                stem_vertical_web_depth,
+                stem_length,
+                travel + stem_height - e
+            );
+        }
+    }
+
+    function get_xy(value) = (center ? value / -2 : 0);
+
+    translate([get_xy(base_width), get_xy(base_length), 0]) {
+        if (show_base) {
+            _base();
+        }
+
+        if (show_stem) {
+            _stem();
+        }
     }
 }
