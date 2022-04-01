@@ -66,7 +66,7 @@ module cherry_switch(
     }
 
     module _base() {
-        # difference() {
+        difference() {
             cube([base_width, base_length, base_height]);
 
             translate([
