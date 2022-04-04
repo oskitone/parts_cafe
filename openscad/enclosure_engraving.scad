@@ -51,7 +51,7 @@ module enclosure_engraving(
     bottom = false,
 
     quick_preview = true,
-    enclosure_height = 0
+    enclosure_height = 1
 ) {
     e = .0135;
 
@@ -92,7 +92,7 @@ module enclosure_engraving(
                             ? undef
                             : [size / OSKITONE_LENGTH_WIDTH_RATIO, size],
                         bleed = quick_preview ? 0 : bleed,
-                        height = placard ? depth + e * 2 : depth + e,
+                        height = placard ? depth + e * 3 : depth + e,
                         center = center,
                         chamfer =  quick_preview ? 0 : (placard ? 0 : chamfer)
                     );
