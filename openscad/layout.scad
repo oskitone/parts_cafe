@@ -426,16 +426,31 @@ module layout(
     }
 }
 
-$vpr = [32,0,330];
-$vpt = [15,20,-36];
+$vpr = [30, 0, -20];
+$vpt = [0,0,8];
 $vpd = 500;
-$vpf = 22;
+$vpf = 18;
+
+layouts = [
+    // [columns, rows, available_area]
+    [[2,4,3], undef, 100],
+    [undef, [3,4,2], 80],
+    [[1,2,3], undef, 70],
+    [undef, [3,2,1], 50],
+    [[4,4,4,4,4], undef, 100],
+    [undef, [1,5], 80],
+];
+
+layout = layouts[floor($t * len(layouts))];
 
 layout(
-    /* columns = [2,4,3], */
-    rows = [3,4,2],
+    columns = layout[0],
+    rows = layout[1],
+
+    available_area = layout[2],
 
     gutter = 5,
     outer_gutter = 5,
-    quick_preview = true
+
+    quick_preview = false
 );
