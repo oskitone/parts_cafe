@@ -7,6 +7,31 @@ VERTICAL = "vertical";
 
 LOREM_IPSUM = ["LOREM","IPSUM", "DOLOR", "SIT", "AMET", "CONSECTETUR", "ADIPISCING", "ELIT", "SED", "DO", "EIUSMOD", "TEMPOR", "INCIDIDUNT", "UT", "LABORE", "ET", "DOLORE", "MAGNA", "ALIQUA"];
 
+function slice(list, start = 0, end) =
+    end == 0
+        ? []
+        : [
+            for (i = [start : (end == undef ? len(list) : end) - 1]) (
+                list[i]
+            )
+        ]
+;
+
+
+function substr(string, length, start = 0) = (
+    let(split = slice(string, start, min(len(string), start + length)))
+    let(cumulative_join = [
+        for (
+            output = "", i = 0;
+            i < len(split);
+            output = str(output, split[i]), i = i + 1) (
+                str(output, split[i])
+            )
+    ])
+
+    cumulative_join[len(cumulative_join) - 1]
+);
+
 function get_knob_diameter_from_available_length(
     available_length,
 
@@ -173,15 +198,20 @@ module knob_and_label_array(
             : (available_area - gutter * (_count - 1)) / count
         : knob_diameter;
 
-    // TODO: truncate
-    function get_label(i) = (
+    function get_label(
+        i = 0,
+        character_truncate = 100
+    ) = (
         let(
             _i = direction == HORIZONTAL
                 ? i % _count
                 : _count - 1 - i % _count
         )
 
-        labels[(label_i_offset + _i) % len(labels)]
+        substr(
+            labels[(label_i_offset + _i) % len(labels)],
+            character_truncate
+        )
     );
 
     for (i = [0 : _count - 1]) {
@@ -190,7 +220,7 @@ module knob_and_label_array(
             : [0, i * (label_length + label_gutter + knob_diameter + gutter)];
 
         knob_and_label(
-            string = get_label(i),
+            string = get_label(i, round(knob_diameter / label_length)),
             position = [
                 position.x + _position.x,
                 position.y + _position.y
