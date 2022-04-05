@@ -32,6 +32,8 @@ function substr(string, length, start = 0) = (
     cumulative_join[len(cumulative_join) - 1]
 );
 
+function reverse(list) = [for (i = [len(list)-1:-1:0]) list[i]];
+
 function get_knob_diameter_from_available_length(
     available_length,
 
@@ -277,7 +279,7 @@ module layout(
     knob_and_label_direction = columns != undef
         ? VERTICAL
         : HORIZONTAL;
-    stack = knob_and_label_direction == VERTICAL ? columns : rows;
+    stack = knob_and_label_direction == VERTICAL ? columns : reverse(rows);
 
     big_knob_diameter = 50;
 
@@ -380,14 +382,17 @@ module layout(
     ];
 
     module _knob_and_label_arrays() {
-        // TODO: when knob_and_label_direction == HORIZONTAL, reverse stack
         for (i = [0 : len(stack) - 1]) {
+            _i = knob_and_label_direction == HORIZONTAL
+                ? len(stack) - 1 - i
+                : i;
+
             position = knob_and_label_direction == HORIZONTAL
-                ? [0, row_ys[i]]
-                : [column_xs[i], 0];
+                ? [0, row_ys[_i]]
+                : [column_xs[_i], 0];
 
             _array(
-                count = stack[i],
+                count = stack[_i],
                 position = position,
                 label_i_offset = stack_is[i],
                 available_area = available_area
