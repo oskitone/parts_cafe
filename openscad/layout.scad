@@ -1,4 +1,6 @@
-include <../../parts_cafe/openscad/enclosure_engraving.scad>;
+include <enclosure_engraving.scad>;
+include <rounded_cube.scad>;
+include <wheel.scad>;
 
 HORIZONTAL = "horizontal";
 VERTICAL = "vertical";
@@ -81,7 +83,9 @@ module knob_and_label(
 
     label_text_size = 3.2,
 
-    knob_height = 1
+    knob_height = 10,
+
+    quick_preview = false
 ) {
     radius = knob_diameter / 2;
 
@@ -90,21 +94,45 @@ module knob_and_label(
         position.y + label_length + label_gutter + radius,
         0
     ]) {
-        cylinder(
-            d = knob_diameter,
-            h = knob_height
+        if (quick_preview) {
+            cylinder(
+                d = knob_diameter,
+                h = knob_height
+            );
+        } else {
+            wheel(
+                diameter = knob_diameter,
+                height = knob_height,
+
+                spokes_count = 0,
+                brodie_knob_count = 0,
+                dimple_count = 1,
+
+                round_bottom = false,
+
+                color = "#fff",
+                cavity_color = "#ccc"
+            );
+        }
+    }
+
+    color("#fff") {
+        enclosure_engraving(
+            string = string,
+            size = label_text_size,
+            position = [
+                position.x + radius,
+                position.y + label_length / 2
+            ],
+            placard = [knob_diameter, label_length]
         );
     }
 
-    enclosure_engraving(
-        string = string,
-        size = label_text_size,
-        position = [
-            position.x + radius,
-            position.y + label_length / 2
-        ],
-        placard = [knob_diameter, label_length]
-    );
+    translate([position.x, position.y, 0]) {
+        color("#ccc") {
+            cube([knob_diameter, label_length, .1]);
+        }
+    }
 }
 
 module knob_and_label_array(
@@ -128,7 +156,8 @@ module knob_and_label_array(
 
     gutter = 5,
 
-    debug = false
+    debug = false,
+    quick_preview = true
 ) {
     _count = count != undef ? count : len(labels);
 
@@ -144,6 +173,7 @@ module knob_and_label_array(
             : (available_area - gutter * (_count - 1)) / count
         : knob_diameter;
 
+    // TODO: truncate
     function get_label(i) = (
         let(
             _i = direction == HORIZONTAL
@@ -165,7 +195,8 @@ module knob_and_label_array(
                 position.x + _position.x,
                 position.y + _position.y
             ],
-            knob_diameter = knob_diameter
+            knob_diameter = knob_diameter,
+            quick_preview = quick_preview
         );
     }
 
@@ -195,32 +226,34 @@ module layout(
     columns = undef,
     rows = undef,
 
-    enclosure_height = 1,
+    available_area = 100,
+
+    enclosure_height = 25,
+    enclosure_fillet = 2,
 
     label_length = 5, // SCOUT_LABEL_LENGTH
     label_gutter = 2.5, // SCOUT_GUTTER / 2
 
     label_text_size = 3.2, // SCOUT_LABEL_TEXT_SIZE
 
-    gutter = 5 // TODO: get SCOUT_GUTTER
+    gutter = 5, // TODO: get SCOUT_GUTTER
+
+    outer_gutter = 5,
+
+    quick_preview = true
 ) {
-    direction = columns != undef
+    e = .01;
+
+    knob_and_label_direction = columns != undef
         ? VERTICAL
         : HORIZONTAL;
-    stack = direction == VERTICAL ? columns : rows;
+    stack = knob_and_label_direction == VERTICAL ? columns : rows;
 
     big_knob_diameter = 50;
 
     SCOUT_KNOB_DIAMETER = 20; // TODO: use
     APC_WHEEL_DIAMETER = 25.58; // TODO: use
     minimum_knob_diameter = 10; // TODO: use
-
-    available_area = direction == VERTICAL
-        ? get_knob_and_label_array_length(
-            knob_diameter = big_knob_diameter,
-            count = stack[0]
-        )
-        : big_knob_diameter * stack[0] + gutter * (stack[0] - 1);
 
     module _array(
         count,
@@ -236,7 +269,7 @@ module layout(
 
             available_area = available_area,
 
-            direction = direction,
+            direction = knob_and_label_direction,
 
             position = position,
 
@@ -247,7 +280,9 @@ module layout(
 
             label_text_size = label_text_size,
 
-            gutter = gutter
+            gutter = gutter,
+
+            quick_preview = quick_preview
         );
     }
 
@@ -266,14 +301,14 @@ module layout(
 
     column_xs = [
         for (
-            sum = 0, i = 0;
-            i < len(stack) - 1;
-            sum = direction == VERTICAL
-                ? (sum + _get_column_width(i))
+            sum = 0, i = -1;
+            i < len(stack);
+            sum = knob_and_label_direction == VERTICAL
+                ? (i < 0 ? 0 : sum + _get_column_width(i) + gutter)
                 : 0, i = i + 1
         ) (
-            direction == VERTICAL
-                ? (sum + _get_column_width(i))
+            knob_and_label_direction == VERTICAL
+                ? (i < 0 ? 0 : sum + _get_column_width(i) + gutter)
                 : 0
         )
     ];
@@ -296,49 +331,76 @@ module layout(
 
     row_ys = [
         for (
-            sum = 0, i = 0;
-            i < len(stack) - 1;
-            sum = sum + get_row_y(i), i = i + 1
+            sum = 0, i = -1;
+            i < len(stack);
+            sum = i < 0 ? 0 : sum + get_row_y(i) + gutter, i = i + 1
         ) (
-            sum + get_row_y(i)
+            i < 0 ? 0 : sum + get_row_y(i) + gutter
         )
     ];
-
-    /* echo("column_xs", column_xs); */
-    /* echo("row_ys", row_ys); */
 
     stack_is = [
         for (
-            sum = 0, i = 0;
+            sum = 0, i = -1;
             i < len(stack);
-            sum = sum + stack[i], i = i + 1
+            sum = i < 0 ? 0 : sum + stack[i], i = i + 1
         ) (
-            sum + stack[i]
+            i < 0 ? 0 : sum + stack[i]
         )
     ];
 
-    _array(
-        count = stack[0],
-        knob_diameter = big_knob_diameter,
-        label_i_offset = 0
-    );
+    module _knob_and_label_arrays() {
+        // TODO: when knob_and_label_direction == HORIZONTAL, reverse stack
+        for (i = [0 : len(stack) - 1]) {
+            position = knob_and_label_direction == HORIZONTAL
+                ? [0, row_ys[i]]
+                : [column_xs[i], 0];
 
-    for (i = [1 : len(stack) - 1]) {
-        position = direction == HORIZONTAL
-            ? [0, row_ys[i - 1] + (gutter * i)]
-            : [column_xs[i - 1] + (gutter * i), 0];
+            _array(
+                count = stack[i],
+                position = position,
+                label_i_offset = stack_is[i],
+                available_area = available_area
+            );
+        }
+    }
 
-        _array(
-            count = stack[i],
-            position = position,
-            label_i_offset = stack_is[i - 1],
-            available_area = available_area
+    gutter_bump = outer_gutter * 2 - gutter;
+    width = knob_and_label_direction == HORIZONTAL
+        ? available_area + outer_gutter * 2
+        : column_xs[len(column_xs) - 1] + gutter_bump;
+    length = knob_and_label_direction == HORIZONTAL
+        ? row_ys[len(row_ys) - 1] + gutter_bump
+        : available_area + outer_gutter * 2;
+
+    module _enclosure() {
+        rounded_cube(
+            [width, length, enclosure_height],
+            quick_preview ? 0 : enclosure_fillet
         );
+    }
+
+    translate([width / -2, length / -2, 0]) {
+        translate([outer_gutter, outer_gutter, enclosure_height - e]) {
+            _knob_and_label_arrays();
+        }
+
+        color("#FF69B4") {
+            _enclosure();
+        }
     }
 }
 
+$vpr = [32,0,330];
+$vpt = [15,20,-36];
+$vpd = 500;
+$vpf = 22;
+
 layout(
-    /* columns = [1,2,3,5], */
-    rows = [2,4,1,3],
-    gutter = 5
+    /* columns = [2,4,3], */
+    rows = [3,4,2],
+
+    gutter = 5,
+    outer_gutter = 5,
+    quick_preview = true
 );
