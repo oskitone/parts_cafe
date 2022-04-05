@@ -1,15 +1,23 @@
-include <../../parts_cafe/openscad/rib_cavities.scad>;
-
+include <rib_cavities.scad>;
 include <rounded_cube.scad>;
 include <switch.scad>;
 
-module switch_clutch(
-    // TODO: base_width and base_length
-    base_height = SWITCH_BASE_HEIGHT + 1,
+SWITCH_CLUTCH_MIN_BASE_HEIGHT = SWITCH_BASE_HEIGHT + 1;
+SWITCH_CLUTCH_MIN_BASE_WIDTH = SWITCH_BASE_WIDTH + 2;
+SWITCH_CLUTCH_MIN_BASE_LENGTH = SWITCH_BASE_LENGTH + SWITCH_ACTUATOR_TRAVEL;
 
-    actuator_width = SWITCH_ACTUATOR_WIDTH + 2,
-    actuator_length = SWITCH_ACTUATOR_LENGTH + 2,
-    actuator_height = SWITCH_ACTUATOR_HEIGHT + 2,
+SWITCH_CLUTCH_MIN_ACTUATOR_WIDTH = SWITCH_CLUTCH_MIN_BASE_WIDTH;
+SWITCH_CLUTCH_MIN_ACTUATOR_LENGTH = SWITCH_ACTUATOR_LENGTH + 2;
+SWITCH_CLUTCH_MIN_ACTUATOR_HEIGHT = SWITCH_ACTUATOR_HEIGHT;
+
+module switch_clutch(
+    base_height = SWITCH_CLUTCH_MIN_BASE_HEIGHT,
+    base_width = SWITCH_CLUTCH_MIN_BASE_WIDTH,
+    base_length = SWITCH_CLUTCH_MIN_BASE_LENGTH,
+
+    actuator_width = SWITCH_CLUTCH_MIN_ACTUATOR_WIDTH,
+    actuator_length = SWITCH_CLUTCH_MIN_ACTUATOR_LENGTH,
+    actuator_height = SWITCH_CLUTCH_MIN_ACTUATOR_HEIGHT,
 
     position = 0,
 
@@ -26,9 +34,6 @@ module switch_clutch(
 
     fillet = 0,
 
-    coverage = 1,
-    wall = 1,
-
     debug = false,
 
     clearance = 0,
@@ -37,10 +42,6 @@ module switch_clutch(
     e = .0193;
 
     gutter = clearance + tolerance;
-
-    // TODO: use derivations if unprovided
-    base_width = switch_base_width + gutter * 2 + wall * 2;
-    base_length = switch_base_length + switch_actuator_travel + coverage * 2;
 
     y = switch_actuator_travel / 2 - switch_actuator_travel * (1 - position);
 
@@ -104,7 +105,7 @@ module switch_clutch(
         _switch(
             base_width = width,
             base_length = switch_base_length + switch_actuator_travel
-                + coverage * 2 + e * 2,
+                + gutter * 2,
             base_height = switch_base_height + e,
 
             actuator_width = width,
@@ -154,3 +155,25 @@ module switch_clutch(
         }
     }
 }
+
+/* for (i = [0 : 2]) {
+    translate([0, 14 * i, 0]) {
+        # switch_clutch(
+            base_height = 6,
+            base_width = 15,
+            base_length = 12,
+
+            actuator_width = 10,
+            actuator_length = 10,
+            actuator_height = 4,
+
+            debug = true,
+
+            fillet = 1, $fn = 6,
+
+            position = i == 2 ? round($t) : i
+        );
+
+        switch(i == 2 ? round($t) : i);
+    }
+} */
