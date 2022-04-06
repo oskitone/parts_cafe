@@ -10,6 +10,17 @@ SWITCH_CLUTCH_MIN_ACTUATOR_WIDTH = SWITCH_CLUTCH_MIN_BASE_WIDTH;
 SWITCH_CLUTCH_MIN_ACTUATOR_LENGTH = SWITCH_ACTUATOR_LENGTH + 2;
 SWITCH_CLUTCH_MIN_ACTUATOR_HEIGHT = SWITCH_ACTUATOR_HEIGHT;
 
+function get_max_switch_clutch_actuator_length(
+    actuator_window_length =
+        SWITCH_CLUTCH_MIN_ACTUATOR_LENGTH + SWITCH_ACTUATOR_TRAVEL,
+    control_clearance = 0,
+    tolerance = 0
+) = (
+    actuator_window_length
+        - SWITCH_ACTUATOR_TRAVEL
+        - (control_clearance + tolerance) * 2
+);
+
 module switch_clutch(
     base_height = SWITCH_CLUTCH_MIN_BASE_HEIGHT,
     base_width = SWITCH_CLUTCH_MIN_BASE_WIDTH,
