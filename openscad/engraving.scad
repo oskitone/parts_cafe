@@ -1,8 +1,10 @@
+ENGRAVING_FONT = "Orbitron:style=Black";
+
 module engraving(
     string = undef,
     svg = undef,
     resize = undef,
-    font = "Work Sans:style=Black",
+    font = ENGRAVING_FONT,
     size = 10,
     bleed = 0,
     height = 1,

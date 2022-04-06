@@ -7,8 +7,15 @@ ENCLOSURE_ENGRAVING_DEPTH = 1.2;
 OSKITONE_LENGTH_WIDTH_RATIO = 4.6 / 28;
 SIDE_ENGRAVING_DEFAULT_WIDTH = 15;
 
-ENCLOSURE_ENGRAVING_LABEL_DEFAULT_TEXT_SIZE = 3.2;
-ENCLOSURE_ENGRAVING_LABEL_DEFAULT_LENGTH = 5;
+ENCLOSURE_ENGRAVING_TEXT_SIZE = 3.2;
+ENCLOSURE_ENGRAVING_LENGTH = 5;
+ENCLOSURE_ENGRAVING_GUTTER = (
+    ENCLOSURE_ENGRAVING_LENGTH
+    - ENCLOSURE_ENGRAVING_TEXT_SIZE
+) / 2;
+
+ENCLOSURE_ENGRAVING_BLEED = -.1;
+ENCLOSURE_ENGRAVING_CHAMFER = .4;
 
 function get_branding_model_length(
     gutter = 0,
@@ -35,12 +42,12 @@ function get_branding_make_length(
 
 module enclosure_engraving(
     string,
-    size = ENCLOSURE_ENGRAVING_LABEL_DEFAULT_TEXT_SIZE,
-    bleed = -.1,
-    chamfer = .4,
+    size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
+    bleed = ENCLOSURE_ENGRAVING_BLEED,
+    chamfer = ENCLOSURE_ENGRAVING_CHAMFER,
     center = true,
     position = [0, 0],
-    font = "Orbitron:style=Black",
+    font = ENGRAVING_FONT,
     depth = ENCLOSURE_ENGRAVING_DEPTH,
 
     placard = undef,
