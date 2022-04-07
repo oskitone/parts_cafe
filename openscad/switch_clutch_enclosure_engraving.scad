@@ -10,6 +10,24 @@ SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_PRIMARY_TEXT_SIZE =
 SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_SECONDARY_TEXT_SIZE =
     ENCLOSURE_ENGRAVING_TEXT_SIZE * .75; // TODO: test
 
+function get_switch_clutch_switch_position(
+    actuator_window_dimensions = get_actuator_window_dimensions(),
+
+    wall_gutter = 0,
+    outer_gutter = ENCLOSURE_ENGRAVING_GUTTER,
+    tolerance = 0,
+
+    e = .01
+) = ([
+    wall_gutter + outer_gutter - SWITCH_ORIGIN.x
+        - (SWITCH_BASE_WIDTH - actuator_window_dimensions.x) / 2
+        - tolerance,
+    wall_gutter + outer_gutter - SWITCH_ORIGIN.y
+        - (SWITCH_BASE_LENGTH - actuator_window_dimensions.y) / 2
+        - tolerance,
+    - SWITCH_CLUTCH_MIN_BASE_HEIGHT - e
+]);
+
 function get_actuator_window_dimensions(
     width = 6,
 
@@ -226,15 +244,12 @@ module __demo_switch_clutch_enclosure_engraving(
         ));
     }
 
-    translate([
-        wall_gutter + outer_gutter - SWITCH_ORIGIN.x
-            - (SWITCH_BASE_WIDTH - actuator_window_dimensions.x) / 2
-            - tolerance,
-        wall_gutter + outer_gutter - SWITCH_ORIGIN.y
-            - (SWITCH_BASE_LENGTH - actuator_window_dimensions.y) / 2
-            - tolerance,
-        - SWITCH_CLUTCH_MIN_BASE_HEIGHT - e
-    ]) {
+    translate(get_switch_clutch_switch_position(
+        wall_gutter = wall_gutter,
+        outer_gutter = outer_gutter,
+        actuator_window_dimensions = actuator_window_dimensions,
+        tolerance = tolerance
+    )) {
         switch(position = switch_position);
 
         translate([0,0,-e]) {
@@ -294,7 +309,7 @@ module __demo_switch_clutch_enclosure_engraving(
         );
     }
 }
-__demo_switch_clutch_enclosure_engraving(
+* __demo_switch_clutch_enclosure_engraving(
     wall_gutter = 2,
     /* engraving_width = 15, */
     /* engraving_length = 20, */

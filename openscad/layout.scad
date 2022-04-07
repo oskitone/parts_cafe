@@ -1,5 +1,6 @@
 include <enclosure_engraving.scad>;
 include <rounded_cube.scad>;
+include <switch_clutch_enclosure_engraving.scad>;
 include <wheel.scad>;
 
 HORIZONTAL = "horizontal";
@@ -50,7 +51,7 @@ function get_knob_diameter_from_available_length(
     ) / count
 );
 
-function get_knob_and_label_array_length(
+function get_control_array_length(
     knob_diameter = 20,
     count = 2,
 
@@ -122,10 +123,12 @@ module knob_and_label(
         0
     ]) {
         if (quick_preview) {
-            cylinder(
-                d = knob_diameter,
-                h = knob_height
-            );
+            color("#fff") {
+                cylinder(
+                    d = knob_diameter,
+                    h = knob_height
+                );
+            }
         } else {
             wheel(
                 diameter = knob_diameter,
@@ -162,7 +165,75 @@ module knob_and_label(
     }
 }
 
-module knob_and_label_array(
+module switch_clutch_and_engraving(
+    primary_label = "",
+    secondary_labels = ["", ""],
+    width,
+    length,
+    switch_position = 0,
+    fillet = 0,
+    control_clearance = 1
+) {
+    actuator_window_dimensions = get_actuator_window_dimensions(
+        width = SWITCH_CLUTCH_MIN_BASE_WIDTH,
+        engraving_length = length,
+        control_clearance = control_clearance
+    );
+
+    actuator_length = get_max_switch_clutch_actuator_length(
+        actuator_window_length = actuator_window_dimensions.y,
+        control_clearance = control_clearance
+    );
+
+    translate(get_switch_clutch_switch_position(actuator_window_dimensions)) {
+        switch_clutch(
+            actuator_length = actuator_length,
+            position = switch_position,
+            fillet = fillet, $fn = 12,
+            color = "#fff",
+            cavity_color = "#ccc"
+        );
+    }
+
+    translate([0,0,ENCLOSURE_ENGRAVING_DEPTH]) {
+        difference() {
+            color("#fff") {
+                switch_clutch_enclosure_engraving(
+                    primary_label = primary_label,
+                    secondary_labels = secondary_labels,
+
+                    width = width,
+                    length = length,
+
+                    actuator_window_dimensions = actuator_window_dimensions,
+
+                    control_clearance = control_clearance,
+
+                    position = [0, 0],
+                    enclosure_height = 0
+                );
+            }
+
+            // HACK OUT WINDOW
+            color("#ccc") {
+                translate([
+                    ENCLOSURE_ENGRAVING_GUTTER,
+                    ENCLOSURE_ENGRAVING_GUTTER,
+                    -2
+                ]) {
+                    cube([
+                        actuator_window_dimensions.x,
+                        actuator_window_dimensions.y,
+                        ENCLOSURE_ENGRAVING_DEPTH + 2 * 2
+                    ]);
+                }
+            }
+        }
+    }
+    color("#ccc") cube([width, length, .1]);
+}
+
+module control_array(
     labels = LOREM_IPSUM,
     count = undef,
 
@@ -221,15 +292,40 @@ module knob_and_label_array(
             ? [i * (knob_diameter + gutter), 0]
             : [0, i * (label_length + label_gutter + knob_diameter + gutter)];
 
-        knob_and_label(
-            string = get_label(i, round(knob_diameter / label_length)),
-            position = [
+        is_switch = (
+            (i + label_i_offset) % 2 == 0)
+            && knob_diameter > 18
+        ;
+        is_knob = !is_switch;
+
+        label = get_label(i, round(knob_diameter / label_length));
+
+        if (is_knob) {
+            knob_and_label(
+                string = label,
+                position = [
+                    position.x + _position.x,
+                    position.y + _position.y
+                ],
+                knob_diameter = knob_diameter,
+                quick_preview = quick_preview
+            );
+        } else if (is_switch) {
+            translate([
                 position.x + _position.x,
-                position.y + _position.y
-            ],
-            knob_diameter = knob_diameter,
-            quick_preview = quick_preview
-        );
+                position.y + _position.y,
+                0
+            ]) {
+                switch_clutch_and_engraving(
+                    primary_label = label,
+                    secondary_labels = slice(LOREM_IPSUM, i + label_i_offset + 1),
+                    width = knob_diameter,
+                    length = knob_diameter + label_length,
+                    switch_position = (abs($t - 1 / 2) * 2),
+                    fillet = quick_preview ? 0 : 1
+                );
+            }
+        }
     }
 
     if (debug) {
@@ -238,7 +334,7 @@ module knob_and_label_array(
                 ? available_area
                 : knob_diameter * count + gutter * (count - 1)
             : knob_diameter;
-        length = get_knob_and_label_array_length(
+        length = get_control_array_length(
             knob_diameter = knob_diameter,
             count = direction == HORIZONTAL ? 1 : count,
 
@@ -294,7 +390,7 @@ module layout(
         available_area = undef,
         label_i_offset = 0
     ) {
-        knob_and_label_array(
+        control_array(
             count = count,
 
             label_i_offset = label_i_offset,
@@ -346,7 +442,7 @@ module layout(
     ];
 
     function get_row_y(i) = (
-        get_knob_and_label_array_length(
+        get_control_array_length(
             knob_diameter = get_knob_diameter_from_available_length(
                 available_area,
                 count = stack[i],
@@ -381,7 +477,7 @@ module layout(
         )
     ];
 
-    module _knob_and_label_arrays() {
+    module _control_arrays() {
         for (i = [0 : len(stack) - 1]) {
             _i = knob_and_label_direction == HORIZONTAL
                 ? len(stack) - 1 - i
@@ -417,7 +513,7 @@ module layout(
 
     translate([width / -2, length / -2, 0]) {
         translate([outer_gutter, outer_gutter, enclosure_height - e]) {
-            _knob_and_label_arrays();
+            _control_arrays();
         }
 
         color("#FF69B4") {
