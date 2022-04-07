@@ -12,15 +12,28 @@ SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_SECONDARY_TEXT_SIZE =
 
 function get_actuator_window_dimensions(
     width = 6,
+
+    engraving_length = 0,
+
+    primary_text_size = SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_PRIMARY_TEXT_SIZE,
     secondary_text_size = SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_SECONDARY_TEXT_SIZE,
     label_gutter = ENCLOSURE_ENGRAVING_GUTTER,
+
+    outer_gutter = ENCLOSURE_ENGRAVING_GUTTER,
+
     control_clearance = SWITCH_CLUTCH_CLEARANCE,
     tolerance = 0
 ) = (
     let(control_gutter = control_clearance + tolerance)
+    let(length_based_on_engraving_length = engraving_length -
+        primary_text_size - label_gutter - outer_gutter * 2)
+    let(length_based_on_text = secondary_text_size * 2 + label_gutter)
+
     [
         width + control_gutter * 2,
-        secondary_text_size * 2 + label_gutter + control_gutter * 2,
+        engraving_length > 0
+            ? length_based_on_engraving_length + tolerance * 2
+            : length_based_on_text + control_gutter * 2,
     ]
 );
 
@@ -142,10 +155,12 @@ module switch_clutch_enclosure_engraving(
 
 module __demo_switch_clutch_enclosure_engraving(
     wall_gutter = 2,
+    engraving_width = 13.7,
+    engraving_length = 12.4, // TODO: derive and extract
+
     actuator_length = undef,
     switch_position = 0,
 
-    width = 13.7,
     depth = ENCLOSURE_ENGRAVING_DEPTH,
 
     label_gutter = ENCLOSURE_ENGRAVING_GUTTER,
@@ -165,13 +180,16 @@ module __demo_switch_clutch_enclosure_engraving(
 
     actuator_window_dimensions = get_actuator_window_dimensions(
         width = SWITCH_CLUTCH_MIN_BASE_WIDTH,
+        engraving_length = engraving_length,
+        primary_text_size = primary_text_size,
         secondary_text_size = secondary_text_size,
         label_gutter = label_gutter,
+        outer_gutter = outer_gutter,
         control_clearance = control_clearance,
         tolerance = tolerance
     );
 
-    length = get_switch_clutch_enclosure_engraving_length(
+    min_length = get_switch_clutch_enclosure_engraving_length(
         actuator_window_length = actuator_window_dimensions.y,
 
         tolerance = tolerance,
@@ -180,6 +198,15 @@ module __demo_switch_clutch_enclosure_engraving(
         label_gutter = label_gutter,
         outer_gutter = outer_gutter
     );
+
+    // TODO: extract
+    if (engraving_length < min_length - e) {
+        echo(str(
+            "WARNING: length of ", engraving_length,
+            " is more than min_length of ",
+            min_length
+        ));
+    }
 
     max_actuator_length = get_max_switch_clutch_actuator_length(
         actuator_window_length = actuator_window_dimensions.y,
@@ -213,7 +240,8 @@ module __demo_switch_clutch_enclosure_engraving(
         translate([0,0,-e]) {
             switch_clutch(
                 base_width = 10,
-                base_length = SWITCH_CLUTCH_MIN_BASE_LENGTH + e * 2,
+                base_length = actuator_window_dimensions.y
+                    + SWITCH_ACTUATOR_TRAVEL + e * 2,
                 actuator_length = actuator_length,
                 position = switch_position,
                 fillet = 1, $fn = 12
@@ -223,8 +251,8 @@ module __demo_switch_clutch_enclosure_engraving(
 
     difference() {
         cube([
-            width + wall_gutter * 2,
-            length + wall_gutter * 2,
+            engraving_width + wall_gutter * 2,
+            engraving_length + wall_gutter * 2,
             enclosure_height
         ]);
 
@@ -244,8 +272,8 @@ module __demo_switch_clutch_enclosure_engraving(
             "POW",
             ["0", "1"],
 
-            width = width,
-            length = length,
+            width = engraving_width,
+            length = engraving_length,
             depth = depth,
 
             label_gutter = label_gutter,
@@ -268,5 +296,7 @@ module __demo_switch_clutch_enclosure_engraving(
 }
 __demo_switch_clutch_enclosure_engraving(
     wall_gutter = 2,
-    switch_position = round($t)
+    /* engraving_width = 15, */
+    /* engraving_length = 20, */
+    switch_position = (abs($t - 1 / 2) * 2)
 );
