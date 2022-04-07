@@ -45,6 +45,9 @@ module switch_clutch(
 
     fillet = 0,
 
+    color = undef,
+    cavity_color = undef,
+
     debug = false,
 
     clearance = 0,
@@ -148,11 +151,14 @@ module switch_clutch(
 
     translate([0, y, 0]) {
         difference() {
-            _outer();
+            color(color) {
+                _outer();
+            }
 
-            _cavity();
-
-            _rib_cavities();
+            color(cavity_color) {
+                _cavity();
+                _rib_cavities();
+            }
 
             if (debug) {
                 translate([0, get_absolute_origin().y - e, -e]) {
