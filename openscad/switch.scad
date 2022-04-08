@@ -30,14 +30,16 @@ module switch(
     translate([origin.x, origin.y, origin.z]) {
         cube([base_width, base_length, base_height]);
 
-        translate([
-            (base_width - actuator_width) / 2,
-            (base_length - actuator_length) / 2
-                - actuator_travel / 2
-                + actuator_travel * position,
-            base_height - e
-        ]) {
-            cube([actuator_width, actuator_length, actuator_height + e]);
+        if (actuator_height > 0) {
+            translate([
+                (base_width - actuator_width) / 2,
+                (base_length - actuator_length) / 2
+                    - actuator_travel / 2
+                    + actuator_travel * position,
+                base_height - e
+            ]) {
+                cube([actuator_width, actuator_length, actuator_height + e]);
+            }
         }
     }
 }
