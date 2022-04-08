@@ -185,7 +185,10 @@ module switch_clutch_and_engraving(
         control_clearance = control_clearance
     );
 
-    translate(get_switch_clutch_switch_position(actuator_window_dimensions)) {
+    switch_clutch_switch_position = get_switch_clutch_switch_position(
+        actuator_window_dimensions);
+
+    translate(switch_clutch_switch_position) {
         switch_clutch(
             actuator_length = actuator_length,
             position = switch_position,
@@ -209,23 +212,31 @@ module switch_clutch_and_engraving(
 
                     control_clearance = control_clearance,
 
-                    position = [0, 0],
                     enclosure_height = 0
                 );
             }
 
             // HACK OUT WINDOW
+            // TODO: use actuator_window
             color("#ccc") {
                 translate([
-                    ENCLOSURE_ENGRAVING_GUTTER,
-                    ENCLOSURE_ENGRAVING_GUTTER,
+                    switch_clutch_switch_position.x,
+                    switch_clutch_switch_position.y,
                     -2
                 ]) {
-                    cube([
-                        actuator_window_dimensions.x,
-                        actuator_window_dimensions.y,
-                        ENCLOSURE_ENGRAVING_DEPTH + 2 * 2
-                    ]);
+                    switch(
+                        base_width = actuator_window_dimensions.x,
+                        base_length = actuator_window_dimensions.y,
+                        base_height = ENCLOSURE_ENGRAVING_DEPTH + 2 * 2,
+
+                        actuator_height = 0,
+
+                        origin = [
+                            actuator_window_dimensions.x / -2,
+                            actuator_window_dimensions.y / -2 - 2,
+                            SWITCH_ORIGIN.z,
+                        ]
+                    );
                 }
             }
         }
