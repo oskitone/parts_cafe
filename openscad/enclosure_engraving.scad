@@ -45,7 +45,7 @@ module enclosure_engraving(
     size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
     bleed = ENCLOSURE_ENGRAVING_BLEED,
     chamfer = ENCLOSURE_ENGRAVING_CHAMFER,
-    center = true,
+    center = true, // TODO: is this working as expected?
     position = [0, 0],
     font = ENGRAVING_FONT,
     depth = ENCLOSURE_ENGRAVING_DEPTH,

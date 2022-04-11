@@ -100,11 +100,13 @@ function get_row_length(
     0
 );
 
-module knob_and_label(
+module control_and_label(
+    is_knob = true,
+
     string = "",
     position = [0, 0],
 
-    knob_diameter = 20,
+    knob_diameter = 20, // aka width
 
     label_length = 5,
     label_gutter = 2.5,
@@ -117,11 +119,7 @@ module knob_and_label(
 ) {
     radius = knob_diameter / 2;
 
-    translate([
-        position.x + radius,
-        position.y + label_length + label_gutter + radius,
-        0
-    ]) {
+    module _knob() {
         if (quick_preview) {
             color("#fff") {
                 cylinder(
@@ -146,93 +144,91 @@ module knob_and_label(
         }
     }
 
-    color("#fff") {
-        enclosure_engraving(
-            string = string,
-            size = label_text_size,
-            position = [
-                position.x + radius,
-                position.y + label_length / 2
-            ],
-            placard = [knob_diameter, label_length]
-        );
-    }
+    module _switch() {
+        * # cube([knob_diameter, knob_diameter, 10]);
 
-    translate([position.x, position.y, 0]) {
-        color("#ccc") {
-            cube([knob_diameter, label_length, .1]);
+        actuator_width = max(
+            SWITCH_CLUTCH_MIN_ACTUATOR_WIDTH,
+            (knob_diameter - label_gutter * (2 - 1)) / 2
+        );
+        actuator_window_dimensions = get_actuator_window_dimensions(
+            width = actuator_width,
+            control_clearance = 0
+        );
+
+        module _window() {
+            # actuator_window(actuator_window_dimensions);
         }
-    }
-}
 
-module switch_clutch_and_engraving(
-    primary_label = "",
-    secondary_labels = ["", ""],
-    width,
-    length,
-    switch_position = 0,
-    fillet = 0,
-    control_clearance = 1
-) {
-    actuator_window_dimensions = get_actuator_window_dimensions(
-        width = SWITCH_CLUTCH_MIN_BASE_WIDTH,
-        engraving_length = length,
-        control_clearance = control_clearance
-    );
-
-    actuator_length = get_max_switch_clutch_actuator_length(
-        actuator_window_length = actuator_window_dimensions.y,
-        control_clearance = control_clearance
-    );
-
-    switch_clutch_switch_position = get_switch_clutch_switch_position(
-        engraving_width = width,
-        engraving_length = length,
-
-        actuator_window_dimensions = actuator_window_dimensions
-    );
-
-    translate(switch_clutch_switch_position) {
-        switch_clutch(
-            actuator_length = actuator_length,
-            position = switch_position,
-            fillet = fillet, $fn = 12,
-            color = "#fff",
-            cavity_color = "#ccc"
-        );
-    }
-
-    translate([0,0,ENCLOSURE_ENGRAVING_DEPTH]) {
-        difference() {
-            color("#fff") {
-                switch_clutch_enclosure_engraving(
-                    primary_label = primary_label,
-                    secondary_labels = secondary_labels,
-
-                    width = width,
-                    length = length,
-
-                    actuator_window_dimensions = actuator_window_dimensions,
-
-                    control_clearance = control_clearance,
-
-                    enclosure_height = 0
+        module _clutch() {
+            translate([
+                actuator_width / 2,
+                -SWITCH_ORIGIN.y
+                    - SWITCH_CLUTCH_MIN_BASE_LENGTH / 2
+                    + SWITCH_CLUTCH_MIN_ACTUATOR_LENGTH / 2
+                    + SWITCH_ACTUATOR_TRAVEL,
+                -SWITCH_CLUTCH_MIN_BASE_HEIGHT
+            ]) {
+                switch_clutch(
+                    base_width = actuator_width,
+                    actuator_width = actuator_width,
+                    position = 0,
+                    fillet = 1, $fn = 12,
+                    color = "#fff",
+                    cavity_color = "#ccc"
                 );
             }
+        }
 
+        module _labels() {
+            switch_clutch_enclosure_engraving(
+                labels = ["NO", "YES"],
+                actuator_window_dimensions = actuator_window_dimensions,
+                control_clearance = 0,
+                quick_preview = true,
+                enclosure_height = 1
+            );
+        }
+
+        _window();
+        _clutch();
+        _labels();
+    }
+
+    module _label() {
+        color("#fff") {
+            enclosure_engraving(
+                string = string,
+                size = label_text_size,
+                position = [
+                    position.x + radius,
+                    position.y + label_length / 2
+                ],
+                placard = [knob_diameter, label_length]
+            );
+        }
+
+        translate([position.x, position.y, 0]) {
             color("#ccc") {
-                translate(get_switch_clutch_window_position(
-                    engraving_width = width,
-                    engraving_length = length,
-
-                    actuator_window_dimensions = actuator_window_dimensions
-                )) {
-                    actuator_window(actuator_window_dimensions);
-                }
+                cube([knob_diameter, label_length, .1]);
             }
         }
     }
-    color("#ccc") cube([width, length, .1]);
+
+    x = position.x
+        + (is_knob ? radius : 0);
+    y = position.y + label_length + label_gutter
+        + (is_knob ? radius : 0);
+
+    translate([x, y, 0]) {
+        if (is_knob) {
+            _knob();
+        } else {
+            _switch();
+        }
+    }
+
+    _label();
 }
 
 module control_array(
@@ -302,32 +298,16 @@ module control_array(
 
         label = get_label(i, round(knob_diameter / label_length));
 
-        if (is_knob) {
-            knob_and_label(
-                string = label,
-                position = [
-                    position.x + _position.x,
-                    position.y + _position.y
-                ],
-                knob_diameter = knob_diameter,
-                quick_preview = quick_preview
-            );
-        } else if (is_switch) {
-            translate([
+        control_and_label(
+            is_knob = is_knob,
+            string = label,
+            position = [
                 position.x + _position.x,
-                position.y + _position.y,
-                0
-            ]) {
-                switch_clutch_and_engraving(
-                    primary_label = label,
-                    secondary_labels = slice(LOREM_IPSUM, i + label_i_offset + 1),
-                    width = knob_diameter,
-                    length = knob_diameter + label_length,
-                    switch_position = (abs($t - 1 / 2) * 2),
-                    fillet = quick_preview ? 0 : 1
-                );
-            }
-        }
+                position.y + _position.y
+            ],
+            knob_diameter = knob_diameter,
+            quick_preview = quick_preview
+        );
     }
 
     if (debug) {
@@ -374,10 +354,10 @@ module layout(
 ) {
     e = .01;
 
-    knob_and_label_direction = columns != undef
+    control_and_label_direction = columns != undef
         ? VERTICAL
         : HORIZONTAL;
-    stack = knob_and_label_direction == VERTICAL ? columns : reverse(rows);
+    stack = control_and_label_direction == VERTICAL ? columns : reverse(rows);
 
     big_knob_diameter = 50;
 
@@ -399,7 +379,7 @@ module layout(
 
             available_area = available_area,
 
-            direction = knob_and_label_direction,
+            direction = control_and_label_direction,
 
             position = position,
 
@@ -433,11 +413,11 @@ module layout(
         for (
             sum = 0, i = -1;
             i < len(stack);
-            sum = knob_and_label_direction == VERTICAL
+            sum = control_and_label_direction == VERTICAL
                 ? (i < 0 ? 0 : sum + _get_column_width(i) + gutter)
                 : 0, i = i + 1
         ) (
-            knob_and_label_direction == VERTICAL
+            control_and_label_direction == VERTICAL
                 ? (i < 0 ? 0 : sum + _get_column_width(i) + gutter)
                 : 0
         )
@@ -481,11 +461,11 @@ module layout(
 
     module _control_arrays() {
         for (i = [0 : len(stack) - 1]) {
-            _i = knob_and_label_direction == HORIZONTAL
+            _i = control_and_label_direction == HORIZONTAL
                 ? len(stack) - 1 - i
                 : i;
 
-            position = knob_and_label_direction == HORIZONTAL
+            position = control_and_label_direction == HORIZONTAL
                 ? [0, row_ys[_i]]
                 : [column_xs[_i], 0];
 
@@ -499,10 +479,10 @@ module layout(
     }
 
     gutter_bump = outer_gutter * 2 - gutter;
-    width = knob_and_label_direction == HORIZONTAL
+    width = control_and_label_direction == HORIZONTAL
         ? available_area + outer_gutter * 2
         : column_xs[len(column_xs) - 1] + gutter_bump;
-    length = knob_and_label_direction == HORIZONTAL
+    length = control_and_label_direction == HORIZONTAL
         ? row_ys[len(row_ys) - 1] + gutter_bump
         : available_area + outer_gutter * 2;
 
@@ -524,10 +504,10 @@ module layout(
     }
 }
 
-$vpr = [30, 0, -20];
+/* $vpr = [30, 0, -20];
 $vpt = [0,0,8];
 $vpd = 500;
-$vpf = 18;
+$vpf = 18; */
 
 layouts = [
     // [columns, rows, available_area]
@@ -539,7 +519,7 @@ layouts = [
     [undef, [1,5], 80],
 ];
 
-layout = layouts[floor($t * len(layouts))];
+layout = layouts[0];
 
 layout(
     columns = layout[0],
@@ -550,5 +530,5 @@ layout(
     gutter = 5,
     outer_gutter = 5,
 
-    quick_preview = false
+    quick_preview = true
 );
