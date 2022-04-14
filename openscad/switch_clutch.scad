@@ -97,19 +97,23 @@ module switch_clutch(
     }
 
     module _outer() {
-        translate(get_absolute_origin()) {
-            cube([base_width, base_length, base_height]);
+        color(cavity_color) {
+            translate(get_absolute_origin()) {
+                cube([base_width, base_length, base_height]);
+            }
         }
 
-        translate(get_absolute_origin(
-            actuator_width,
-            actuator_length,
-            z = base_height - fillet - e
-        )) {
-            rounded_cube(
-                [actuator_width, actuator_length, actuator_height + fillet + e],
-                fillet
-            );
+        color(color) {
+            translate(get_absolute_origin(
+                actuator_width,
+                actuator_length,
+                z = base_height - fillet - e
+            )) {
+                rounded_cube(
+                    [actuator_width, actuator_length, actuator_height + fillet + e],
+                    fillet
+                );
+            }
         }
     }
 
@@ -151,9 +155,7 @@ module switch_clutch(
 
     translate([0, y, 0]) {
         difference() {
-            color(color) {
-                _outer();
-            }
+            _outer();
 
             color(cavity_color) {
                 _cavity();
