@@ -24,6 +24,7 @@ function get_switch_clutch_switch_position(
 
 function get_actuator_window_dimensions(
     width = SWITCH_CLUTCH_MIN_ACTUATOR_WIDTH,
+    length = undef, // used if provided, otherwise derived from text + gutter
 
     secondary_text_size = SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_SECONDARY_TEXT_SIZE,
     label_gutter = ENCLOSURE_ENGRAVING_GUTTER,
@@ -32,7 +33,8 @@ function get_actuator_window_dimensions(
 ) = (
     [
         width + control_clearance * 2,
-        secondary_text_size * 2 + label_gutter + control_clearance * 2,
+        (length != undef ? length : secondary_text_size * 2 + label_gutter)
+            + control_clearance * 2,
     ]
 );
 

@@ -151,8 +151,10 @@ module control_and_label(
             SWITCH_CLUTCH_MIN_ACTUATOR_WIDTH,
             (knob_diameter - label_gutter * (2 - 1)) / 2
         );
+        actuator_length = knob_diameter - SWITCH_ACTUATOR_TRAVEL;
         actuator_window_dimensions = get_actuator_window_dimensions(
             width = actuator_width,
+            length = knob_diameter,
             control_clearance = 0
         );
 
@@ -165,14 +167,15 @@ module control_and_label(
                 actuator_width / 2,
                 -SWITCH_ORIGIN.y
                     - SWITCH_CLUTCH_MIN_BASE_LENGTH / 2
-                    + SWITCH_CLUTCH_MIN_ACTUATOR_LENGTH / 2
+                    + actuator_length / 2
                     + SWITCH_ACTUATOR_TRAVEL,
                 -SWITCH_CLUTCH_MIN_BASE_HEIGHT
             ]) {
                 switch_clutch(
                     base_width = actuator_width,
                     actuator_width = actuator_width,
-                    position = 0,
+                    actuator_length = actuator_length,
+                    position = abs($t - .5) * 2,
                     fillet = 1, $fn = 12,
                     color = "#fff",
                     cavity_color = "#ccc"
