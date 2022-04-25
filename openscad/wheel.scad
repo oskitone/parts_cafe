@@ -31,6 +31,9 @@ module wheel(
 
     round_bottom = true,
 
+    brim_diameter = 0,
+    brim_height = 0,
+
     shaft_type = POT_SHAFT_TYPE_DEFAULT,
 
     grip_count = undef,
@@ -247,11 +250,22 @@ module wheel(
         }
     }
 
+    module _brim() {
+        cylinder(
+            d = brim_diameter,
+            h = brim_height
+        );
+    }
+
     difference() {
         color(color) {
             union() {
                 if (spokes_count > 0) {
                     _hub();
+                }
+
+                if (brim_diameter > 0 && brim_height > 0) {
+                    _brim();
                 }
 
                 if (!test_fit) {
