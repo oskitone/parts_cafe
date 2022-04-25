@@ -32,6 +32,8 @@ module cherry_switch_keycap(
 
     cherry_switch_travel = CHERRY_SWITCH_TRAVEL,
 
+    brim_dimensions = [0,0,0],
+
     debug = false
 ) {
     e = .0418;
@@ -101,6 +103,16 @@ module cherry_switch_keycap(
                         sphere(r = fillet);
                     }
                 }
+            }
+        }
+
+        if (brim_dimensions.z > 0) {
+            translate([
+                (brim_dimensions.x - dimensions.x) / -2,
+                (brim_dimensions.y - dimensions.y) / -2,
+                0
+            ]) {
+                cube(brim_dimensions);
             }
         }
 
