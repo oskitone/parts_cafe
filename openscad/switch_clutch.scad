@@ -1,3 +1,4 @@
+include <flat_top_rectangular_pyramid.scad>;
 include <rib_cavities.scad>;
 include <rounded_cube.scad>;
 include <switch.scad>;
@@ -49,6 +50,8 @@ module switch_clutch(
     cavity_color = undef,
 
     debug = false,
+
+    show_dfm = true,
 
     clearance = 0,
     tolerance = .1
@@ -119,11 +122,11 @@ module switch_clutch(
 
     module _cavity() {
         width = switch_base_width + gutter * 2;
+        length = switch_base_length + switch_actuator_travel + gutter * 2;
 
         _switch(
             base_width = width,
-            base_length = switch_base_length + switch_actuator_travel
-                + gutter * 2,
+            base_length = length,
             base_height = switch_base_height + e,
 
             actuator_width = width,
@@ -132,6 +135,22 @@ module switch_clutch(
 
             z = -e
         );
+
+        if (show_dfm) {
+            translate([
+                switch_origin.x,
+                switch_origin.y - switch_actuator_travel / 2 - tolerance,
+                switch_base_height - e
+            ]) {
+                flat_top_rectangular_pyramid(
+                    top_width = 0,
+                    top_length = length,
+                    bottom_width = width,
+                    bottom_length = length,
+                    height = width / 3
+                );
+            }
+        }
     }
 
     module _rib_cavities(depth = DEFAULT_RIB_SIZE) {
