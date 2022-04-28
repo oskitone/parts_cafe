@@ -62,7 +62,7 @@ module wheel(
                     donut(
                         diameter = hub_diameter,
                         thickness = ring,
-                        segments = $preview ? 24 : 36
+                        segments = $fn != undef ? $fn : 24
                     );
                 }
             }
@@ -81,7 +81,7 @@ module wheel(
                     donut(
                         diameter = diameter,
                         thickness = ring,
-                        segments = $preview ? 24 : 36
+                        segments = $fn != undef ? $fn : 24
                     );
                 }
             }
@@ -253,7 +253,8 @@ module wheel(
     module _brim() {
         cylinder(
             d = brim_diameter,
-            h = brim_height
+            h = brim_height,
+            $fn = $fn
         );
     }
 
