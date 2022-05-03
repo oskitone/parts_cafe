@@ -122,7 +122,7 @@ module switch_clutch(
 
     module _cavity() {
         width = switch_base_width + gutter * 2;
-        length = switch_base_length + switch_actuator_travel + gutter * 2;
+        length = base_length + e * 2;
 
         _switch(
             base_width = width,
@@ -137,11 +137,11 @@ module switch_clutch(
         );
 
         if (show_dfm) {
-            translate([
-                switch_origin.x,
-                switch_origin.y - switch_actuator_travel / 2 - tolerance,
+            translate(get_absolute_origin(
+                width,
+                length,
                 switch_base_height - e
-            ]) {
+            )) {
                 flat_top_rectangular_pyramid(
                     top_width = 0,
                     top_length = length,
