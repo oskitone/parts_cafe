@@ -8,7 +8,7 @@ SWITCH_CLUTCH_CLEARANCE = .4;
 SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_PRIMARY_TEXT_SIZE =
     ENCLOSURE_ENGRAVING_TEXT_SIZE;
 SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_SECONDARY_TEXT_SIZE =
-    ENCLOSURE_ENGRAVING_TEXT_SIZE * .75; // TODO: test
+    ENCLOSURE_ENGRAVING_TEXT_SIZE;
 
 function get_switch_clutch_switch_position(
     actuator_window_dimensions = [0, 0]
@@ -87,6 +87,7 @@ module switch_clutch_enclosure_engraving(
         enclosure_engraving(
             string = string,
             size = secondary_text_size,
+            chamfer = ENCLOSURE_ENGRAVING_CHAMFER / 2,
             depth = depth,
             center = false,
             position = [x, ys[i]],
