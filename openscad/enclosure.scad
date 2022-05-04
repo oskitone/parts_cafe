@@ -100,12 +100,16 @@ module enclosure_half(
 
                 z = add_lip ? height - e : height - lip_height -e ;
 
-                translate([(width - snap_width) / 2, -e, z]) {
-                    cube([snap_width, length + e * 2, lip_height + e * 2]);
+                if (_snap.x > 0) {
+                    translate([(width - snap_width) / 2, -e, z]) {
+                        cube([snap_width, length + e * 2, lip_height + e * 2]);
+                    }
                 }
 
-                translate([-e, (length - snap_length) / 2, z]) {
-                    cube([width + e * 2, snap_length, lip_height + e * 2]);
+                if (_snap.y > 0) {
+                    translate([-e, (length - snap_length) / 2, z]) {
+                        cube([width + e * 2, snap_length, lip_height + e * 2]);
+                    }
                 }
             }
         }
