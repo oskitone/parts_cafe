@@ -19,7 +19,7 @@ module enclosure_half(
 
     include_tongue_and_groove = false,
     tongue_and_groove_end_length = undef,
-    tongue_and_groove_snap = undef, // ex: .5, [.25, .75]
+    tongue_and_groove_snap = undef, // [back, right, front, left],
     tongue_and_groove_pull = 0,
 
     outer_color,
@@ -78,6 +78,30 @@ module enclosure_half(
         }
 
         module _intersection() {
+            size = wall + e * 2;
+
+            BACK = "back";
+            RIGHT = "right";
+            FRONT = "front";
+            LEFT = "left";
+
+            module _side(
+                side = FRONT,
+                _width = size,
+                _length = size,
+                x = -e,
+                y = -e,
+                z = add_lip ? height - e : height - lip_height -e
+            ) {
+                translate([
+                    _width == size ? x : (width - _width) / 2,
+                    _length == size ? y : (length - _length) / 2,
+                    z
+                ]) {
+                    cube([_width, _length, lip_height + e * 2]);
+                }
+            }
+
             if (tongue_and_groove_end_length) {
                 y = length - wall - tongue_and_groove_end_length - bleed;
                 z = add_lip ? height : height - lip_height;
@@ -91,25 +115,32 @@ module enclosure_half(
                 }
             } else if (tongue_and_groove_snap) {
                 _tolerance = tolerance * (add_lip ? -1 : 1);
-                _snap = !!tongue_and_groove_snap.y
-                    ? tongue_and_groove_snap
-                    : [tongue_and_groove_snap, tongue_and_groove_snap];
+                _snap = tongue_and_groove_snap;
 
-                snap_width = _snap.x * width + _tolerance;
-                snap_length = _snap.y * length + _tolerance;
-
-                z = add_lip ? height - e : height - lip_height -e ;
-
-                if (_snap.x > 0) {
-                    translate([(width - snap_width) / 2, -e, z]) {
-                        cube([snap_width, length + e * 2, lip_height + e * 2]);
-                    }
+                // BACK
+                if (_snap[0] > 0) {
+                    _side(
+                        _width = _snap[0] * width + _tolerance,
+                        y = length - size + e
+                    );
                 }
 
-                if (_snap.y > 0) {
-                    translate([-e, (length - snap_length) / 2, z]) {
-                        cube([width + e * 2, snap_length, lip_height + e * 2]);
-                    }
+                // RIGHT
+                if (_snap[1] > 0) {
+                    _side(
+                        _length = _snap[1] * length + _tolerance,
+                        x = width - size + e
+                    );
+                }
+
+                // FRONT
+                if (_snap[2] > 0) {
+                    _side(_width = _snap[2] * width + _tolerance);
+                }
+
+                // LEFT
+                if (_snap[3] > 0) {
+                    _side(_length = _snap[3] * length + _tolerance);
                 }
             }
         }
