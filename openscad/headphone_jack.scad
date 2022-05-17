@@ -3,29 +3,39 @@
 HEADPHONE_JACK_WIDTH = 12;
 HEADPHONE_JACK_LENGTH = 11;
 HEADPHONE_JACK_HEIGHT = 5;
+
+HEADPHONE_JACK_BRIM_WIDTH = 9;
+HEADPHONE_JACK_BRIM_LENGTH = 1;
+
 HEADPHONE_JACK_BARREL_LENGTH = 3;
 HEADPHONE_JACK_BARREL_DIAMETER = 6;
-HEADPHONE_JACK_BARREL_Z = HEADPHONE_JACK_BARREL_DIAMETER / 2;
 
-module headphone_jack() {
+HEADPHONE_JACK_BARREL_Z = HEADPHONE_JACK_HEIGHT / 2;
+
+module headphone_jack(
+    width = HEADPHONE_JACK_WIDTH,
+    length = HEADPHONE_JACK_LENGTH,
+    height = HEADPHONE_JACK_HEIGHT,
+
+    brim_width = HEADPHONE_JACK_BRIM_WIDTH,
+    brim_length = HEADPHONE_JACK_BRIM_LENGTH,
+
+    barrel_length = HEADPHONE_JACK_BARREL_LENGTH,
+    barrel_diameter = HEADPHONE_JACK_BARREL_DIAMETER,
+
+    barrel_z = HEADPHONE_JACK_BARREL_Z,
+) {
     e = .0341;
 
-    cube([
-        HEADPHONE_JACK_WIDTH,
-        HEADPHONE_JACK_LENGTH,
-        HEADPHONE_JACK_HEIGHT
-    ]);
+    cube([width, length, height]);
 
-    translate([
-        HEADPHONE_JACK_WIDTH / 2,
-        HEADPHONE_JACK_LENGTH - e,
-        HEADPHONE_JACK_BARREL_Z
-    ]) {
+    translate([(width - brim_width) / 2, length - e, 0]) {
+        cube([brim_width, brim_length + e, height]);
+    }
+
+    translate([width / 2, length - e, barrel_z]) {
         rotate([-90, 0, 0]) {
-            cylinder(
-                d = HEADPHONE_JACK_BARREL_DIAMETER,
-                h = HEADPHONE_JACK_BARREL_LENGTH + e
-            );
+            cylinder(d = barrel_diameter, h = barrel_length + e);
         }
     }
 }
