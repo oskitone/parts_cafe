@@ -1,8 +1,8 @@
-// TODO: extract parts to common repo
-use <../../poly555/openscad/lib/basic_shapes.scad>;
-
+include <cylinder_grip.scad>;
+include <donut.scad>;
 include <pot.scad>;
 include <rib_cavities.scad>;
+include <ring.scad>;
 
 module wheel(
     diameter = 20,

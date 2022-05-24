@@ -1,7 +1,5 @@
-/* TODO: extract into common parts repo */
-use <../../poly555/openscad/lib/basic_shapes.scad>;
-
 include <engraving.scad>;
+include <flat_top_rectangular_pyramid.scad>;
 
 ENCLOSURE_ENGRAVING_DEPTH = 1.2;
 OSKITONE_LENGTH_WIDTH_RATIO = 4.6 / 28;
