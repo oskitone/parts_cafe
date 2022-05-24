@@ -1,4 +1,3 @@
-include <../../openscad-animation/animation.scad>;
 include <enclosure_engraving.scad>;
 include <engraving.scad>;
 include <switch_clutch.scad>;
@@ -213,7 +212,7 @@ module __demo_switch_clutch_enclosure_engraving(
 }
 * __demo_switch_clutch_enclosure_engraving(
     wall_gutter = 2,
-    switch_position = ease_in_out_quint(abs($t - 1 / 2) * 2),
+    switch_position = abs($t - 1 / 2) * 2,
     control_clearance = SWITCH_CLUTCH_CLEARANCE,
     tolerance = .1,
     quick_preview = 1
