@@ -292,10 +292,12 @@ module wheel(
         }
 
         if (debug) {
-            translate([0, diameter / -2 -e, -e]) {
+            max_diameter = max(diameter, brim_diameter);
+
+            translate([0, max_diameter / -2 -e, -e]) {
                 cube([
-                    diameter / 2 + e,
-                    diameter + e * 2,
+                    max_diameter / 2 + e,
+                    max_diameter + e * 2,
                     height + brodie_knob_diameter / 2 + e * 2
                 ]);
             }
