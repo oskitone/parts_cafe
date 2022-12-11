@@ -8,6 +8,11 @@ module speaker_pocket(
 
     tolerance = 0,
 
+    anchor_hole_diameter = 2,
+    anchor_brim = 2,
+    anchor_height = 2,
+    anchor_count = 3,
+
     grill_size = 2,
     grill_angle = 45,
 
@@ -70,11 +75,34 @@ module speaker_pocket(
         }
     }
 
+    module _anchors() {
+        for (i = [0 : anchor_count - 1]) {
+            rotate([0, 0, (360 / anchor_count) * i]) {
+                translate([0, (outer_diameter + anchor_hole_diameter) / 2]) {
+                    difference() {
+                        cylinder(
+                            d = anchor_hole_diameter + anchor_brim * 2,
+                            h = anchor_height
+                        );
+
+                        translate([0, 0, -e]) {
+                            cylinder(
+                                d = anchor_hole_diameter,
+                                h = anchor_height + e * 2
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     difference() {
         union() {
             _outer_wall();
             _brim();
             _grill_cover();
+            _anchors();
         }
 
         if (debug) {
