@@ -1,3 +1,4 @@
+include <diagonal_grill.scad>;
 include <ring.scad>;
 include <speaker.scad>;
 
@@ -6,6 +7,9 @@ module speaker_pocket(
     floor_ceiling = 1,
 
     tolerance = 0,
+
+    grill_size = 2,
+    grill_angle = 45,
 
     show_speaker = false,
     debug = false,
@@ -23,6 +27,9 @@ module speaker_pocket(
     outer_diameter = speaker_diameter + (tolerance + wall) * 2;
     outer_height = speaker_total_height + floor_ceiling;
 
+    exposure_diameter = outer_diameter - wall * 2 - speaker_brim_depth * 2
+        + tolerance * 2;
+
     module _outer_wall() {
         ring(
             diameter = outer_diameter,
@@ -35,9 +42,31 @@ module speaker_pocket(
         translate([0, 0, outer_height - floor_ceiling]) {
             ring(
                 diameter = outer_diameter - wall * 2 + e * 2,
-                height = floor_ceiling,
-                thickness = speaker_brim_depth + tolerance - e * 2
+                inner_diameter = exposure_diameter,
+                height = floor_ceiling
             );
+        }
+    }
+
+    module _grill_cover() {
+        z = outer_height - floor_ceiling;
+        diameter = exposure_diameter + e * 2;
+
+        intersection() {
+            translate([diameter / -2, diameter / -2, z]) {
+                diagonal_grill(
+                    diameter, diameter, floor_ceiling,
+                    size = grill_size,
+                    angle = grill_angle
+                );
+            }
+
+            translate([0, 0, z]) {
+                cylinder(
+                    d = diameter,
+                    h = floor_ceiling
+                );
+            }
         }
     }
 
@@ -45,6 +74,7 @@ module speaker_pocket(
         union() {
             _outer_wall();
             _brim();
+            _grill_cover();
         }
 
         if (debug) {
