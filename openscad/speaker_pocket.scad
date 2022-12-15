@@ -1,5 +1,6 @@
 include <anchor_mount.scad>;
 include <diagonal_grill.scad>;
+include <donut.scad>;
 include <nuts_and_bolts.scad>;
 include <ring.scad>;
 include <speaker.scad>;
@@ -11,6 +12,8 @@ module speaker_pocket(
     tolerance = 0,
 
     anchor_count = 3,
+
+    fillet = 1,
 
     grill_size = 2,
     grill_angle = 45,
@@ -24,7 +27,10 @@ module speaker_pocket(
     speaker_magnet_height = SPEAKER_MAGNET_HEIGHT,
     speaker_magnet_diameter = SPEAKER_MAGNET_DIAMETER,
     speaker_total_height = SPEAKER_TOTAL_HEIGHT,
-    speaker_cone_height = SPEAKER_CONE_HEIGHT
+    speaker_cone_height = SPEAKER_CONE_HEIGHT,
+
+    // Wall, fillet, and grill must have matching fragment count to avoid cracks
+    $wall_fn = 60
 ) {
     e = .042;
 
@@ -34,12 +40,38 @@ module speaker_pocket(
     exposure_diameter = outer_diameter - wall * 2 - speaker_brim_depth * 2
         + tolerance * 2;
 
-    module _outer_wall() {
-        ring(
-            diameter = outer_diameter,
-            height = outer_height,
-            thickness = wall
-        );
+    module _outer_wall(segments = $wall_fn) {
+        // Fillet can't be larger than wall or there'll be weird vertical gaps
+        fillet = min(wall, fillet);
+
+        difference() {
+            hull() {
+                cylinder(
+                    d = outer_diameter,
+                    h = fillet > 0 ? e : outer_height,
+                    $fn = segments
+                );
+
+                if (fillet > 0) {
+                    translate([0, 0, outer_height - fillet]) {
+                        donut(
+                            diameter = outer_diameter,
+                            thickness = fillet * 2,
+                            segments = segments,
+                            $fn = 12
+                        );
+                    }
+                }
+            }
+
+            translate([0, 0, -e]) {
+                cylinder(
+                    d = outer_diameter - wall * 2,
+                    h = outer_height + e * 2,
+                    $fn = segments
+                );
+            }
+        }
     }
 
     module _brim() {
@@ -47,7 +79,8 @@ module speaker_pocket(
             ring(
                 diameter = outer_diameter - wall * 2 + e * 2,
                 inner_diameter = exposure_diameter,
-                height = floor_ceiling
+                height = floor_ceiling,
+                $fn = $wall_fn
             );
         }
     }
@@ -68,7 +101,8 @@ module speaker_pocket(
             translate([0, 0, z]) {
                 cylinder(
                     d = diameter,
-                    h = floor_ceiling
+                    h = floor_ceiling,
+                    $fn = $wall_fn
                 );
             }
         }
