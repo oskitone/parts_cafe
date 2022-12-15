@@ -7,7 +7,7 @@ include <speaker.scad>;
 
 module speaker_pocket(
     wall = 2,
-    floor_ceiling = 1,
+    floor_ceiling = 1.2,
 
     tolerance = 0,
 
@@ -20,6 +20,10 @@ module speaker_pocket(
 
     show_speaker = false,
     debug = false,
+
+    outline_gutter = undef,
+    outline_depth = .6,
+    outline_length = 1,
 
     speaker_diameter = SPEAKER_DIAMETER,
     speaker_brim_height = SPEAKER_BRIM_HEIGHT,
@@ -122,6 +126,22 @@ module speaker_pocket(
         }
     }
 
+    module _outline() {
+        outline_gutter = outline_gutter != undef
+            ? outline_gutter
+            : (outer_diameter - exposure_diameter - sqrt(2 * pow(grill_size, 2))
+                - outline_length * 2) / 2 + e;
+
+        translate([0, 0, outer_height - outline_depth]) {
+            ring(
+                diameter = outer_diameter - outline_gutter * 2,
+                thickness = outline_length,
+                height = outline_depth + e,
+                $fn = $wall_fn
+            );
+        }
+    }
+
     difference() {
         union() {
             _outer_wall();
@@ -129,6 +149,8 @@ module speaker_pocket(
             _grill_cover();
             _anchor_mounts();
         }
+
+        _outline();
 
         if (debug) {
             translate([0, outer_diameter / -2 - e, -e]) {
