@@ -5,6 +5,14 @@ include <nuts_and_bolts.scad>;
 include <ring.scad>;
 include <speaker.scad>;
 
+function get_speaker_pocket_outer_diameter(
+    speaker_diameter,
+    tolerance,
+    wall
+) = (
+    speaker_diameter + (tolerance + wall) * 2
+);
+
 module speaker_pocket(
     wall = 2,
     floor_ceiling = 1.2,
@@ -12,6 +20,7 @@ module speaker_pocket(
     tolerance = 0,
 
     anchor_count = 3,
+    anchor_mount_distance = ANCHOR_MOUNT_MIN_DISTANCE,
 
     fillet = 1,
 
@@ -38,7 +47,11 @@ module speaker_pocket(
 ) {
     e = .042;
 
-    outer_diameter = speaker_diameter + (tolerance + wall) * 2;
+    outer_diameter = get_speaker_pocket_outer_diameter(
+        speaker_diameter,
+        tolerance,
+        wall
+    );
     outer_height = speaker_total_height + floor_ceiling;
 
     exposure_diameter = outer_diameter - wall * 2 - speaker_brim_depth * 2
@@ -117,6 +130,7 @@ module speaker_pocket(
             rotate([0, 0, (360 / anchor_count) * i]) {
                 translate([0, outer_diameter / 2, 0]) {
                     anchor_mount(
+                        distance = anchor_mount_distance,
                         extension = wall / 2,
                         tolerance = tolerance,
                         debug = debug
@@ -146,8 +160,11 @@ module speaker_pocket(
         union() {
             _outer_wall();
             _brim();
-            _grill_cover();
             _anchor_mounts();
+
+            if (!debug) {
+                _grill_cover();
+            }
         }
 
         _outline();
@@ -176,7 +193,91 @@ module speaker_pocket(
     }
 }
 
-* speaker_pocket(
+module perfboard_speaker_pocket(
+    wall = 2,
+
+    tolerance = 0,
+
+    anchor_count = 2,
+
+    fillet = 1,
+
+    show_speaker = false,
+    debug = false,
+
+    grid = 2.54,
+
+    speaker_diameter = SPEAKER_DIAMETER,
+    speaker_brim_height = SPEAKER_BRIM_HEIGHT,
+    speaker_brim_depth = SPEAKER_BRIM_DEPTH,
+    speaker_magnet_height = SPEAKER_MAGNET_HEIGHT,
+    speaker_magnet_diameter = SPEAKER_MAGNET_DIAMETER,
+    speaker_total_height = SPEAKER_TOTAL_HEIGHT,
+    speaker_cone_height = SPEAKER_CONE_HEIGHT,
+) {
+    function even_up(
+        n
+    ) = (
+        n + (n % 2)
+    );
+
+    rotated_grid = sqrt(2 * pow(grid, 2));
+    outer_diameter = get_speaker_pocket_outer_diameter(
+        speaker_diameter,
+        tolerance,
+        wall
+    );
+    minimum_outer_diameter = outer_diameter + ANCHOR_MOUNT_MIN_DISTANCE * 2;
+    anchor_mount_distance = (
+        even_up(ceil(minimum_outer_diameter / rotated_grid)) * rotated_grid
+        - outer_diameter
+    ) / 2;
+
+    module _grid() {
+        count = round(outer_diameter * 1.5 / grid);
+        offset = round(count / -2);
+
+        for (ix = [0 : count - 1]) {
+            for (iy = [0 : count - 1]) {
+                translate([(ix + offset) * grid, (iy + offset) * grid, 0]) {
+                    # % cylinder(
+                        d = grid * .5,
+                        h = 10,
+                        $fn = 4
+                    );
+                }
+            }
+        }
+    }
+
+    rotate([0, 0, 45]) {
+        speaker_pocket(
+            tolerance = tolerance,
+
+            anchor_count = anchor_count,
+            anchor_mount_distance = anchor_mount_distance,
+
+            fillet = fillet,
+
+            show_speaker = show_speaker,
+            debug = debug,
+
+            speaker_diameter = speaker_diameter,
+            speaker_brim_height = speaker_brim_height,
+            speaker_brim_depth = speaker_brim_depth,
+            speaker_magnet_height = speaker_magnet_height,
+            speaker_magnet_diameter = speaker_magnet_diameter,
+            speaker_total_height = speaker_total_height,
+            speaker_cone_height = speaker_cone_height
+        );
+    }
+
+    if (debug) {
+        _grid();
+    }
+}
+
+* perfboard_speaker_pocket(
     tolerance = .1,
 
     show_speaker = true,

@@ -2,10 +2,12 @@ include <nuts_and_bolts.scad>;
 
 // TODO: DFM. maybe square anchor w/ ramped walls up
 
+ANCHOR_MOUNT_MIN_DISTANCE = max(SCREW_HEAD_DIAMETER, NUT_DIAMETER) / 2;
+
 module anchor_mount(
     width = undef,
     hole_diameter = SCREW_DIAMETER,
-    distance = max(SCREW_HEAD_DIAMETER, NUT_DIAMETER) / 2,
+    distance = ANCHOR_MOUNT_MIN_DISTANCE,
     height = 2,
     extension = 0,
     tolerance = 0,
