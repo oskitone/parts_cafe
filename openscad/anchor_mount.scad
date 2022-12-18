@@ -74,7 +74,8 @@ module anchor_mount(
             translate([0, 0, -e]) {
                 cylinder(
                     d = hole_diameter + tolerance * 2,
-                    h = height + e * 2
+                    h = height + e * 2,
+                    $fn = 12
                 );
             }
         }
