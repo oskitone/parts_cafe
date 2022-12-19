@@ -1,5 +1,6 @@
 include <flat_top_rectangular_pyramid.scad>;
 include <nuts_and_bolts.scad>;
+include <supportless_screw_cavity.scad>;
 
 // TODO: DFM. maybe square anchor w/ ramped walls up
 
@@ -71,11 +72,11 @@ module anchor_mount(
         difference() {
             _base();
 
-            translate([0, 0, -e]) {
-                cylinder(
-                    d = hole_diameter + tolerance * 2,
-                    h = height + e * 2,
-                    $fn = 12
+            translate([0, 0, height + e]) mirror([0, 0, 1]) {
+                supportless_screw_cavity(
+                    height = height + e * 2,
+                    span = width,
+                    diameter = hole_diameter
                 );
             }
         }
