@@ -1,10 +1,22 @@
+PERFBOARD_HEIGHT = 2;
+PERFBOARD_PITCH = 2.54;
+PERFBOARD_HOLE_DIAMETER = 1.5;
+
+function get_pefboard_dimension(
+    size,
+    pitch = 2.54
+) = (
+    ceil(size / pitch) * pitch
+);
+
 module perfboard(
     width = 4 * 25.4,
     length = 4 * 25.4,
-    height = 2,
+    height = PERFBOARD_HEIGHT,
 
-    pitch = 2.54,
-    hole_diameter = 1.5
+    pitch = PERFBOARD_PITCH,
+    hole_diameter = PERFBOARD_HOLE_DIAMETER,
+    offset = 0
 ) {
     e = .05821;
 
@@ -12,13 +24,14 @@ module perfboard(
         cube([width, length, height]);
 
         for (ix = [0 : ceil(width / pitch)]) {
-            translate([ix * pitch, 0, 0]) {
+            translate([(ix + offset) * pitch, 0, 0]) {
                 render() {
                     for (iy = [0 : ceil(length / pitch)]) {
-                        translate([0, iy * pitch, -e]) {
+                        translate([0, (iy + offset) * pitch, -e]) {
                             cylinder(
                                 d = hole_diameter,
-                                h = height + e * 2
+                                h = height + e * 2,
+                                $fn = 4
                             );
                         }
                     }
@@ -28,4 +41,4 @@ module perfboard(
     }
 }
 
-perfboard();
+* perfboard();
