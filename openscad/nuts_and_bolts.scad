@@ -5,6 +5,27 @@ NUT_HEIGHT = 2.4;
 
 FLATHEAD_SCREWDRIVER_POINT = .8;
 
+module nut(
+    diameter = NUT_DIAMETER,
+    height = NUT_HEIGHT,
+    hole_diameter = SCREW_DIAMETER
+) {
+    e = .0852;
+
+    difference() {
+        translate([diameter / -2, diameter / -2, 0]) {
+            cube([diameter, diameter, height]);
+        }
+
+        translate([0, 0, -e]) {
+            cylinder(
+                d = hole_diameter,
+                h = height + 2 * 2
+            );
+        }
+    }
+}
+
 module nuts(
     pcb_position = [],
     positions = [],
