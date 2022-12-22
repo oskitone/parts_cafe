@@ -9,10 +9,15 @@ ANCHOR_MOUNT_MIN_DISTANCE = max(SCREW_HEAD_DIAMETER, NUT_DIAMETER) / 2;
 module anchor_mount(
     width = undef,
     hole_diameter = SCREW_DIAMETER,
-    distance = ANCHOR_MOUNT_MIN_DISTANCE,
     height = 2,
     extension = 0,
     tolerance = 0,
+
+    // TODO: rename/obviate to make obvious this is to center of nut/screw
+    min_distance = ANCHOR_MOUNT_MIN_DISTANCE,
+    max_distance = ANCHOR_MOUNT_MIN_DISTANCE,
+
+    nut_distance = undef,
 
     include_ramp_walls = true,
     ramp_wall_width = .8,
@@ -24,32 +29,19 @@ module anchor_mount(
     width = width != undef
         ? width
         : max(SCREW_HEAD_DIAMETER, NUT_DIAMETER) + tolerance * 2;
-    total_length = distance + width / 2 + extension;
+    total_length = max_distance + width / 2 + extension;
 
-    y = -(distance + extension);
+    nut_distance = nut_distance != undef
+        ? nut_distance
+        : (max_distance - min_distance) / 2;
+
+    y = -(min_distance + extension);
 
     module _base() {
-        if (include_ramp_walls) {
-            total_width = width + ramp_wall_width * 2;
+        total_width = width + ramp_wall_width * 2;
 
-            translate([total_width / -2, y, 0]) {
-                cube([total_width, total_length, height]);
-            }
-        } else {
-            hull() {
-                cylinder(
-                    d = width,
-                    h = height
-                );
-
-                translate([
-                    width / -2,
-                    width / -2 - distance + width / 2 - extension,
-                    0
-                ]) {
-                    cube([width, e, height]);
-                }
-            }
+        translate([total_width / -2, y, 0]) {
+            cube([total_width, total_length, height]);
         }
     }
 
@@ -68,17 +60,22 @@ module anchor_mount(
         }
     }
 
-    translate([0, distance, 0]) {
+    module _screw_cavity() {
+        // TODO: DFM
+        translate([hole_diameter / -2, hole_diameter / -2, -e]) {
+            cube([
+                hole_diameter,
+                hole_diameter + (max_distance - min_distance),
+                height + e * 2
+            ]);
+        }
+    }
+
+    // TODO: rethink position. should it start at 0?
+    translate([0, min_distance, 0]) {
         difference() {
             _base();
-
-            translate([0, 0, height + e]) mirror([0, 0, 1]) {
-                supportless_screw_cavity(
-                    height = height + e * 2,
-                    span = width,
-                    diameter = hole_diameter
-                );
-            }
+            _screw_cavity();
         }
 
         if (include_ramp_walls) {
@@ -86,11 +83,8 @@ module anchor_mount(
         }
 
         if (debug) {
-            translate([0, 0, height - e]) {
-                % cylinder(
-                    d = NUT_DIAMETER,
-                    h = NUT_HEIGHT
-                );
+            translate([0, nut_distance, height - e]) {
+                % # nut();
             }
         }
     }
