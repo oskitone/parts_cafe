@@ -17,7 +17,7 @@ module anchor_mount(
     min_distance = ANCHOR_MOUNT_MIN_DISTANCE,
     max_distance = ANCHOR_MOUNT_MIN_DISTANCE,
 
-    nut_distance = undef,
+    nut_distance = ANCHOR_MOUNT_MIN_DISTANCE,
 
     include_ramp_walls = true,
     ramp_wall_width = .8,
@@ -35,19 +35,17 @@ module anchor_mount(
         ? nut_distance
         : (max_distance - min_distance) / 2;
 
-    y = -(min_distance + extension);
-
     module _base() {
         total_width = width + ramp_wall_width * 2;
 
-        translate([total_width / -2, y, 0]) {
+        translate([total_width / -2, -extension, 0]) {
             cube([total_width, total_length, height]);
         }
     }
 
     module _ramp_walls() {
         for (x = [ramp_wall_width, -width + e]) {
-            translate([width / -2 - x, y, height - e]) {
+            translate([width / -2 - x, -extension, height - e]) {
                 flat_top_rectangular_pyramid(
                     top_width = ramp_wall_width + e,
                     top_length = 0,
@@ -62,7 +60,7 @@ module anchor_mount(
 
     module _screw_cavity() {
         // TODO: DFM
-        translate([hole_diameter / -2, hole_diameter / -2, -e]) {
+        translate([hole_diameter / -2, hole_diameter / 2, -e]) {
             cube([
                 hole_diameter,
                 hole_diameter + (max_distance - min_distance),
@@ -71,21 +69,18 @@ module anchor_mount(
         }
     }
 
-    // TODO: rethink position. should it start at 0?
-    translate([0, min_distance, 0]) {
-        difference() {
-            _base();
-            _screw_cavity();
-        }
+    difference() {
+        _base();
+        _screw_cavity();
+    }
 
-        if (include_ramp_walls) {
-            _ramp_walls();
-        }
+    if (include_ramp_walls) {
+        _ramp_walls();
+    }
 
-        if (debug) {
-            translate([0, nut_distance, height - e]) {
-                % # nut();
-            }
+    if (debug) {
+        translate([0, nut_distance, height - e]) {
+            % # nut();
         }
     }
 }
