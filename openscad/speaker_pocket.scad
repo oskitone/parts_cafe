@@ -2,6 +2,7 @@ include <anchor_mount.scad>;
 include <diagonal_grill.scad>;
 include <donut.scad>;
 include <nuts_and_bolts.scad>;
+include <perfboard.scad>;
 include <ring.scad>;
 include <speaker.scad>;
 
@@ -19,8 +20,9 @@ module speaker_pocket(
 
     tolerance = 0,
 
-    anchor_count = 3,
-    anchor_mount_distance = ANCHOR_MOUNT_MIN_DISTANCE,
+    anchor_mount_count = 3,
+    anchor_mount_max_distance = ANCHOR_MOUNT_MIN_DISTANCE,
+    anchor_mount_nut_distance = 0,
 
     fillet = 1,
 
@@ -126,12 +128,13 @@ module speaker_pocket(
     }
 
     module _anchor_mounts() {
-        for (i = [0 : anchor_count - 1]) {
-            rotate([0, 0, (360 / anchor_count) * i]) {
+        for (i = [0 : anchor_mount_count - 1]) {
+            rotate([0, 0, (360 / anchor_mount_count) * i]) {
                 translate([0, outer_diameter / 2, 0]) {
                     anchor_mount(
-                        distance = anchor_mount_distance,
                         extension = wall / 2,
+                        max_distance = anchor_mount_max_distance,
+                        nut_distance = anchor_mount_nut_distance,
                         tolerance = tolerance,
                         debug = debug
                     );
@@ -198,14 +201,14 @@ module perfboard_speaker_pocket(
 
     tolerance = 0,
 
-    anchor_count = 2,
+    anchor_mount_count = 2,
 
     fillet = 1,
 
     show_speaker = false,
     debug = false,
 
-    grid = 2.54,
+    grid = PERFBOARD_PITCH,
 
     speaker_diameter = SPEAKER_DIAMETER,
     speaker_brim_height = SPEAKER_BRIM_HEIGHT,
@@ -228,34 +231,15 @@ module perfboard_speaker_pocket(
         wall
     );
     minimum_outer_diameter = outer_diameter + ANCHOR_MOUNT_MIN_DISTANCE * 2;
-    anchor_mount_distance = (
-        even_up(ceil(minimum_outer_diameter / rotated_grid)) * rotated_grid
-        - outer_diameter
-    ) / 2;
-
-    module _grid() {
-        count = round(outer_diameter * 1.5 / grid);
-        offset = round(count / -2);
-
-        for (ix = [0 : count - 1]) {
-            for (iy = [0 : count - 1]) {
-                translate([(ix + offset) * grid, (iy + offset) * grid, 0]) {
-                    # % cylinder(
-                        d = grid * .5,
-                        h = 10,
-                        $fn = 4
-                    );
-                }
-            }
-        }
-    }
 
     rotate([0, 0, 45]) {
         speaker_pocket(
             tolerance = tolerance,
 
-            anchor_count = anchor_count,
-            anchor_mount_distance = anchor_mount_distance,
+            anchor_mount_count = anchor_mount_count,
+            anchor_mount_max_distance =
+                // TODO: tidy/obviate
+                ANCHOR_MOUNT_MIN_DISTANCE + rotated_grid - SCREW_DIAMETER / 2,
 
             fillet = fillet,
 
@@ -273,7 +257,14 @@ module perfboard_speaker_pocket(
     }
 
     if (debug) {
-        _grid();
+        size = get_pefboard_dimension(outer_diameter * 1.5);
+
+        translate([size / -2, size / -2, -PERFBOARD_HEIGHT]) {
+            % perfboard(
+                width = size,
+                length = size
+            );
+        }
     }
 }
 
