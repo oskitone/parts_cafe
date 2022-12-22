@@ -136,7 +136,7 @@ module speaker_pocket(
                         nut_distance = anchor_mount_nut_distance,
                         nut_max_distance = anchor_mount_nut_max_distance,
                         tolerance = tolerance,
-                        debug = debug
+                        show_nut = true
                     );
                 }
             }
