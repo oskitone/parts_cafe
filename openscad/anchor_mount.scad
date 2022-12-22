@@ -1,8 +1,7 @@
+include <breakaway_support.scad>;
 include <flat_top_rectangular_pyramid.scad>;
 include <nuts_and_bolts.scad>;
 include <supportless_screw_cavity.scad>;
-
-// TODO: DFM. maybe square anchor w/ ramped walls up
 
 ANCHOR_MOUNT_MIN_NUT_DISTANCE = max(SCREW_HEAD_DIAMETER, NUT_DIAMETER) / 2;
 
@@ -22,7 +21,10 @@ module anchor_mount(
     include_ramp_walls = true,
     ramp_wall_width = .8,
 
-    debug = false
+    show_dfm = true,
+    dfm_layer_height = DEFAULT_DFM_LAYER_HEIGHT,
+
+    show_nut = false
 ) {
     e = .02519;
 
@@ -59,13 +61,17 @@ module anchor_mount(
     }
 
     module _screw_cavity() {
-        // TODO: DFM
-        translate([hole_diameter / -2, hole_diameter / 2, -e]) {
-            cube([
-                hole_diameter,
-                hole_diameter + (nut_max_distance - nut_min_distance),
-                height + e * 2
-            ]);
+        y = hole_diameter / 2;
+        length = hole_diameter + (nut_max_distance - nut_min_distance);
+
+        translate([hole_diameter / -2, y, -e]) {
+            cube([hole_diameter, length, height + e * 2]);
+        }
+
+        if (show_dfm) {
+            translate([width / -2, y, height - dfm_layer_height]) {
+                cube([width, length, dfm_layer_height + e]);
+            }
         }
     }
 
@@ -78,7 +84,7 @@ module anchor_mount(
         _ramp_walls();
     }
 
-    if (debug) {
+    if (show_nut) {
         translate([0, nut_distance, height - e]) {
             % # nut();
         }
