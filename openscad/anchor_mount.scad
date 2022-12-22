@@ -4,7 +4,7 @@ include <supportless_screw_cavity.scad>;
 
 // TODO: DFM. maybe square anchor w/ ramped walls up
 
-ANCHOR_MOUNT_MIN_DISTANCE = max(SCREW_HEAD_DIAMETER, NUT_DIAMETER) / 2;
+ANCHOR_MOUNT_MIN_NUT_DISTANCE = max(SCREW_HEAD_DIAMETER, NUT_DIAMETER) / 2;
 
 module anchor_mount(
     width = undef,
@@ -13,11 +13,11 @@ module anchor_mount(
     extension = 0,
     tolerance = 0,
 
-    // TODO: rename/obviate to make obvious this is to center of nut/screw
-    min_distance = ANCHOR_MOUNT_MIN_DISTANCE,
-    max_distance = ANCHOR_MOUNT_MIN_DISTANCE,
-
-    nut_distance = ANCHOR_MOUNT_MIN_DISTANCE,
+    // By default, nut is flush to outer wall with no give.
+    // Use _max_ to provide "wiggle room"
+    nut_distance = ANCHOR_MOUNT_MIN_NUT_DISTANCE,
+    nut_min_distance = ANCHOR_MOUNT_MIN_NUT_DISTANCE,
+    nut_max_distance = ANCHOR_MOUNT_MIN_NUT_DISTANCE,
 
     include_ramp_walls = true,
     ramp_wall_width = .8,
@@ -29,11 +29,11 @@ module anchor_mount(
     width = width != undef
         ? width
         : max(SCREW_HEAD_DIAMETER, NUT_DIAMETER) + tolerance * 2;
-    total_length = max_distance + width / 2 + extension;
+    total_length = nut_max_distance + width / 2 + extension;
 
     nut_distance = nut_distance != undef
         ? nut_distance
-        : (max_distance - min_distance) / 2;
+        : (nut_max_distance - nut_min_distance) / 2;
 
     module _base() {
         total_width = width + ramp_wall_width * 2;
@@ -63,7 +63,7 @@ module anchor_mount(
         translate([hole_diameter / -2, hole_diameter / 2, -e]) {
             cube([
                 hole_diameter,
-                hole_diameter + (max_distance - min_distance),
+                hole_diameter + (nut_max_distance - nut_min_distance),
                 height + e * 2
             ]);
         }

@@ -21,8 +21,8 @@ module speaker_pocket(
     tolerance = 0,
 
     anchor_mount_count = 3,
-    anchor_mount_max_distance = ANCHOR_MOUNT_MIN_DISTANCE,
-    anchor_mount_nut_distance = 0,
+    anchor_mount_nut_distance = ANCHOR_MOUNT_MIN_NUT_DISTANCE,
+    anchor_mount_nut_max_distance = ANCHOR_MOUNT_MIN_NUT_DISTANCE,
 
     fillet = 1,
 
@@ -133,8 +133,8 @@ module speaker_pocket(
                 translate([0, outer_diameter / 2, 0]) {
                     anchor_mount(
                         extension = wall / 2,
-                        max_distance = anchor_mount_max_distance,
                         nut_distance = anchor_mount_nut_distance,
+                        nut_max_distance = anchor_mount_nut_max_distance,
                         tolerance = tolerance,
                         debug = debug
                     );
@@ -230,16 +230,16 @@ module perfboard_speaker_pocket(
         tolerance,
         wall
     );
-    minimum_outer_diameter = outer_diameter + ANCHOR_MOUNT_MIN_DISTANCE * 2;
+    minimum_outer_diameter = outer_diameter + ANCHOR_MOUNT_MIN_NUT_DISTANCE * 2;
 
     rotate([0, 0, 45]) {
         speaker_pocket(
             tolerance = tolerance,
 
             anchor_mount_count = anchor_mount_count,
-            anchor_mount_max_distance =
+            anchor_mount_nut_max_distance =
                 // TODO: tidy/obviate
-                ANCHOR_MOUNT_MIN_DISTANCE + rotated_grid - SCREW_DIAMETER / 2,
+                ANCHOR_MOUNT_MIN_NUT_DISTANCE + rotated_grid - SCREW_DIAMETER / 2,
 
             fillet = fillet,
 
