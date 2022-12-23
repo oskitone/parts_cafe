@@ -268,7 +268,7 @@ module perfboard_speaker_pocket(
 
             debug = debug,
 
-            speaker_diameter = speaker_diameter + .1,
+            speaker_diameter = speaker_diameter,
             speaker_brim_height = speaker_brim_height,
             speaker_brim_depth = speaker_brim_depth,
             speaker_magnet_height = speaker_magnet_height,
