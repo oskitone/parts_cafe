@@ -16,7 +16,8 @@ function get_speaker_pocket_outer_diameter(
 
 module speaker_pocket(
     wall = 2,
-    floor_ceiling = 1.2,
+    ceiling_depth = 1.2,
+    floor_depth = .6,
 
     tolerance = 0,
 
@@ -30,6 +31,8 @@ module speaker_pocket(
     grill_angle = 45,
 
     show_speaker = false,
+    show_floor = true,
+
     debug = false,
 
     outline_gutter = undef,
@@ -54,10 +57,10 @@ module speaker_pocket(
         tolerance,
         wall
     );
-    outer_height = speaker_total_height + floor_ceiling;
+    outer_height = floor_depth + speaker_total_height + ceiling_depth;
 
-    exposure_diameter = outer_diameter - wall * 2 - speaker_brim_depth * 2
-        + tolerance * 2;
+    inner_diameter = outer_diameter - wall * 2;
+    exposure_diameter = inner_diameter - speaker_brim_depth * 2 + tolerance * 2;
 
     module _outer_wall(segments = $wall_fn) {
         // Fillet can't be larger than wall or there'll be weird vertical gaps
@@ -85,7 +88,7 @@ module speaker_pocket(
 
             translate([0, 0, -e]) {
                 cylinder(
-                    d = outer_diameter - wall * 2,
+                    d = inner_diameter,
                     h = outer_height + e * 2,
                     $fn = segments
                 );
@@ -94,24 +97,24 @@ module speaker_pocket(
     }
 
     module _brim() {
-        translate([0, 0, outer_height - floor_ceiling]) {
+        translate([0, 0, outer_height - ceiling_depth]) {
             ring(
                 diameter = outer_diameter - wall * 2 + e * 2,
                 inner_diameter = exposure_diameter,
-                height = floor_ceiling,
+                height = ceiling_depth,
                 $fn = $wall_fn
             );
         }
     }
 
     module _grill_cover() {
-        z = outer_height - floor_ceiling;
+        z = outer_height - ceiling_depth;
         diameter = exposure_diameter + e * 2;
 
         intersection() {
             translate([diameter / -2, diameter / -2, z]) {
                 diagonal_grill(
-                    diameter, diameter, floor_ceiling,
+                    diameter, diameter, ceiling_depth,
                     size = grill_size,
                     angle = grill_angle
                 );
@@ -120,7 +123,7 @@ module speaker_pocket(
             translate([0, 0, z]) {
                 cylinder(
                     d = diameter,
-                    h = floor_ceiling,
+                    h = ceiling_depth,
                     $fn = $wall_fn
                 );
             }
@@ -143,7 +146,7 @@ module speaker_pocket(
         }
     }
 
-    module _outline() {
+    module _outline_cavity() {
         outline_gutter = outline_gutter != undef
             ? outline_gutter
             : (outer_diameter - exposure_diameter - sqrt(2 * pow(grill_size, 2))
@@ -159,18 +162,30 @@ module speaker_pocket(
         }
     }
 
+    module _floor() {
+        cylinder(
+            d = inner_diameter - tolerance * 2,
+            h = floor_depth,
+            $fn = $wall_fn
+        );
+    }
+
     difference() {
         union() {
             _outer_wall();
             _brim();
             _anchor_mounts();
 
+            if (show_floor && floor_depth > 0) {
+                _floor();
+            }
+
             if (!debug) {
                 _grill_cover();
             }
         }
 
-        _outline();
+        _outline_cavity();
 
         if (debug) {
             translate([0, outer_diameter / -2 - e, -e]) {
@@ -184,15 +199,17 @@ module speaker_pocket(
     }
 
     if (show_speaker) {
-        % speaker(
-            speaker_diameter,
-            speaker_brim_height,
-            speaker_brim_depth,
-            speaker_magnet_height,
-            speaker_magnet_diameter,
-            speaker_total_height,
-            speaker_cone_height
-        );
+        translate([0, 0, floor_depth]) {
+            % speaker(
+                speaker_diameter,
+                speaker_brim_height,
+                speaker_brim_depth,
+                speaker_magnet_height,
+                speaker_magnet_diameter,
+                speaker_total_height,
+                speaker_cone_height
+            );
+        }
     }
 }
 
@@ -206,6 +223,9 @@ module perfboard_speaker_pocket(
     fillet = 1,
 
     show_speaker = false,
+    show_floor = true,
+    show_perfboard = false,
+
     debug = false,
 
     grid = PERFBOARD_PITCH,
@@ -244,6 +264,8 @@ module perfboard_speaker_pocket(
             fillet = fillet,
 
             show_speaker = show_speaker,
+            show_floor = show_floor,
+
             debug = debug,
 
             speaker_diameter = speaker_diameter + .1,
@@ -256,7 +278,7 @@ module perfboard_speaker_pocket(
         );
     }
 
-    if (debug) {
+    if (show_perfboard) {
         size = get_pefboard_dimension(outer_diameter * 1.5);
 
         translate([size / -2, size / -2, -PERFBOARD_HEIGHT]) {
@@ -272,5 +294,7 @@ module perfboard_speaker_pocket(
     tolerance = .1,
 
     show_speaker = true,
+    show_perfboard = true,
+
     debug = true
 );
