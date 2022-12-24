@@ -24,6 +24,10 @@ module speaker_pocket(
     anchor_mount_count = 3,
     anchor_mount_nut_distance = ANCHOR_MOUNT_MIN_NUT_DISTANCE,
     anchor_mount_nut_max_distance = ANCHOR_MOUNT_MIN_NUT_DISTANCE,
+    anchor_mount_rotation = 0,
+
+    wire_access_diameter = 2,
+    wire_access_rotation = 0,
 
     fillet = 1,
 
@@ -131,8 +135,11 @@ module speaker_pocket(
     }
 
     module _anchor_mounts() {
+        function get_r(i) =
+            anchor_mount_rotation + (360 / anchor_mount_count) * i;
+
         for (i = [0 : anchor_mount_count - 1]) {
-            rotate([0, 0, (360 / anchor_mount_count) * i]) {
+            rotate([0, 0, get_r(i)]) {
                 translate([0, outer_diameter / 2, 0]) {
                     anchor_mount(
                         extension = wall / 2,
@@ -162,6 +169,24 @@ module speaker_pocket(
         }
     }
 
+    module _wire_access_cavity() {
+        e = .1;
+
+        rotate([0, 0, wire_access_rotation]) {
+            translate([
+                wire_access_diameter / -2,
+                outer_diameter / 2 - wall - e,
+                -e
+            ]) {
+                cube([
+                    wire_access_diameter,
+                    wall + e * 2,
+                    floor_depth + wire_access_diameter + e
+                ]);
+            }
+        }
+    }
+
     module _floor() {
         cylinder(
             d = inner_diameter - tolerance * 2,
@@ -185,6 +210,7 @@ module speaker_pocket(
             }
         }
 
+        _wire_access_cavity();
         _outline_cavity();
 
         if (debug) {
@@ -252,31 +278,30 @@ module perfboard_speaker_pocket(
     );
     minimum_outer_diameter = outer_diameter + ANCHOR_MOUNT_MIN_NUT_DISTANCE * 2;
 
-    rotate([0, 0, 45]) {
-        speaker_pocket(
-            tolerance = tolerance,
+    speaker_pocket(
+        tolerance = tolerance,
 
-            anchor_mount_count = anchor_mount_count,
-            anchor_mount_nut_max_distance =
-                // TODO: tidy/obviate
-                ANCHOR_MOUNT_MIN_NUT_DISTANCE + rotated_grid - SCREW_DIAMETER / 2,
+        anchor_mount_count = anchor_mount_count,
+        anchor_mount_nut_max_distance =
+            // TODO: tidy/obviate
+            ANCHOR_MOUNT_MIN_NUT_DISTANCE + rotated_grid - SCREW_DIAMETER / 2,
+        anchor_mount_rotation = 45,
 
-            fillet = fillet,
+        fillet = fillet,
 
-            show_speaker = show_speaker,
-            show_floor = show_floor,
+        show_speaker = show_speaker,
+        show_floor = show_floor,
 
-            debug = debug,
+        debug = debug,
 
-            speaker_diameter = speaker_diameter,
-            speaker_brim_height = speaker_brim_height,
-            speaker_brim_depth = speaker_brim_depth,
-            speaker_magnet_height = speaker_magnet_height,
-            speaker_magnet_diameter = speaker_magnet_diameter,
-            speaker_total_height = speaker_total_height,
-            speaker_cone_height = speaker_cone_height
-        );
-    }
+        speaker_diameter = speaker_diameter,
+        speaker_brim_height = speaker_brim_height,
+        speaker_brim_depth = speaker_brim_depth,
+        speaker_magnet_height = speaker_magnet_height,
+        speaker_magnet_diameter = speaker_magnet_diameter,
+        speaker_total_height = speaker_total_height,
+        speaker_cone_height = speaker_cone_height
+    );
 
     if (show_perfboard) {
         size = get_pefboard_dimension(outer_diameter * 1.5);
