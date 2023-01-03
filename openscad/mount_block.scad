@@ -1,3 +1,9 @@
+include <nuts_and_bolts.scad>;
+include <ring.scad>;
+
+MOUNTING_BAR_HOLE_DIAMETER = 7;
+MOUNTING_BAR_MATERIAL_DEPTH = 2;
+
 module mount_block(
     width = 40,
     length = 40,
@@ -63,6 +69,45 @@ module mount_block(
     }
 }
 
-mount_block(
+module mount_block_washers(
+    mounting_bar_washer_diameter = MOUNTING_BAR_HOLE_DIAMETER,
+    mounting_bar_washer_height = MOUNTING_BAR_MATERIAL_DEPTH,
+
+    fastener_gutter_washer_diameter = NUT_DIAMETER,
+    fastener_gutter_washer_height = 4,
+
+    inner_diameter = SCREW_DIAMETER,
+
+    tolerance = 0,
+
+    $fn = 24
+) {
+    plot = max(mounting_bar_washer_diameter, fastener_gutter_washer_diameter)
+        + 1;
+
+    for (x = [0, plot]) {
+        translate([x, 0, 0]) {
+            ring(
+                diameter = mounting_bar_washer_diameter - tolerance * 2,
+                height = mounting_bar_washer_height,
+                inner_diameter = inner_diameter + tolerance * 2
+            );
+        }
+
+        translate([x, plot, 0]) {
+            ring(
+                diameter = fastener_gutter_washer_diameter - tolerance * 2,
+                height = fastener_gutter_washer_height,
+                inner_diameter = inner_diameter + tolerance * 2
+            );
+        }
+    }
+}
+
+* mount_block(
+    tolerance = .1
+);
+
+mount_block_washers(
     tolerance = .1
 );
