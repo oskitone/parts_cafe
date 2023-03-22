@@ -70,13 +70,13 @@ module mount_block(
 }
 
 module mount_block_washers(
-    mounting_bar_washer_diameter = MOUNTING_BAR_HOLE_DIAMETER,
+    mounting_bar_washer_diameter = 20,
     mounting_bar_washer_height = MOUNTING_BAR_MATERIAL_DEPTH,
 
-    fastener_gutter_washer_diameter = NUT_DIAMETER,
-    fastener_gutter_washer_height = 4,
+    fastener_gutter_washer_diameter = 8,
+    fastener_gutter_washer_height = NUT_HEIGHT,
 
-    inner_diameter = SCREW_DIAMETER,
+    inner_diameter = 3.4,
 
     tolerance = 0,
 
