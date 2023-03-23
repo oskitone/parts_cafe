@@ -1,28 +1,18 @@
 module donut(
-    diameter,
-    thickness,
-    segments = 24,
-    starting_angle = 0,
-    coverage = 360
+  diameter,
+  thickness,
+
+  segments = 24, // DEPRECATED
+  starting_angle = 0,
+  coverage = 360
 ) {
-    e = .001;
+    $fn = segments; // TODO: remove when segments is no longer used
 
-    segments = max(1, round(segments * (coverage / 360)));
-
-    module segment(angle = 0) {
-        rotate([0, 0, -angle]) {
-            translate([e / -2, diameter / 2 - thickness / 2, 0]) {
-                rotate([0, 90, 0]) {
-                    cylinder(d = thickness, h = e);
-                }
+    rotate([0, 0, 90 - starting_angle]) {
+        rotate_extrude(angle = -coverage) {
+            translate([(diameter - thickness) / 2, 0]) {
+              circle(thickness / 2);
             }
-        }
-    }
-
-    for (i = [0 : segments - 1]) {
-        hull() {
-            segment(starting_angle + i * (coverage / segments));
-            segment(starting_angle + (i + 1) * (coverage / segments));
         }
     }
 }
