@@ -7,7 +7,7 @@ module kallax_backer_bracket(
     shelf_hold_depth = 25.4,
 
     backer_thickness = 5,
-    shelf_thickness = 16.5,
+    shelf_thickness = 16,
 
     tolerance = .1
 ) {
