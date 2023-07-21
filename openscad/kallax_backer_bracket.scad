@@ -14,6 +14,7 @@ module kallax_backer_bracket(
     e = .0941;
 
     backer_width = backer_thickness + (wall + tolerance) * 2;
+    stress_point_x = backer_width;
 
     function get_xys(thickness) = [0, wall + thickness + tolerance * 2];
 
@@ -35,8 +36,33 @@ module kallax_backer_bracket(
         }
     }
 
+    module _stress_relief() {
+        cutout_size = (stress_point_x + e) * 2;
+
+        difference() {
+            translate([stress_point_x, 0, 0]) {
+                cylinder(
+                    r = stress_point_x,
+                    h = height
+                );
+            }
+
+            translate([-e, e, -e]) {
+                cube([cutout_size, cutout_size, height + e * 2]);
+            }
+
+            translate([stress_point_x, 0, -e]) {
+                cylinder(
+                    r = stress_point_x - wall,
+                    h = height + e * 2
+                );
+            }
+        }
+    }
+
     _backer_hold();
     _shelf_hold();
+    _stress_relief();
 }
 
 kallax_backer_bracket();
