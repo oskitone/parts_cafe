@@ -1,6 +1,8 @@
 NUT_DIAMETER = 6.4;
 NUT_HEIGHT = 2.4;
 
+// TODO: fix this being too tight even with standard .1 tolerance
+
 function get_pcb_mount_post_hole_diameter(
     screw_diameter = 3.2, // PCB_MOUNT_HOLE_DIAMETER
     tolerance = 0
@@ -27,7 +29,7 @@ module pcb_mount_post(
     tolerance = 0,
 
     // Conservatively larger than needed to ensure layers aren't skipped
-    bridge_height = .2 * 1.5, // SACRIFICIAL_BRIDGE_HEIGHT
+    bridge_height = .4,
     include_sacrificial_bridge = true,
 
     quick_preview = true
