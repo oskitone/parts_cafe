@@ -1,3 +1,5 @@
+include <rounded_cube.scad>;
+
 ENCLOSURE_LIP_HEIGHT = 3;
 
 module enclosure_half(
