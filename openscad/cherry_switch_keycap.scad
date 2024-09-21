@@ -1,5 +1,6 @@
 include <cherry_switch.scad>;
 include <enclosure_engraving.scad>;
+include <cap_blank.scad>;
 
 STOCK_CHERRY_SWITCH_KEYCAP_DIMENSIONS = [18, 18, 10];
 
@@ -76,58 +77,6 @@ module cherry_switch_keycap(
         }
     }
 
-    module _outer() {
-        base_height = dimensions.z - exposed_height;
-
-        module _layer(
-            width = dimensions.x,
-            length = dimensions.y,
-            z = 0,
-            flat = false
-        ) {
-            for (
-                x = [fillet, width - fillet],
-                y = [fillet, length - fillet]
-            ) {
-                translate([
-                    x + (dimensions.x - width) / 2,
-                    y + (dimensions.y - length) / 2,
-                    z
-                ]) {
-                    if (flat) {
-                        cylinder(
-                            r = fillet,
-                            h = e
-                        );
-                    } else {
-                        sphere(r = fillet);
-                    }
-                }
-            }
-        }
-
-        if (brim_dimensions.z > 0) {
-            translate([
-                (brim_dimensions.x - dimensions.x) / -2,
-                (brim_dimensions.y - dimensions.y) / -2,
-                0
-            ]) {
-                cube(brim_dimensions);
-            }
-        }
-
-        hull() {
-            _layer(flat = true);
-            _layer(z = base_height);
-
-            _layer(
-                width = contact_width,
-                length = contact_length,
-                z = dimensions.z - fillet
-            );
-        }
-    }
-
     module _cavity() {
         _cherry_switch(
             z = -cherry_switch_base_height + cherry_switch_travel,
@@ -146,7 +95,12 @@ module cherry_switch_keycap(
 
     translate([0, 0, switch_position * -cherry_switch_travel]) {
         difference() {
-            _outer();
+            cap_blank(
+                dimensions = dimensions,
+                contact_dimensions = [contact_width, contact_length, exposed_height],
+                fillet = fillet,
+                brim_dimensions = brim_dimensions
+            );
 
             _cavity();
 
