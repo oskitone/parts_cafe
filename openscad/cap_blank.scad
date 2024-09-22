@@ -4,7 +4,6 @@ module cap_blank(
     // Usage: exposure beyond enclosure after travel
     contact_dimensions = [8, 8, 2],
 
-    // TODO: fix 0 fillet
     fillet = 1,
 
     brim_dimensions = [16, 16, 1]
@@ -19,23 +18,33 @@ module cap_blank(
         z = 0,
         flat = false
     ) {
-        for (
-            x = [fillet, width - fillet],
-            y = [fillet, length - fillet]
-        ) {
+        if (fillet > 0) {
+            for (
+                x = [fillet, width - fillet],
+                y = [fillet, length - fillet]
+            ) {
+                translate([
+                    x + (dimensions.x - width) / 2,
+                    y + (dimensions.y - length) / 2,
+                    z
+                ]) {
+                    if (flat) {
+                        cylinder(
+                            r = fillet,
+                            h = e
+                        );
+                    } else {
+                        sphere(r = fillet);
+                    }
+                }
+            }
+        } else {
             translate([
-                x + (dimensions.x - width) / 2,
-                y + (dimensions.y - length) / 2,
+                (dimensions.x - width) / 2,
+                (dimensions.y - length) / 2,
                 z
             ]) {
-                if (flat || fillet == 0) {
-                    cylinder(
-                        r = fillet,
-                        h = e
-                    );
-                } else {
-                    sphere(r = fillet);
-                }
+                cube([width, length, e]);
             }
         }
     }
