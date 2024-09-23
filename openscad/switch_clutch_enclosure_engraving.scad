@@ -1,3 +1,4 @@
+include <console.scad>;
 include <enclosure_engraving.scad>;
 include <engraving.scad>;
 include <switch_clutch.scad>;
@@ -150,14 +151,11 @@ module __demo_switch_clutch_enclosure_engraving(
         ? actuator_length
         : max_actuator_length;
 
-    // TODO: extract
-    if (actuator_length > max_actuator_length) {
-        echo(str(
-            "WARNING: actuator_length of ", actuator_length,
-            " is more than max_actuator_length of ",
-            max_actuator_length
-        ));
-    }
+    warn_if(actuator_length > max_actuator_length, str(
+        "actuator_length of ", actuator_length,
+        " is more than max_actuator_length of ",
+        max_actuator_length
+    ));
 
     # translate(switch_and_clutch_position) {
         translate(get_switch_clutch_switch_position(actuator_window_dimensions)) {
