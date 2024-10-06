@@ -281,6 +281,10 @@ module battery_holder(
         KEYSTONE_5204_5226_LENGTH + KEYSTONE_5204_5226_DIMPLE_LENGTH,
     end_terminal_bottom_right = true,
 
+    include_wire_relief_hitches = true,
+    include_nub_fixture_cavities = true,
+    include_wire_channel = true,
+
     outer_color = undef,
     cavity_color = undef,
 
@@ -478,8 +482,9 @@ module battery_holder(
 
                 _alignment_rails();
 
-                // TODO: parameterize
-                _wire_relief_hitches();
+                if (include_wire_relief_hitches) {
+                    _wire_relief_hitches();
+                }
             }
         }
 
@@ -503,11 +508,13 @@ module battery_holder(
                 );
             }
 
-            // TODO: parameterize
-            _nub_fixture_cavities();
+            if (include_nub_fixture_cavities) {
+                _nub_fixture_cavities();
+            }
 
-            // TODO: parameterize
-            _wire_channel();
+            if (include_wire_channel) {
+                _wire_channel();
+            }
         }
     }
 }
