@@ -202,7 +202,7 @@ module battery_contacts(
     e = .091;
 
     cavity_width = get_battery_holder_cavity_width(tolerance);
-    start_on_right = end_terminal_bottom_right;
+    start_on_right = !end_terminal_bottom_right;
 
     function get_y(contact_width, i, is_dual = false) = (
         (AAA_BATTERY_DIAMETER + gutter) * i

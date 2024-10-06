@@ -328,7 +328,7 @@ module battery_holder(
         }
     }
 
-    module _contact_tab_cavities(start_on_right = !end_terminal_bottom_right) {
+    module _contact_tab_cavities(start_on_right = end_terminal_bottom_right) {
         x = -(wall + tolerance);
 
         _width = wall + contact_tab_cavity_length;
@@ -458,7 +458,7 @@ module battery_holder(
                     tolerance = tolerance,
                     gutter = gutter,
                     height = height - floor,
-                    start_on_right = end_terminal_bottom_right,
+                    start_on_right = !end_terminal_bottom_right,
                     count = count
                 );
 
@@ -495,7 +495,7 @@ module battery_holder(
                     gutter = gutter,
                     floor_cavity_height = KEYSTONE_5204_5226_CONTACT_Z
                         - (AAA_BATTERY_DIAMETER / 2),
-                    start_on_right = end_terminal_bottom_right,
+                    start_on_right = !end_terminal_bottom_right,
                     count = count
                 );
 
