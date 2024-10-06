@@ -33,15 +33,16 @@ module nuts(
     y = 0,
     z = 0,
     diameter = NUT_DIAMETER,
-    height = NUT_HEIGHT
+    height = NUT_HEIGHT,
+    rotation = 0
 ) {
     for (xy = positions) {
-        translate([
-            pcb_position.x + xy.x - diameter / 2,
-            y + pcb_position.y + xy.y - diameter / 2,
-            z
-        ]) {
-            cube([diameter, diameter, height]);
+        translate([pcb_position.x + xy.x, y + pcb_position.y + xy.y, z]) {
+            rotate([0, 0, rotation]) {
+                translate([diameter / -2, diameter / -2, 0]) {
+                    cube([diameter, diameter, height]);
+                }
+            }
         }
     }
 }
