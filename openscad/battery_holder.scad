@@ -63,6 +63,8 @@ function get_battery_holder_dimensions(
     AAA_BATTERY_DIAMETER + floor + wall_height_extension
 ];
 
+// NOTE: Confusingly, including floor_cavity_height turns this into a cavity.
+// TODO: Make less confusing
 module battery_contact_fixture(
     height = KEYSTONE_181_HEIGHT,
     tolerance = 0,
@@ -200,6 +202,8 @@ module battery_contact_fixtures(
 ) {
     e = .091;
 
+    end_on_right = count % 2 == 0 ? !start_on_right : start_on_right;
+
     cavity_width = get_battery_holder_cavity_width(tolerance);
     tab_contact_fixture_wall = AAA_BATTERY_DIAMETER - KEYSTONE_5204_5226_WIDTH;
 
@@ -248,11 +252,11 @@ module battery_contact_fixtures(
                     );
                 }
             } else if (i == count - 1) {
-                x = start_on_right ? right_x : left_x;
+                x = end_on_right ? right_x : left_x;
 
                 translate([x, get_y(KEYSTONE_5204_5226_WIDTH, i), 0]) {
                     battery_contact_fixture(
-                        flip = !start_on_right,
+                        flip = !end_on_right,
                         floor_cavity_height = floor_cavity_height,
                         diameter = KEYSTONE_5204_5226_WIDTH,
                         wall = tab_contact_fixture_wall,
@@ -338,9 +342,11 @@ module battery_holder(
         left_x = -(wall + tolerance) - e;
         right_x = width - _width + x + e;
 
+        end_on_right = count % 2 == 0 ? !start_on_right : start_on_right;
+
         for (xy = [
             [
-                start_on_right ? left_x : right_x,
+                end_on_right ? left_x : right_x,
                 (AAA_BATTERY_DIAMETER + gutter) * (count - 1)
                     + AAA_BATTERY_DIAMETER / 2
             ],
