@@ -1,4 +1,5 @@
 include <flat_top_rectangular_pyramid.scad>;
+include <nuts_and_bolts.scad>;
 include <rounded_cube.scad>;
 
 ENCLOSURE_WALL = 2.4;
@@ -33,6 +34,8 @@ module enclosure_half(
     tongue_and_groove_end_length = undef,
     tongue_and_groove_snap = ENCLOSURE_TONGUE_AND_GROOVE_SNAP,
     tongue_and_groove_pull = ENCLOSURE_TONGUE_AND_GROOVE_PULL,
+
+    include_disassembly_cavities = false,
 
     outer_color,
     cavity_color
@@ -275,6 +278,52 @@ module enclosure_half(
         }
     }
 
+    module _disassembly_cavities(
+        include_dimple = false,
+        dimple_diameter = 10,
+        dimple_depth = ENCLOSURE_ENGRAVING_DEPTH,
+
+        include_wedge = false,
+        wedge_width = 10,
+        wedge_height = FLATHEAD_SCREWDRIVER_POINT
+    ) {
+        if (include_dimple) {
+            difference() {
+                for (x = [-e, width - dimple_depth]) {
+                    translate([x, length / 2, height]) {
+                        rotate([0, 90, 0]) {
+                            cylinder(
+                                d = dimple_diameter,
+                                h = dimple_depth + e,
+                                $fn = 24
+                            );
+                        }
+                    }
+                }
+
+                translate([
+                    -e,
+                    (length - dimple_diameter) / 2,
+                    height + e
+                ]) {
+                    cube([
+                        width,
+                        dimple_diameter + e * 2,
+                        lip_height + e
+                    ]);
+                }
+            }
+        }
+
+        if (include_wedge) {
+            x = (width - wedge_width) / 2;
+
+            translate([x, -e, height - wedge_height]) {
+                cube([wedge_width, ENCLOSURE_WALL + e * 2, wedge_height + e]);
+            }
+        }
+    }
+
     difference() {
         color(outer_color) {
             _outer_wall();
@@ -283,6 +332,27 @@ module enclosure_half(
         color(cavity_color) {
             _inner_cutout();
             _groove_exposure();
+
+            if (include_disassembly_cavities) {
+                _disassembly_cavities(
+                    include_dimple = add_lip,
+                    include_wedge = remove_lip
+                );
+            }
         }
     }
 }
+
+* enclosure_half(
+    50, 50, 10,
+
+    // add_lip = true,
+    remove_lip = true,
+
+    include_tongue_and_groove = true,
+    tongue_and_groove_snap = [.5, .8, .5, .8],
+    tongue_and_groove_pull = .1,
+
+    outer_color = "#fff",
+    cavity_color = "#eee"
+);
