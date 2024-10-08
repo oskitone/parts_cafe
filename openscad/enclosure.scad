@@ -1,3 +1,4 @@
+include <flat_top_rectangular_pyramid.scad>;
 include <rounded_cube.scad>;
 
 ENCLOSURE_LIP_HEIGHT = 3;
