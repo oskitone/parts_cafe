@@ -1,13 +1,22 @@
 include <flat_top_rectangular_pyramid.scad>;
 include <rounded_cube.scad>;
 
+ENCLOSURE_WALL = 2.4;
+ENCLOSURE_FLOOR_CEILING = 1.8;
+ENCLOSURE_INNER_WALL = 1.2;
 ENCLOSURE_LIP_HEIGHT = 3;
+ENCLOSURE_ENGRAVING_DEPTH = 1.2;
+ENCLOSURE_FILLET = 2;
+
+// [back, right, front, left],
+ENCLOSURE_TONGUE_AND_GROOVE_SNAP = [.5, .8, .5, .8];
+ENCLOSURE_TONGUE_AND_GROOVE_PULL = .1;
 
 module enclosure_half(
     width, length, height,
 
-    wall = 2.5,
-    floor_ceiling = undef,
+    wall = ENCLOSURE_WALL,
+    floor_ceiling = ENCLOSURE_FLOOR_CEILING,
 
     add_lip = false,
     remove_lip = false,
@@ -15,15 +24,15 @@ module enclosure_half(
     lip_depth = undef,
     lip_height = ENCLOSURE_LIP_HEIGHT,
 
-    fillet = 0,
+    fillet = ENCLOSURE_FILLET,
 
     // Increase to .2 for looser fit, will need separate fixture
     tolerance = .1,
 
     include_tongue_and_groove = false,
     tongue_and_groove_end_length = undef,
-    tongue_and_groove_snap = undef, // [back, right, front, left],
-    tongue_and_groove_pull = 0,
+    tongue_and_groove_snap = ENCLOSURE_TONGUE_AND_GROOVE_SNAP,
+    tongue_and_groove_pull = ENCLOSURE_TONGUE_AND_GROOVE_PULL,
 
     outer_color,
     cavity_color
@@ -34,8 +43,6 @@ module enclosure_half(
     groove_height = lip_height * .67;
 
     lip_depth = lip_depth != undef ? lip_depth : (wall - groove_depth) / 2;
-
-    floor_ceiling = floor_ceiling ? floor_ceiling : wall;
 
     module _grooves(z, bleed = 0) {
         support_depth = groove_depth - tolerance;
