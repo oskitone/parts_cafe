@@ -1,6 +1,7 @@
 include <flat_top_rectangular_pyramid.scad>;
 include <nuts_and_bolts.scad>;
 include <rounded_cube.scad>;
+include <rounded_xy_cube.scad>;
 
 ENCLOSURE_WALL = 2.4;
 ENCLOSURE_FLOOR_CEILING = 1.8;
@@ -26,6 +27,7 @@ module enclosure_half(
     lip_height = ENCLOSURE_LIP_HEIGHT,
 
     fillet = ENCLOSURE_FILLET,
+    inner_fillet = ENCLOSURE_FILLET,
 
     // Increase to .2 for looser fit, will need separate fixture
     tolerance = .1,
@@ -224,7 +226,11 @@ module enclosure_half(
                 : length - y * 2;
 
             translate([x, y, height - e]) {
-                cube([width - x * 2, length, lip_height + e]);
+                rounded_xy_cube(
+                    [width - x * 2, length, lip_height + e],
+                    inner_fillet,
+                    $fn = 7
+                );
             }
 
             _grooves(
@@ -236,11 +242,15 @@ module enclosure_half(
 
     module _inner_cutout() {
         translate([wall, wall, floor_ceiling]) {
-            cube([
-                width - wall * 2,
-                length - wall * 2,
-                height + lip_height + e
-            ]);
+            rounded_cube(
+                [
+                    width - wall * 2,
+                    length - wall * 2,
+                    height + lip_height + e
+                ],
+                inner_fillet,
+                $fn = 7
+            );
         }
 
         if (remove_lip) {
@@ -256,7 +266,11 @@ module enclosure_half(
                 : length - y * 2;
 
             translate([x, y, z]) {
-                cube([width, length, lip_height + e]);
+                rounded_xy_cube(
+                    [width, length, lip_height * 2 + e],
+                    inner_fillet,
+                    $fn = 7
+                );
             }
 
             _grooves(
@@ -343,11 +357,15 @@ module enclosure_half(
     }
 }
 
-* enclosure_half(
+* difference() {
+enclosure_half(
     50, 50, 10,
 
-    // add_lip = true,
-    remove_lip = true,
+    // fillet = 0,
+    // inner_fillet = 0,
+
+    add_lip = true,
+    // remove_lip = true,
 
     include_tongue_and_groove = true,
     tongue_and_groove_snap = [.5, .8, .5, .8],
@@ -356,3 +374,5 @@ module enclosure_half(
     outer_color = "#fff",
     cavity_color = "#eee"
 );
+translate([50 / 2, -1, -1]) cube([100, 100, 100]);
+}
