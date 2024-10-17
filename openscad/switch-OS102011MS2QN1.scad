@@ -1,4 +1,5 @@
-/* https://www.ckswitches.com/media/1428/os.pdf */
+// https://www.ckswitches.com/media/1428/os.pdf
+// OS102011MS2QN1
 
 SWITCH_BASE_WIDTH = 4.4;
 SWITCH_BASE_LENGTH = 8.7;
