@@ -234,7 +234,7 @@ module enclosure_half(
                 rounded_xy_cube(
                     [width - x * 2, length, lip_height + e],
                     inner_fillet,
-                    $fn = 7
+                    $fn = 20
                 );
             }
 
@@ -254,7 +254,7 @@ module enclosure_half(
                     height + lip_height + e
                 ],
                 inner_fillet,
-                $fn = 7
+                $fn = 20
             );
         }
 
@@ -274,7 +274,7 @@ module enclosure_half(
                 rounded_xy_cube(
                     [width, length, lip_height * 2 + e],
                     inner_fillet,
-                    $fn = 7
+                    $fn = 20
                 );
             }
 
