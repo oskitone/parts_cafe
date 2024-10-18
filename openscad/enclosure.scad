@@ -132,10 +132,15 @@ module enclosure_half(
                 _tolerance = tolerance * (add_lip ? -1 : 1);
                 _snap = tongue_and_groove_snap;
 
+                // NOTE: eyeballed
+                end_offset = wall - lip_depth + tolerance + inner_fillet * .55;
+                exposed_width = width - end_offset * 2;
+                exposed_length = length - end_offset * 2;
+
                 // BACK
                 if (_snap[0] > 0) {
                     _side(
-                        _width = _snap[0] * width + _tolerance,
+                        _width = _snap[0] * exposed_width + _tolerance,
                         y = length - size + e
                     );
                 }
@@ -143,19 +148,19 @@ module enclosure_half(
                 // RIGHT
                 if (_snap[1] > 0) {
                     _side(
-                        _length = _snap[1] * length + _tolerance,
+                        _length = _snap[1] * exposed_length + _tolerance,
                         x = width - size + e
                     );
                 }
 
                 // FRONT
                 if (_snap[2] > 0) {
-                    _side(_width = _snap[2] * width + _tolerance);
+                    _side(_width = _snap[2] * exposed_width + _tolerance);
                 }
 
                 // LEFT
                 if (_snap[3] > 0) {
-                    _side(_length = _snap[3] * length + _tolerance);
+                    _side(_length = _snap[3] * exposed_length + _tolerance);
                 }
             }
         }
