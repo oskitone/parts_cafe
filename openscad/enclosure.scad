@@ -12,6 +12,8 @@ ENCLOSURE_FILLET = 2;
 
 // [back, right, front, left],
 ENCLOSURE_TONGUE_AND_GROOVE_SNAP = [.5, .8, .5, .8];
+
+// Max is around .3 but it's hard to get back open
 ENCLOSURE_TONGUE_AND_GROOVE_PULL = .1;
 
 module enclosure_half(
@@ -37,7 +39,8 @@ module enclosure_half(
     tongue_and_groove_snap = ENCLOSURE_TONGUE_AND_GROOVE_SNAP,
     tongue_and_groove_pull = ENCLOSURE_TONGUE_AND_GROOVE_PULL,
 
-    include_disassembly_cavities = false,
+    include_disassembly_dimples = false,
+    include_disassembly_wedge = false,
 
     outer_color,
     cavity_color
@@ -352,12 +355,10 @@ module enclosure_half(
             _inner_cutout();
             _groove_exposure();
 
-            if (include_disassembly_cavities) {
-                _disassembly_cavities(
-                    include_dimple = add_lip,
-                    include_wedge = remove_lip
-                );
-            }
+            _disassembly_cavities(
+                include_dimple = include_disassembly_dimples && add_lip,
+                include_wedge = include_disassembly_wedge && remove_lip
+            );
         }
     }
 }
