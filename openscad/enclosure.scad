@@ -1,6 +1,8 @@
 include <flat_top_rectangular_pyramid.scad>;
 include <nuts_and_bolts.scad>;
 include <rounded_cube.scad>;
+include <chamfered_cube.scad>;
+include <chamfered_xy_cube.scad>;
 include <rounded_xy_cube.scad>;
 
 ENCLOSURE_WALL = 2.4;
@@ -29,7 +31,7 @@ module enclosure_half(
     lip_height = ENCLOSURE_LIP_HEIGHT,
 
     fillet = ENCLOSURE_FILLET,
-    inner_fillet = ENCLOSURE_FILLET,
+    inner_chamfer = ENCLOSURE_FILLET / 2,
 
     // Increase to .2 for looser fit, will need separate fixture
     tolerance = .1,
@@ -135,8 +137,7 @@ module enclosure_half(
                 _tolerance = tolerance * (add_lip ? -1 : 1);
                 _snap = tongue_and_groove_snap;
 
-                // NOTE: eyeballed
-                end_offset = wall - lip_depth + tolerance + inner_fillet * .55;
+                end_offset = wall - lip_depth + inner_chamfer + tolerance;
                 exposed_width = width - end_offset * 2;
                 exposed_length = length - end_offset * 2;
 
@@ -234,10 +235,9 @@ module enclosure_half(
                 : length - y * 2;
 
             translate([x, y, height - e]) {
-                rounded_xy_cube(
+                chamfered_xy_cube(
                     [width - x * 2, length, lip_height + e],
-                    inner_fillet,
-                    $fn = 20
+                    inner_chamfer
                 );
             }
 
@@ -250,14 +250,13 @@ module enclosure_half(
 
     module _inner_cutout() {
         translate([wall, wall, floor_ceiling]) {
-            rounded_cube(
+            chamfered_cube(
                 [
                     width - wall * 2,
                     length - wall * 2,
-                    height + lip_height + e
+                    height * 2 // NOTE: arbitrary
                 ],
-                inner_fillet,
-                $fn = 20
+                inner_chamfer
             );
         }
 
@@ -274,10 +273,9 @@ module enclosure_half(
                 : length - y * 2;
 
             translate([x, y, z]) {
-                rounded_xy_cube(
+                chamfered_xy_cube(
                     [width, length, lip_height * 2 + e],
-                    inner_fillet,
-                    $fn = 20
+                    inner_chamfer
                 );
             }
 
@@ -368,7 +366,7 @@ enclosure_half(
     50, 50, 10,
 
     // fillet = 0,
-    // inner_fillet = 0,
+    // inner_chamfer = 0,
 
     add_lip = true,
     // remove_lip = true,
@@ -378,7 +376,9 @@ enclosure_half(
     tongue_and_groove_pull = .1,
 
     outer_color = "#fff",
-    cavity_color = "#eee"
+    cavity_color = "#eee",
+
+    $fn = 24
 );
 translate([50 / 2, -1, -1]) cube([100, 100, 100]);
 }
