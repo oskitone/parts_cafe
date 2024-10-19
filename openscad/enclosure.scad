@@ -11,6 +11,7 @@ ENCLOSURE_INNER_WALL = 1.2;
 ENCLOSURE_LIP_HEIGHT = 3;
 ENCLOSURE_ENGRAVING_DEPTH = 1.2;
 ENCLOSURE_FILLET = 2;
+ENCLOSURE_INNER_CHAMFER = 1;
 
 // [back, right, front, left],
 ENCLOSURE_TONGUE_AND_GROOVE_SNAP = [.5, .8, .5, .8];
@@ -31,7 +32,7 @@ module enclosure_half(
     lip_height = ENCLOSURE_LIP_HEIGHT,
 
     fillet = ENCLOSURE_FILLET,
-    inner_chamfer = ENCLOSURE_FILLET / 2,
+    inner_chamfer = ENCLOSURE_INNER_CHAMFER,
 
     // Increase to .2 for looser fit, will need separate fixture
     tolerance = .1,
@@ -366,7 +367,7 @@ module enclosure_fit_check(
     width, length, bottom_height, top_height,
 
     fillet = ENCLOSURE_FILLET,
-    inner_chamfer = ENCLOSURE_FILLET / 2,
+    inner_chamfer = ENCLOSURE_INNER_CHAMFER,
 
     tongue_and_groove_snap = ENCLOSURE_TONGUE_AND_GROOVE_SNAP,
     tongue_and_groove_pull = ENCLOSURE_TONGUE_AND_GROOVE_PULL,
