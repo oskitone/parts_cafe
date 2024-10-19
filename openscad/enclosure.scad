@@ -361,24 +361,70 @@ module enclosure_half(
     }
 }
 
+
+module enclosure_fit_check(
+    width, length, bottom_height, top_height,
+
+    fillet = ENCLOSURE_FILLET,
+    inner_chamfer = ENCLOSURE_FILLET / 2,
+
+    tongue_and_groove_snap = ENCLOSURE_TONGUE_AND_GROOVE_SNAP,
+    tongue_and_groove_pull = ENCLOSURE_TONGUE_AND_GROOVE_PULL,
+
+    bottom_color,
+    top_color
+) {
+    module _half(height, lip, color = undef) {
+        enclosure_half(
+            width, length, height,
+
+            add_lip = lip,
+            remove_lip = !lip,
+
+            fillet = fillet,
+            inner_chamfer = inner_chamfer,
+
+            include_tongue_and_groove = true,
+            tongue_and_groove_snap = tongue_and_groove_snap,
+            tongue_and_groove_pull = tongue_and_groove_pull,
+
+            outer_color = color,
+            cavity_color = color
+        );
+    }
+
+    _half(bottom_height, true, bottom_color);
+
+    e = .031;
+    intersection_height = e * 2 + (2 + ENCLOSURE_LIP_HEIGHT - e * 3) * (abs($t - .5) * 2);
+
+    color(top_color) translate([e, -e, 0]) intersection() {
+        translate([0, 0, bottom_height + top_height]) {
+            mirror([0, 0, 1]) {
+                _half(top_height, false);
+            }
+        }
+
+        translate([-e, -e, bottom_height - e]) {
+            cube([width + e * 2, length + e * 2, intersection_height]);
+        }
+    }
+}
+
 * difference() {
-enclosure_half(
-    50, 50, 10,
+enclosure_fit_check(
+    50, 50, 20, 20,
 
     // fillet = 0,
     // inner_chamfer = 0,
 
-    add_lip = true,
-    // remove_lip = true,
-
-    include_tongue_and_groove = true,
     tongue_and_groove_snap = [.5, .8, .5, .8],
     tongue_and_groove_pull = .1,
 
-    outer_color = "#fff",
-    cavity_color = "#eee",
+    bottom_color = "#FF69B4",
+    top_color = "#fff",
 
     $fn = 24
 );
-translate([50 / 2, -1, -1]) cube([100, 100, 100]);
+color("#fff") translate([50 / 2, -1, -1]) cube([100, 100, 100]);
 }
