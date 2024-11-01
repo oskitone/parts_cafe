@@ -1,7 +1,7 @@
 include <flat_top_rectangular_pyramid.scad>;
 include <rib_cavities.scad>;
 include <rounded_cube.scad>;
-include <switch.scad>;
+include <switch-OS102011MS2QN1.scad>;
 
 SWITCH_CLUTCH_MIN_BASE_HEIGHT = SWITCH_BASE_HEIGHT + 1;
 SWITCH_CLUTCH_MIN_BASE_WIDTH = SWITCH_BASE_WIDTH + 2;
