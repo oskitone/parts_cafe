@@ -1,18 +1,21 @@
+DIAGONAL_GRILL_SIZE = 2;
+
 module diagonal_grill(
     width, length, height,
-    size = 2,
+    size = DIAGONAL_GRILL_SIZE,
+    offset = 0,
     angle = 45
 ) {
     e = 0.0049;
     plot_width = size * 2;
 
-    long_side = max(width, length);
+    long_side = max(width, length) + offset;
 
     module _cavities() {
         count = floor(long_side / plot_width * 2) + 1;
         total_width = (count * 2 - 1) * size;
 
-        translate([width / 2, length / 2, 0 ]) {
+        translate([width / 2 + offset, length / 2, 0 ]) {
             rotate([0, 0, angle]) {
                 translate([total_width / -2, total_width / -2, 0]) {
                     for (i = [0 : count - 1]) {
