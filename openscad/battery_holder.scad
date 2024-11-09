@@ -288,6 +288,7 @@ module battery_holder(
     include_wire_relief_hitches = true,
     include_nub_fixture_cavities = true,
     include_wire_channel = true,
+    use_wire_channel_as_relief = false,
 
     outer_color = undef,
     cavity_color = undef,
@@ -436,23 +437,41 @@ module battery_holder(
         _length = RIBBON_CABLE_HEIGHT,
         _height = RIBBON_CABLE_WIDTH,
 
+        _block_width = 5,
+        _block_distance_from_end = width / 6,
+
         diameter = wire_channel_diameter
     ) {
         x = wall_xy;
         y = AAA_BATTERY_DIAMETER;
 
-        translate([x - e, y, diameter - floor - tolerance * 2]) {
-            rotate([0, 90, 0]) {
-                cylinder(
-                    d = diameter,
-                    h = width + e * 2,
-                    $fn = 12
-                );
-            }
-        }
+        difference() {
+            union() {
+                translate([x - e, y, diameter - floor - tolerance * 2]) {
+                    rotate([0, 90, 0]) {
+                        cylinder(
+                            d = diameter,
+                            h = width + e * 2,
+                            $fn = 12
+                        );
+                    }
+                }
 
-        translate([x - e, y + diameter / -2, -floor - e]) {
-            cube([width + e * 2, diameter, floor]);
+                translate([x - e, y + diameter / -2, -floor - e]) {
+                    cube([width + e * 2, diameter, floor]);
+                }
+            }
+
+            if (use_wire_channel_as_relief) {
+                for (_x = [
+                    _block_distance_from_end,
+                    cavity_width - _block_distance_from_end - _block_width
+                ]) {
+                    translate([_x, y + diameter / -2, -floor - e]) {
+                        cube([_block_width, diameter, floor]);
+                    }
+                }
+            }
         }
     }
 
