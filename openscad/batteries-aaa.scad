@@ -9,10 +9,7 @@ AAA_BATTERY_POSITIVE_CONTACT_MAX_DIAMETER = 3.8;
 AAA_BATTERY_TOTAL_LENGTH = AAA_BATTERY_LENGTH +
     AAA_BATTERY_POSITIVE_CONTACT_MIN_LENGTH;
 
-module battery(
-    reverse = false,
-    $fn = 24
-) {
+module battery(reverse = false) {
     module _output() {
         translate([0, AAA_BATTERY_DIAMETER / 2, AAA_BATTERY_DIAMETER / 2]) {
             rotate([0, 90, 0]) {
@@ -47,7 +44,9 @@ module battery_array(
     gutter = KEYSTONE_181_GUTTER,
 
     positive_x = KEYSTONE_181_BUTTON_LENGTH,
-    negative_x = KEYSTONE_181_SPRING_COMPRESSED_LENGTH
+    negative_x = KEYSTONE_181_SPRING_COMPRESSED_LENGTH,
+
+    $fn = 24
 ) {
     plot = AAA_BATTERY_DIAMETER + gutter;
 
