@@ -1,3 +1,7 @@
+// TODO: fix bottom of tab contact bracket fixture unsupported bridge
+// (is that what it's called?)
+// TODO: loosen ^ fit too. it's very tight printed
+
 include <batteries-aaa.scad>;
 include <battery_contacts.scad>;
 include <enclosure.scad>;
@@ -308,12 +312,13 @@ module battery_holder(
 
     center_z = height / 2 - floor;
 
-    wire_channel_diameter = RIBBON_CABLE_HEIGHT + tolerance * 2;
+    wire_channel_diameter = max(RIBBON_CABLE_HEIGHT, RIBBON_CABLE_WIDTH)
+        + tolerance * 2;
 
     module _alignment_rails(
         _width = AAA_BATTERY_LENGTH * .33,
         top_length = 1,
-        bottom_length = RIBBON_CABLE_HEIGHT + BATTERY_HOLDER_DEFAULT_WALL * 3,
+        bottom_length = wire_channel_diameter + BATTERY_HOLDER_DEFAULT_WALL * 2,
         _height = AAA_BATTERY_DIAMETER * .25
     ) {
         x = (cavity_width - _width) / 2 - tolerance;
@@ -447,7 +452,7 @@ module battery_holder(
 
         difference() {
             union() {
-                translate([x - e, y, diameter - floor - tolerance * 2]) {
+                translate([x - e, y, 0]) {
                     rotate([0, 90, 0]) {
                         cylinder(
                             d = diameter,
