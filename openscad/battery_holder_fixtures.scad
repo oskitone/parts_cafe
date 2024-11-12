@@ -12,7 +12,7 @@ module battery_holder_fixtures(
     web_height = 10,
 
     hitch_width = AAA_BATTERY_LENGTH / 2,
-    hitch_length = ENCLOSURE_INNER_WALL,
+    hitch_length = ENCLOSURE_WALL,
 
     side_aligner_width = ENCLOSURE_INNER_WALL,
     side_aligner_clearance = .2,
@@ -92,8 +92,17 @@ module battery_holder_fixtures(
                 endstop_y + hitch_length - e,
                 ENCLOSURE_FLOOR_CEILING - e
             ]) {
-                // TODO: ramp up
-                cube([web_width, web_length + e * 2, web_height + e]);
+                hull() {
+                    cube([web_width, web_length + e, e]);
+
+                    translate([0, 0, web_height]) {
+                        cube([web_width, web_length + e, e]);
+                    }
+
+                    translate([0, 0, height - e]) {
+                        cube([web_width, e, e]);
+                    }
+                }
             }
         }
     }
