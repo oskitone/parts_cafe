@@ -10,7 +10,7 @@ module card_stand(
     base_diameter = US_QUARTER_DIAMETER,
     base_height = 2,
 
-    tolerance = 0,
+    tolerance = -.05,
 
     $fn = 60
 ) {
@@ -79,6 +79,4 @@ module card_stand(
    _braces();
 }
 
-translate([25 * 0, 0, 0]) card_stand(tolerance = 0);
-translate([25 * 1, 0, 0]) card_stand(tolerance = .05);
-translate([25 * 2, 0, 0]) card_stand(tolerance = .1);
+card_stand();
