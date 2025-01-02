@@ -1,6 +1,6 @@
 include <ring.scad>;
 
-module framed_cylinder(
+module ghost_cylinder(
     diameter = 0,
     height = 0,
     size = .1,
@@ -37,7 +37,7 @@ module framed_cylinder(
     }
 }
 
-* framed_cylinder(
+* ghost_cylinder(
     diameter = 10,
     height = 10
 );

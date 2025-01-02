@@ -1,4 +1,4 @@
-module framed_cube(
+module ghost_cube(
     dimensions = [0,0,0],
     size = .1
 ) {
@@ -31,4 +31,4 @@ module framed_cube(
     }
 }
 
-* framed_cube([10,20,30]);
+* ghost_cube([10,20,30]);
