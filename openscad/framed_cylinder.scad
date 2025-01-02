@@ -14,11 +14,23 @@ module framed_cylinder(
 
 
             for (z = [0, height - size]) {
-                translate([0, 0, z]) {
+                * translate([0, 0, z]) {
                     ring(
                         diameter, size,
                         thickness = size
                     );
+                }
+
+                hull() {
+                    translate([size / -2, diameter / 2 - size, z]) {
+                        cube([size, size, size]);
+                    }
+
+                    rotate([0, 0, 360/$fn]) {
+                        translate([size / -2, diameter / 2 - size, z]) {
+                            cube([size, size, size]);
+                        }
+                    }
                 }
             }
         }
