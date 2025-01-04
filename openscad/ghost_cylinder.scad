@@ -6,6 +6,8 @@ module ghost_cylinder(
     size = .1,
     $fn = 12
 ) {
+    fragment_length = sin(180 / $fn) * diameter;
+
     for (i = [0 : $fn]) {
         rotate([0, 0, i * 360/$fn]) {
             translate([size / -2, diameter / 2 - size, 0]) {
@@ -14,21 +16,10 @@ module ghost_cylinder(
 
 
             for (z = [0, height - size]) {
-                * translate([0, 0, z]) {
-                    ring(
-                        diameter, size,
-                        thickness = size
-                    );
-                }
-
-                hull() {
-                    translate([size / -2, diameter / 2 - size, z]) {
-                        cube([size, size, size]);
-                    }
-
-                    rotate([0, 0, 360/$fn]) {
-                        translate([size / -2, diameter / 2 - size, z]) {
-                            cube([size, size, size]);
+                translate([0, diameter / 2, z]) {
+                    rotate([0, 0, -180 / $fn]) {
+                        translate([0, -size, 0]) {
+                            cube([fragment_length, size, size]);
                         }
                     }
                 }
