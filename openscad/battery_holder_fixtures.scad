@@ -13,7 +13,7 @@ function get_battery_holder_back_hitch_position(
     battery_holder_position.x
         + (battery_holder_dimensions.x - hitch_width) / 2,
     battery_holder_position.y
-        + tolerance * 0 // intentionally, explicitly snug
+        + tolerance * 2
         + battery_holder_dimensions.y
 ];
 
@@ -91,7 +91,8 @@ module battery_holder_fixtures(
         position = get_battery_holder_back_hitch_position(
             battery_holder_position = battery_holder_position,
             battery_holder_dimensions = battery_holder_dimensions,
-            hitch_width = hitch_width
+            hitch_width = hitch_width,
+            tolerance = tolerance
         );
 
         translate([position.x, position.y, ENCLOSURE_FLOOR_CEILING - e]) {
