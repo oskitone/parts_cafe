@@ -24,6 +24,7 @@ function get_speaker_fixture_diameter(
 module speaker_fixture(
     height = SPEAKER_HEIGHT,
     wall = 1,
+    tab_cavity_count = 1,
     tab_cavity_rotation = 90,
     tab_cavity_size = 15,
     tolerance = 0,
@@ -42,9 +43,13 @@ module speaker_fixture(
             $fn = quick_preview ? undef : HIDEF_ROUNDING
         );
 
-        rotate([0, 0, tab_cavity_rotation]) {
-            translate([tab_cavity_size / -2, 0, ring_z - e]) {
-                cube([tab_cavity_size, diameter / 2, height + e * 2]);
+        for (i = [0 : tab_cavity_count]) {
+            rotation = tab_cavity_rotation + i * (360 / tab_cavity_count);
+
+            rotate([0, 0, rotation]) {
+                translate([tab_cavity_size / -2, 0, ring_z - e]) {
+                    cube([tab_cavity_size, diameter / 2, height + e * 2]);
+                }
             }
         }
     }
