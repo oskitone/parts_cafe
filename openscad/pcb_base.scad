@@ -52,24 +52,11 @@ module pcb_base(
         }
     }
 
-    module _button_support() {
-        x = 2.54 * 41;
-        y = 2.54 * (5 - 2);
-
-        _width = 2.54 * 1;
-        _length = length - y * 2;
-
-        translate([x - _width / 2, y, height - e]) {
-            cube([_width, _length, pcb_clearance + e]);
-        }
-    }
-
     difference() {
         cube([width, length, height]);
         _screw_exits();
     }
     _mount_posts();
-    _button_support();
 }
 
 pcb_base(
