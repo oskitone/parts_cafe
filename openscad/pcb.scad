@@ -4,7 +4,7 @@ PCB_HEIGHT = 1.7;
 PCB_HOLE_DIAMETER = 3.2;
 
 // ie, trimmed leads and solder joints on bottom
-PCB_BOTTOM_CLEARANCE = 2;
+MIN_PCB_BOTTOM_CLEARANCE = 2;
 
 // USAGE: copy and wrap values from *.kicad_pcb, eg:
 // PCB_HOLE_POSITIONS = [ get_translated_xy([133.35, 79.375]) ];
@@ -12,15 +12,17 @@ function get_translated_xy(xy) = (
     [xy.x - 4 * 25.4, 4.5 * 25.4 - xy.y]
 );
 
+EXAMPLE_EDGE_CUTS = [
+    // Copy from *.kicad_pcb
+    // start xy -> end xy
+    [[0, 0], [10, 0]],
+    [[10, 0], [10, 10]],
+    [[10, 10], [0, 10]],
+    [[0, 10], [0, 0]],
+];
+
 function get_pcb_dimensions(
-    edge_cuts = [
-        // Copy from *.kicad_pcb
-        // start xy -> end xy
-        [[0, 0], [10, 0]],
-        [[10, 0], [10, 10]],
-        [[10, 10], [0, 10]],
-        [[0, 10], [0, 0]],
-    ],
+    edge_cuts = EXAMPLE_EDGE_CUTS,
     height = PCB_HEIGHT
 ) = (
     // Theoretically only need either START or END, since cut is a closed loop
@@ -35,7 +37,7 @@ function get_pcb_dimensions(
 );
 
 function get_pcb_component_offset_position(
-    edge_cuts = [[[0, 0], [0, 0]]]
+    edge_cuts = EXAMPLE_EDGE_CUTS
 ) = (
     [
         min([for (cut = edge_cuts) cut[0].x]) * -1,
@@ -67,7 +69,7 @@ module pcb(
     length = 100,
     height = PCB_HEIGHT,
 
-    bottom_clearance = PCB_BOTTOM_CLEARANCE,
+    bottom_clearance = MIN_PCB_BOTTOM_CLEARANCE,
 
     hole_positions = [],
     hole_diameter = PCB_HOLE_DIAMETER,

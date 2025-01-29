@@ -1,18 +1,22 @@
-NUT_DIAMETER = 6.4;
-NUT_HEIGHT = 2.4;
+include <nuts_and_bolts.scad>;
 
 // TODO: fix this being too tight even with standard .1 tolerance
 
+PCB_MOUNT_POST_CEILING = 2;
+PCB_MOUNT_NUT_Z_CLEARANCE = .2;
+
 function get_pcb_mount_post_hole_diameter(
-    screw_diameter = 3.2, // PCB_MOUNT_HOLE_DIAMETER
+    screw_diameter = SCREW_DIAMETER,
     tolerance = 0
 ) = (screw_diameter + tolerance * 2);
 
 function get_pcb_mount_post_min_height(
-    ceiling = 2,
-    tolerance = 0
+    ceiling = PCB_MOUNT_POST_CEILING,
+    nut_z_clearance = PCB_MOUNT_NUT_Z_CLEARANCE,
+    min_pcb_bottom_clearance = MIN_PCB_BOTTOM_CLEARANCE
 ) = (
-    NUT_HEIGHT + tolerance * 2 + ceiling
+    NUT_HEIGHT + nut_z_clearance * 2
+    + ceiling + min_pcb_bottom_clearance
 );
 
 module pcb_mount_post(
@@ -20,11 +24,11 @@ module pcb_mount_post(
     length = NUT_DIAMETER,
     height = 10,
 
-    ceiling = 2,
+    ceiling = PCB_MOUNT_POST_CEILING,
 
-    screw_diameter = 3.2, // PCB_MOUNT_HOLE_DIAMETER
+    screw_diameter = SCREW_DIAMETER,
 
-    layer_height = .2,
+    nut_z_clearance = PCB_MOUNT_NUT_Z_CLEARANCE,
 
     tolerance = 0,
 
@@ -39,7 +43,7 @@ module pcb_mount_post(
     nut_lock_dimensions = [
         NUT_DIAMETER + tolerance * 2 + e,
         NUT_DIAMETER + tolerance * 2 + e,
-        NUT_HEIGHT + tolerance * 2
+        NUT_HEIGHT + nut_z_clearance * 2
     ];
 
     hole_diameter = get_pcb_mount_post_hole_diameter(
