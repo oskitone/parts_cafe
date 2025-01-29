@@ -17,6 +17,8 @@ module pcb_mounting_columns(
     screw_head_diameter = SCREW_HEAD_DIAMETER,
     pcb_hole_diameter = 3.2, // PCB_HOLE_DIAMETER
 
+    registration_nub_height = 1.6, // PCB_HEIGHT
+
     support_web_length = undef,
 
     quick_preview = true
@@ -53,6 +55,7 @@ module pcb_mounting_columns(
                     height = pcb_position.z - z,
                     support_web_length = support_web_length,
                     registration_nub = true,
+                    registration_nub_height = registration_nub_height,
                     tolerance = tolerance,
                     quick_preview = quick_preview
                 );
