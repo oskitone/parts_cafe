@@ -12,6 +12,49 @@ function get_translated_xy(xy) = (
     [xy.x - 4 * 25.4, 4.5 * 25.4 - xy.y]
 );
 
+function get_pcb_dimensions(
+    edge_cuts = [
+        // Copy from *.kicad_pcb
+        // start xy -> end xy
+        [[0, 0], [10, 0]],
+        [[10, 0], [10, 10]],
+        [[10, 10], [0, 10]],
+        [[0, 10], [0, 0]],
+    ],
+    height = PCB_HEIGHT
+) = (
+    // Theoretically only need either START or END, since cut is a closed loop
+    let (start_xs = [ for (cut = edge_cuts) cut[0].x ])
+    let (start_ys = [ for (cut = edge_cuts) cut[0].y ])
+
+    [
+        max(start_xs) - min(start_xs),
+        max(start_ys) - min(start_ys),
+        height
+    ]
+);
+
+function get_pcb_component_offset_position(
+    edge_cuts = [[[0, 0], [0, 0]]]
+) = (
+    [
+        min([for (cut = edge_cuts) cut[0].x]) * -1,
+        min(start_ys = [for (cut = edge_cuts) cut[0].y])
+    ]
+);
+
+function get_pcb_component_positions(
+    component_positions = [[0, 0]],
+    pcb_component_offset_position = [0, 0],
+    pcb_dimensions = [0, 0, 0]
+) = (
+    // For KiCad -> OpenSCAD, Y axis is flipped but X is not
+    [ for (xy = component_positions) [
+        pcb_component_offset_position.x + xy.x,
+        pcb_component_offset_position.y + (pcb_dimensions.y - xy.y)
+    ] ]
+);
+
 module pcb(
     show_board = true,
     show_silkscreen = true,
