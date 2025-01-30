@@ -6,6 +6,8 @@ SPST_ACTUATOR_HEIGHT_OFF_PCB = 6;
 SPST_MAX_TRAVEL = .5;
 SPST_CONSERVATIVE_TRAVEL = 1;
 
+SPST_PLOT = 2.54 * 3;
+
 module spst(
     base_dimensions = SPST_BASE_DIMENSIONS,
     actuator_diameter = SPST_ACTUATOR_DIAMETER,
