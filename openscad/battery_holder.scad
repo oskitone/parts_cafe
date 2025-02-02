@@ -308,6 +308,7 @@ module battery_holder(
     length = cavity_length + wall * 2;
     height = AAA_BATTERY_DIAMETER + floor + wall_height_extension;
 
+    // TODO: Remove! Everything should start at [0,0,0]
     wall_xy = -(wall + tolerance);
 
     center_z = height / 2 - floor;
