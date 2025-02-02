@@ -6,6 +6,8 @@ include <ring.scad>;
 SPEAKER_DIAMETER = 39.7;
 SPEAKER_HEIGHT = 5.4;
 
+SPEAKER_FIXTURE_WALL = 1.2; // ENCLOSURE_INNER_WALL
+
 module speaker() {
     cylinder(
         d = SPEAKER_DIAMETER,
@@ -15,7 +17,7 @@ module speaker() {
 
 function get_speaker_fixture_diameter(
     tolerance = 0,
-    wall = 1.2, // ENCLOSURE_INNER_WALL,
+    wall = SPEAKER_FIXTURE_WALL,
     speaker_diameter = SPEAKER_DIAMETER
 ) = (
     speaker_diameter + wall * 2 + tolerance * 2
@@ -23,7 +25,7 @@ function get_speaker_fixture_diameter(
 
 module speaker_fixture(
     height = SPEAKER_HEIGHT,
-    wall = 1,
+    wall = SPEAKER_FIXTURE_WALL,
     tab_cavity_count = 1,
     tab_cavity_rotation = 90,
     tab_cavity_size = 15,
@@ -40,7 +42,7 @@ module speaker_fixture(
             diameter = diameter,
             height = height,
             thickness = wall,
-            $fn = quick_preview ? undef : HIDEF_ROUNDING
+            $fn = quick_preview ? undef : 120
         );
 
         for (i = [0 : tab_cavity_count]) {
