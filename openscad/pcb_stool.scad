@@ -1,5 +1,8 @@
 include <flat_top_rectangular_pyramid.scad>;
 
+// For non-secure PCB registration
+// Can be used with and without matching holes on PCB
+
 PCB_STOOL_DIAMETER = 4;
 PCB_STOOL_CHAMFER = 2;
 

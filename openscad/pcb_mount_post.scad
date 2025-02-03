@@ -1,5 +1,7 @@
 include <nuts_and_bolts.scad>;
 
+// For securely mounting a PCB with nuts and bolts
+
 // TODO: fix this being too tight even with standard .1 tolerance
 
 PCB_MOUNT_POST_CEILING = 2;

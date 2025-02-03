@@ -1,11 +1,13 @@
 include <nuts_and_bolts.scad>;
 include <pcb_stool.scad>;
 
+// For PCB registration/mounting on both screw and post holes
+
 module pcb_mounting_columns(
     pcb_position = [0,0,0],
 
     screw_head_clearance = 0,
-    wall = 0,
+    wall = 1.2, // ENCLOSURE_INNER_WALL
 
     pcb_screw_hole_positions = [[0,0]],
     pcb_post_hole_positions = [[0,0]],
