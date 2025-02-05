@@ -1,6 +1,13 @@
-// TODO: fix bottom of tab contact bracket fixture unsupported bridge
-// (is that what it's called?)
-// TODO: loosen ^ fit too. it's very tight printed
+// TODO: legion
+// - Ditch wall_xy and floor position stuff
+//   Everything should start at [0,0,0]
+// - Relatedly, positioning against batteries should be obvious
+// - parameterize wire_channel_diameter
+//   sometimes it's just the one ribbon, not two.
+// - Make battery_contact_fixture's floor_cavity_height less confusing
+//   Sometimes it's a fixture, sometimes a cavity. decouple?
+// - Fix sibling battery_contact_fixture obstruction
+//   Very probably caused assembly tightness problem
 
 include <batteries-aaa.scad>;
 include <battery_contacts.scad>;
@@ -67,8 +74,6 @@ function get_battery_holder_dimensions(
     AAA_BATTERY_DIAMETER + floor + wall_height_extension
 ];
 
-// NOTE: Confusingly, including floor_cavity_height turns this into a cavity.
-// TODO: Make less confusing
 module battery_contact_fixture(
     height = KEYSTONE_181_HEIGHT,
     tolerance = 0,
@@ -274,7 +279,6 @@ module battery_contact_fixtures(
     }
 }
 
-// TODO: make positioning against batteries more obvious
 module battery_holder(
     wall = BATTERY_HOLDER_DEFAULT_WALL,
     wall_height_extension = 0,
@@ -308,7 +312,6 @@ module battery_holder(
     length = cavity_length + wall * 2;
     height = AAA_BATTERY_DIAMETER + floor + wall_height_extension;
 
-    // TODO: Remove! Everything should start at [0,0,0]
     wall_xy = -(wall + tolerance);
 
     center_z = height / 2 - floor;
@@ -376,7 +379,6 @@ module battery_holder(
 
         x = wall_xy + (width - _width) / 2;
 
-        // TODO: lock to top and bottom, regardless of floor
         for (
             y = [wall_xy - e, wall_xy + length - _length],
             z = [
@@ -451,6 +453,13 @@ module battery_holder(
         x = wall_xy;
         y = AAA_BATTERY_DIAMETER;
 
+        // HACK: it's very unintuitive to derive these values,
+        // so they are eyeballed.
+        dfm_chamfer = [(2 - tolerance), diameter - e * 2, diameter - .5];
+        dfm_x = end_terminal_bottom_right
+            ? wall_xy + width - wall - dfm_chamfer.x - e
+            : wall_xy + wall + e;
+
         difference() {
             union() {
                 translate([x - e, y, 0]) {
@@ -466,6 +475,21 @@ module battery_holder(
                 translate([x - e, y + diameter / -2, -floor - e]) {
                     cube([width + e * 2, diameter, floor]);
                 }
+
+                render() translate([dfm_x, y + diameter / -2 + e, -floor - e]) {
+                    cube([dfm_chamfer.x, dfm_chamfer.y, dfm_chamfer.z + e]);
+
+                    translate([0, 0, dfm_chamfer.z]) {
+                        flat_top_rectangular_pyramid(
+                            top_width = 0,
+                            top_length = dfm_chamfer.y,
+                            bottom_width = dfm_chamfer.x,
+                            bottom_length = dfm_chamfer.y,
+                            height = dfm_chamfer.x,
+                            top_weight_x = end_terminal_bottom_right ? 0 : 1
+                        );
+                    }
+                }
             }
 
             if (use_wire_channel_as_relief) {
@@ -480,7 +504,6 @@ module battery_holder(
         }
     }
 
-    // TODO: elevate to floor?
     difference() {
         color(outer_color) {
             union() {
