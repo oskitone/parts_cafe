@@ -2,8 +2,6 @@
 // - Ditch wall_xy and floor position stuff
 //   Everything should start at [0,0,0]
 // - Relatedly, positioning against batteries should be obvious
-// - parameterize wire_channel_diameter
-//   sometimes it's just the one ribbon, not two.
 // - Make battery_contact_fixture's floor_cavity_height less confusing
 //   Sometimes it's a fixture, sometimes a cavity. decouple?
 // - Fix sibling battery_contact_fixture obstruction
@@ -297,6 +295,7 @@ module battery_holder(
     include_nub_fixture_cavities = true,
     include_wire_channel = true,
     use_wire_channel_as_relief = false,
+    wire_channel_diameter = max(RIBBON_CABLE_HEIGHT, RIBBON_CABLE_WIDTH),
 
     outer_color = undef,
     cavity_color = undef,
@@ -316,13 +315,12 @@ module battery_holder(
 
     center_z = height / 2 - floor;
 
-    wire_channel_diameter = max(RIBBON_CABLE_HEIGHT, RIBBON_CABLE_WIDTH)
-        + tolerance * 2;
+    _wire_channel_diameter = wire_channel_diameter + tolerance * 2;
 
     module _alignment_rails(
         _width = AAA_BATTERY_LENGTH * .33,
         top_length = 1,
-        bottom_length = wire_channel_diameter + BATTERY_HOLDER_DEFAULT_WALL * 2,
+        bottom_length = _wire_channel_diameter + BATTERY_HOLDER_DEFAULT_WALL * 2,
         _height = AAA_BATTERY_DIAMETER * .25
     ) {
         x = (cavity_width - _width) / 2 - tolerance;
@@ -395,7 +393,7 @@ module battery_holder(
     module _wire_relief_hitches(
         hole_diameter = RIBBON_CABLE_WIDTH + tolerance * 2,
         wall = BATTERY_HOLDER_DEFAULT_WALL,
-        _length = AAA_BATTERY_DIAMETER - wire_channel_diameter
+        _length = AAA_BATTERY_DIAMETER - _wire_channel_diameter
     ) {
         _width = wall + hole_diameter;
 
@@ -448,7 +446,7 @@ module battery_holder(
         _block_width = 5,
         _block_distance_from_end = width / 6,
 
-        diameter = wire_channel_diameter
+        diameter = _wire_channel_diameter
     ) {
         x = wall_xy;
         y = AAA_BATTERY_DIAMETER;
