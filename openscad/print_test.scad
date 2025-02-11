@@ -1,26 +1,28 @@
-include <../../parts_cafe/openscad/diagonal_grill.scad>;
-include <../../parts_cafe/openscad/enclosure_engraving.scad>;
-include <../../parts_cafe/openscad/enclosure.scad>;
+include <diagonal_grill.scad>;
+include <enclosure_engraving.scad>;
+include <enclosure.scad>;
+include <rounded_xy_cube.scad>;
 
 module print_test(
     dimensions = [
         25.4 * 2,
-        25.4 * 1.5,
+        25.4 * 1,
         ENCLOSURE_FLOOR_CEILING
     ],
     depth = ENCLOSURE_ENGRAVING_DEPTH,
+    radius = ENCLOSURE_FILLET,
 
-    outer_gutter = 5,
-    label_gutter = 1,
-    inner_gutter = 3.4,
+    outer_gutter = 4,
+    inner_gutter = 2,
+
+    hole_diameter = 4,
 
     // NOTE: eyeballed against width
-    label_text_size = 4.35,
-    label_text = "REDUCED",
+    label_text_size = 6.4,
+    label_text = "ABCD",
 
-    placard_length = ENCLOSURE_ENGRAVING_LENGTH,
     placard_text_size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
-    placard_text = "PRINT TEST",
+    placard_text = "1 2 3 4 5",
 
     quick_preview = true,
 
@@ -30,33 +32,69 @@ module print_test(
     e = 1.0151;
 
     available_length = dimensions.y - outer_gutter * 2;
-    sidebar_width = available_length * OSKITONE_LENGTH_WIDTH_RATIO;
+    grill_width = (dimensions.x - outer_gutter * 2 - inner_gutter * 2)
+        / 3;
     available_width = dimensions.x - outer_gutter * 2
-        - sidebar_width - inner_gutter;
+        - grill_width - inner_gutter;
 
     label_length = label_text_size;
-    grill_length = available_length
-        - label_length - placard_length
-        - inner_gutter - label_gutter;
+
+    placard_length = available_length - label_length - inner_gutter;
+
+    hole_position = [
+        outer_gutter + hole_diameter / 2,
+        dimensions.y - outer_gutter - hole_diameter / 2,
+        -e
+    ];
+
+    module _base() {
+        rounded_xy_cube(
+            dimensions,
+            radius = radius,
+            $fn = 12
+        );
+    }
+
+    module _hole() {
+        translate(hole_position) {
+            cylinder(
+                h = dimensions.z + e * 2,
+                d = hole_diameter,
+                $fn = 12
+            );
+        }
+    }
+
+    module _grill() {
+        difference() {
+            translate([
+                outer_gutter,
+                outer_gutter,
+                dimensions.z - depth
+            ]) {
+                diagonal_grill(
+                    grill_width,
+                    available_length,
+                    depth + e
+                );
+            }
+
+            translate(hole_position) {
+                cylinder(
+                    h = dimensions.z + e * 2,
+                    d = hole_diameter + inner_gutter * 2,
+                    $fn = 12
+                );
+            }
+        }
+    }
 
     module _text_engraving() {
-        enclosure_engraving(
-            size = sidebar_width,
-            position = [
-                outer_gutter + sidebar_width,
-                outer_gutter
-            ],
-            center = false,
-            rotation = 90,
-            quick_preview = quick_preview,
-            enclosure_height = dimensions.z
-        );
-
         enclosure_engraving(
             string = label_text,
             size = label_text_size,
             position = [
-                outer_gutter + sidebar_width + inner_gutter
+                outer_gutter + grill_width + inner_gutter
                     + available_width / 2,
                 dimensions.y  - outer_gutter - label_length / 2
             ],
@@ -69,10 +107,9 @@ module print_test(
             string = placard_text,
             size = placard_text_size,
             position = [
-                outer_gutter + sidebar_width + inner_gutter
+                outer_gutter + grill_width + inner_gutter
                     + available_width / 2,
-                outer_gutter + grill_length
-                    + inner_gutter + placard_length / 2
+                outer_gutter + placard_length / 2
             ],
             placard = [available_width, placard_length],
             center = true,
@@ -83,23 +120,13 @@ module print_test(
 
     difference() {
         color(color) {
-            cube(dimensions);
+            _base();
         }
 
         color(cavity_color) {
-            translate([
-                outer_gutter + sidebar_width + inner_gutter,
-                outer_gutter,
-                dimensions.z - depth
-            ]) {
-                diagonal_grill(
-                    available_width,
-                    grill_length,
-                    depth + e
-                );
-            }
-
+            _grill();
             _text_engraving();
+            _hole();
         }
     }
 }
