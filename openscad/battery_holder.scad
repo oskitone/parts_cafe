@@ -492,8 +492,8 @@ module battery_holder(
 
             if (use_wire_channel_as_relief) {
                 _x = end_terminal_bottom_right
-                    ? cavity_width - _block_distance_from_end - _block_width
-                    : _block_distance_from_end;
+                    ? _block_distance_from_end
+                    : cavity_width - _block_distance_from_end - _block_width;
 
                 translate([_x, y + diameter / -2, - floor - e]) {
                     cube([_block_width, diameter, floor + e * 2]);
