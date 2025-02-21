@@ -43,7 +43,7 @@ module enclosure_half(
     tongue_and_groove_pull = ENCLOSURE_TONGUE_AND_GROOVE_PULL,
 
     include_disassembly_dimples = false,
-    include_disassembly_wedge = false,
+    include_disassembly_wedges = false,
 
     outer_color,
     cavity_color
@@ -304,7 +304,7 @@ module enclosure_half(
         dimple_diameter = 10,
         dimple_depth = ENCLOSURE_ENGRAVING_DEPTH,
 
-        include_wedge = false,
+        include_wedges = false,
         wedge_width = 10,
         wedge_height = FLATHEAD_SCREWDRIVER_POINT
     ) {
@@ -336,11 +336,14 @@ module enclosure_half(
             }
         }
 
-        if (include_wedge) {
+        if (include_wedges) {
             x = (width - wedge_width) / 2;
+            ys = [-e, length - ENCLOSURE_WALL - e];
 
-            translate([x, -e, height - wedge_height]) {
-                cube([wedge_width, ENCLOSURE_WALL + e * 2, wedge_height + e]);
+            for (y = ys) {
+                translate([x, y, height - wedge_height]) {
+                    cube([wedge_width, ENCLOSURE_WALL + e * 2, wedge_height + e]);
+                }
             }
         }
     }
@@ -356,7 +359,7 @@ module enclosure_half(
 
             _disassembly_cavities(
                 include_dimple = include_disassembly_dimples && add_lip,
-                include_wedge = include_disassembly_wedge && remove_lip
+                include_wedges = include_disassembly_wedges && remove_lip
             );
         }
     }
