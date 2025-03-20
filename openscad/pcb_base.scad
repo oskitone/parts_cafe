@@ -1,5 +1,6 @@
 include <pcb.scad>;
 include <pcb_mount_post.scad>;
+include <pcb_stool.scad>;
 
 PCB_BASE_BASE_HEIGHT = 2.5;
 
@@ -45,6 +46,7 @@ module pcb_base(
     pcb_mount_post_ceiling = PCB_MOUNT_POST_CEILING,
 
     screw_positions = [],
+    stool_positions = [],
 
     tolerance = 0,
 
@@ -72,7 +74,7 @@ module pcb_base(
         }
     }
 
-    module _mount_posts() {
+    module _posts_and_stools() {
         for (p = screw_positions) {
             translate([p.x, p.y, base_height - e]) {
                 pcb_mount_post(
@@ -84,11 +86,37 @@ module pcb_base(
                 );
             }
         }
+
+        for (p = stool_positions) {
+            translate([p.x, p.y, base_height - e]) {
+                pcb_stool(
+                    height = pcb_bottom_clearance + e,
+
+                    // diameter = PCB_STOOL_DIAMETER,
+                    // chamfer = PCB_STOOL_CHAMFER,
+
+                    // support_web_count = 3,
+                    // support_web_width = 1.2, // ENCLOSURE_INNER_WALL
+                    // support_web_length = undef,
+
+                    // registration_nub = false,
+                    // registration_nub_height = 1.6, // PCB_HEIGHT
+                    // registration_nub_hole_diameter = 3.2, // PCB_HOLE_DIAMETER
+                    // registration_nub_clearance = .2,
+
+                    tolerance = tolerance,
+
+                    // hidef_rounding = 120, // HIDEF_ROUNDING
+
+                    quick_preview = quick_preview
+                );
+            }
+        }
     }
 
     difference() {
         cube([width, length, base_height]);
         _screw_exits();
     }
-    _mount_posts();
+    _posts_and_stools();
 }
