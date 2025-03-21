@@ -1,41 +1,75 @@
-include <../../parts_cafe/openscad/lightpipe.scad>;
+include <enclosure_engraving.scad>;
+include <lightpipe.scad>;
+include <nuts_and_bolts.scad>;
+include <rounded_cube.scad>;
 
 // TODO/try:
 // * a big metal washer vs knife
-// * width covers full material_length
+// * size test foxhole
 
 module lightpipe_jig(
-    length = LIGHTPIPE_LENGTH,
-    diameter = LIGHTPIPE_DIAMETER,
-    width = 20,
-    base = 5,
-    wall = 5,
-    material_length = 100,
-    blade_width = .6,
-    extension = 10,
-    tolerance = 0
-) {
-    e = .014; // TODO: is this affecting dimensions?, revisit
+    lightpipe_length = LIGHTPIPE_LENGTH,
+    lightpipe_length_string = LIGHTPIPE_LENGTH_STRING,
+    lightpipe_diameter = LIGHTPIPE_DIAMETER,
 
     dimensions = [
-        width,
-        diameter + wall * 2,
-        base + diameter
-    ];
+        MINI_HOT_GLUE_STICK_LENGTH / 4 + 4,
+        15,
+        15
+    ],
+
+    material_length = MINI_HOT_GLUE_STICK_LENGTH / 4,
+
+    pushout_diameter = SCREW_DIAMETER,
+
+    blade_width = .6,
+    blade_top_registration = 2,
+    blade_well = 1,
+
+    tolerance = 0
+) {
+    e = .014;
+
+    endstop = dimensions.x - material_length;
+    cavity_diameter = lightpipe_diameter + tolerance * 2;
 
     material_position = [
-        wall - tolerance,
+        endstop - tolerance,
         dimensions.y / 2,
-        base + diameter / 2
+        dimensions.z - lightpipe_diameter / 2
+            - blade_top_registration
     ];
 
-    module _cavity() {
-        cavity_length = dimensions.x - wall + tolerance + e * 2;
+    module _blade_cavities() {
+        blade_cavity_width = blade_width + tolerance * 2;
+
+         for (x = [
+            lightpipe_length
+            : lightpipe_length
+            : material_length - lightpipe_length
+        ]) {
+            translate([
+                material_position.x + x - blade_cavity_width / 2,
+                -e,
+                material_position.z - cavity_diameter / 2
+                    - blade_well
+            ]) {
+                cube([
+                    blade_cavity_width,
+                    dimensions.y + e * 2,
+                    dimensions.z
+                ]);
+            }
+        }
+    }
+
+    module _material_cavity() {
+        cavity_length = dimensions.x - endstop + tolerance + e * 2;
 
         translate(material_position) {
             rotate([0, 90, 0]) {
                 cylinder(
-                    d = diameter,
+                    d = cavity_diameter,
                     h = cavity_length
                 );
             }
@@ -43,53 +77,74 @@ module lightpipe_jig(
 
         translate([
             material_position.x,
-            material_position.y - diameter / 2,
-            material_position.z - e
+            material_position.y - cavity_diameter / 2,
+            material_position.z
         ]) {
             cube([
-                dimensions.x + 10, // NOTE: just arbitrarily bigger
-                diameter,
-                diameter / 2 + e * 2
+                dimensions.x - material_position.x + e,
+                cavity_diameter,
+                dimensions.z - material_position.z + e
             ]);
         }
+    }
+
+    module _pushout_cavity() {
+        diameter = pushout_diameter + tolerance * 2;
 
         translate([
-            material_position.x + length,
             -e,
-            material_position.z - e
+            material_position.y,
+            material_position.z
         ]) {
-            cube([
-                dimensions.x + 11, // NOTE: ^
-                dimensions.y + e * 2,
-                diameter / 2 + e * 2
-            ]);
-        }
+            rotate([0, 90, 0]) {
+                cylinder(
+                    d = diameter,
+                    h = endstop + e * 2
+                );
+            }
 
-        translate([
-            material_position.x + length,
-            -e,
-            material_position.z - diameter / 2
-        ]) {
-            cube([
-                blade_width + tolerance * 2,
-                dimensions.y + e * 2,
-                diameter + e * 2
-            ]);
+            translate([0, diameter / -2, 0]) {
+                cube([
+                    endstop + e * 2,
+                    diameter,
+                    dimensions.z
+                ]);
+            }
         }
+    }
+
+    module _label() {
+        enclosure_engraving(
+            lightpipe_length_string,
+            position = [dimensions.x / 2, dimensions.y / 2],
+            bottom = true,
+            quick_preview = $preview
+        );
     }
 
     difference() {
-        cube(dimensions);
+        rounded_cube(dimensions, radius = 1, $fn = 12);
 
-        _cavity();
+        _material_cavity();
+        _blade_cavities();
+        _pushout_cavity();
+        _label();
     }
 
     % translate(material_position) {
-        rotate([0, 90, 0]) {
-            cylinder(
-                d = diameter,
-                h = length
-            );
+        for (x = [
+            0 :
+            lightpipe_length :
+            material_length - lightpipe_length
+        ]) {
+            translate([x, 0, 0]) {
+                rotate([0, 90, 0]) {
+                    cylinder(
+                        d = lightpipe_diameter,
+                        h = lightpipe_length
+                    );
+                }
+            }
         }
     }
 }
