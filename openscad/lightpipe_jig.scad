@@ -1,3 +1,4 @@
+include <donut.scad>;
 include <enclosure_engraving.scad>;
 include <lightpipe.scad>;
 include <nuts_and_bolts.scad>;
@@ -5,7 +6,6 @@ include <rounded_cube.scad>;
 
 // TODO/try:
 // * a big metal washer vs knife
-// * size test foxhole
 
 module lightpipe_jig(
     lightpipe_length = LIGHTPIPE_LENGTH,
@@ -13,25 +13,31 @@ module lightpipe_jig(
     lightpipe_diameter = LIGHTPIPE_DIAMETER,
 
     dimensions = [
-        MINI_HOT_GLUE_STICK_LENGTH / 4 + 4,
+        MINI_HOT_GLUE_STICK_LENGTH + 4,
         15,
         15
     ],
 
-    material_length = MINI_HOT_GLUE_STICK_LENGTH / 4,
+    material_length = MINI_HOT_GLUE_STICK_LENGTH,
 
     pushout_diameter = SCREW_DIAMETER,
 
-    blade_width = .6,
-    blade_top_registration = 2,
-    blade_well = 1,
+    notch_cadence = 4,
 
-    tolerance = 0
+    blade_width = .6,
+    blade_top_registration = 1,
+    blade_well = 3,
+
+    tolerance = 0,
+
+    outer_color = "#FF69B4",
+    cavity_color = "#CC5490"
 ) {
     e = .014;
 
     endstop = dimensions.x - material_length;
     cavity_diameter = lightpipe_diameter + tolerance * 2;
+    blade_cavity_width = blade_width + tolerance * 2;
 
     material_position = [
         endstop - tolerance,
@@ -41,8 +47,6 @@ module lightpipe_jig(
     ];
 
     module _blade_cavities() {
-        blade_cavity_width = blade_width + tolerance * 2;
-
          for (x = [
             lightpipe_length
             : lightpipe_length
@@ -94,7 +98,7 @@ module lightpipe_jig(
         translate([
             -e,
             material_position.y,
-            material_position.z
+            material_position.z - (lightpipe_diameter - diameter) / 2
         ]) {
             rotate([0, 90, 0]) {
                 cylinder(
@@ -115,20 +119,86 @@ module lightpipe_jig(
 
     module _label() {
         enclosure_engraving(
-            lightpipe_length_string,
+            str(
+                lightpipe_length_string,
+                " x ",
+                floor((dimensions.x - endstop) / lightpipe_length)
+            ),
             position = [dimensions.x / 2, dimensions.y / 2],
             bottom = true,
             quick_preview = $preview
         );
     }
 
-    difference() {
-        rounded_cube(dimensions, radius = 1, $fn = 12);
+    module _notches(depth = 1) {
+        for (x = [
+            0 :
+            lightpipe_length * notch_cadence :
+            material_length - lightpipe_length
+        ], y = [-e, dimensions.y - depth]) {
+            translate([
+                material_position.x + x - blade_cavity_width / 2,
+                y,
+                -e
+            ]) {
+                cube([
+                    blade_cavity_width,
+                    1 + e,
+                    dimensions.z
+                ]);
+            }
+        }
+    }
 
-        _material_cavity();
-        _blade_cavities();
-        _pushout_cavity();
-        _label();
+    module _body(radius = 1, $fn = 12) {
+        rounded_cube(dimensions, radius = radius);
+
+        difference() {
+            hull() {
+                translate([dimensions.x - radius * 2, 0, 0]) {
+                    rounded_cube(
+                        [radius * 2, dimensions.y, lightpipe_length],
+                        radius = radius
+                    );
+                }
+
+                translate([dimensions.x + cavity_diameter, dimensions.y / 2, 0]) {
+                    for (z = [
+                        radius,
+                        lightpipe_length - radius
+                    ]) {
+                        translate([0, 0, z]) {
+                            donut(
+                                diameter = dimensions.y,
+                                thickness = radius * 2
+                            );
+                        }
+                    }
+                }
+            }
+
+            translate([dimensions.x + cavity_diameter, dimensions.y / 2, -e]) {
+                cylinder(
+                    h = lightpipe_length + e * 2,
+                    d = cavity_diameter,
+                    $fn = 24
+                );
+            }
+        }
+    }
+
+    difference() {
+        color(outer_color) {
+            _body();
+        }
+
+        color(cavity_color) {
+            _material_cavity();
+            _blade_cavities();
+            _pushout_cavity();
+            _label();
+            _notches();
+        }
     }
 
     % translate(material_position) {
