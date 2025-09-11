@@ -46,3 +46,12 @@ module led(
         }
     }
 }
+
+module led_3mm() {
+    led(
+        diameter = 3.05,
+        height = 3.85,
+        base_height = .75,
+        base_diameter = 4.02
+    );
+}
