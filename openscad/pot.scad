@@ -13,6 +13,9 @@ POT_SHAFT_TYPE_PLAIN = "pot_shaft_type_plain";
 POT_SHAFT_TYPE_FLATTED = "pot_shaft_type_flatted";
 POT_SHAFT_TYPE_DEFAULT = POT_SHAFT_TYPE_SPLINED;
 
+// Distance from pin 1 to shaft center
+PTV09A_POT_ORIGIN = [2.5, -7.5];
+
 module pot(
     show_base = true,
     show_actator = true,

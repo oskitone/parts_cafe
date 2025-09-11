@@ -8,6 +8,9 @@ SPST_CONSERVATIVE_TRAVEL = 1;
 
 SPST_PLOT = 2.54 * 3;
 
+// Distance from pin 1 to actuator center
+SPST_ORIGIN = [4.5 / 2, 6 / 2];
+
 module spst(
     base_dimensions = SPST_BASE_DIMENSIONS,
     actuator_diameter = SPST_ACTUATOR_DIAMETER,
