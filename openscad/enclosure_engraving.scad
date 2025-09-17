@@ -49,6 +49,9 @@ module enclosure_engraving(
     depth = ENCLOSURE_ENGRAVING_DEPTH,
 
     placard = undef,
+
+    // Chamfers the top of the placard's engraving.
+    // Use to prevent drooping when printing vertically!
     chamfer_placard_top = false,
 
     rotation = 0,
