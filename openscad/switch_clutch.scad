@@ -33,15 +33,17 @@ module switch_clutch(
 
     position = 0,
 
+    cavity_base_width = SWITCH_BASE_WIDTH,
+    cavity_base_length = SWITCH_BASE_LENGTH,
+    cavity_base_height = SWITCH_BASE_HEIGHT,
+
+    cavity_actuator_width = SWITCH_ACTUATOR_WIDTH,
+    cavity_actuator_length = SWITCH_ACTUATOR_LENGTH,
+    cavity_actuator_height = SWITCH_ACTUATOR_HEIGHT,
+    cavity_actuator_travel = SWITCH_ACTUATOR_TRAVEL,
+
     switch_base_width = SWITCH_BASE_WIDTH,
     switch_base_length = SWITCH_BASE_LENGTH,
-    switch_base_height = SWITCH_BASE_HEIGHT,
-
-    switch_actuator_width = SWITCH_ACTUATOR_WIDTH,
-    switch_actuator_length = SWITCH_ACTUATOR_LENGTH,
-    switch_actuator_height = SWITCH_ACTUATOR_HEIGHT,
-    switch_actuator_travel = SWITCH_ACTUATOR_TRAVEL,
-
     switch_origin = SWITCH_ORIGIN,
 
     fillet = 0,
@@ -51,7 +53,7 @@ module switch_clutch(
 
     debug = false,
 
-    show_dfm = true,
+    chamfer_cavity_top = true, // for DFM when printed standing up
 
     clearance = 0,
     tolerance = .1
@@ -59,8 +61,6 @@ module switch_clutch(
     e = .0193;
 
     gutter = clearance + tolerance;
-
-    y = switch_actuator_travel / 2 - switch_actuator_travel * (1 - position);
 
     function get_absolute_origin(
         _base_width = base_width,
@@ -121,26 +121,27 @@ module switch_clutch(
     }
 
     module _cavity() {
-        width = switch_base_width + gutter * 2;
-        length = base_length + e * 2;
+        width = cavity_base_width + gutter * 2;
+        length = cavity_base_length + gutter * 2
+            + cavity_actuator_travel;
 
         _switch(
             base_width = width,
             base_length = length,
-            base_height = switch_base_height + e,
+            base_height = cavity_base_height + e,
 
-            actuator_width = width,
-            actuator_length = switch_actuator_length + gutter * 2,
-            actuator_height = switch_actuator_height,
+            actuator_width = cavity_actuator_width + gutter * 2,
+            actuator_length = cavity_actuator_length + gutter * 2,
+            actuator_height = cavity_actuator_height,
 
             z = -e
         );
 
-        if (show_dfm) {
+        if (chamfer_cavity_top) {
             translate(get_absolute_origin(
                 width,
                 length,
-                switch_base_height - e
+                cavity_base_height - e
             )) {
                 flat_top_rectangular_pyramid(
                     top_width = 0,
@@ -172,7 +173,11 @@ module switch_clutch(
         }
     }
 
-    translate([0, y, 0]) {
+    translate([
+        0,
+        cavity_actuator_travel / 2 - cavity_actuator_travel * (1 - position),
+        0
+    ]) {
         difference() {
             _outer();
 
@@ -183,21 +188,23 @@ module switch_clutch(
 
             if (debug) {
                 translate([0, get_absolute_origin().y - e, -e]) {
-                    cube([
-                        base_width / 2 + e,
-                        base_length + e * 2,
-                        base_height + actuator_height + e * 2
-                    ]);
+                    color(cavity_color) {
+                        cube([
+                            base_width / 2 + e,
+                            base_length + e * 2,
+                            base_height + actuator_height + e * 2
+                        ]);
+                    }
                 }
             }
         }
     }
 }
 
-/* for (i = [0 : 2]) {
+* for (i = [0 : 2]) {
     translate([0, 14 * i, 0]) {
-        # switch_clutch(
-            base_height = 6,
+        switch_clutch(
+            base_height = 7,
             base_width = 15,
             base_length = 12,
 
@@ -205,13 +212,24 @@ module switch_clutch(
             actuator_length = 10,
             actuator_height = 4,
 
-            debug = true,
+            position = i == 2 ? round($t) : i,
+
+            // Uncomment either (but not both!) of these to demo
+            // full width/length cavities:
+            // cavity_base_width = 100, chamfer_cavity_top = 0,
+            // cavity_base_length = 100,
 
             fillet = 1, $fn = 6,
 
-            position = i == 2 ? round($t) : i
+            color = "#FFFFFF",
+            cavity_color = "#EEEEEE",
+
+            debug = true,
+
+            clearance = 0,
+            tolerance = .1
         );
 
-        switch(i == 2 ? round($t) : i);
+        # translate([0,0,-.01]) switch(i == 2 ? round($t) : i);
     }
-} */
+}
