@@ -1,5 +1,6 @@
-include <nuts_and_bolts.scad>;
 include <enclosure.scad>;
+include <flat_top_rectangular_pyramid.scad>;
+include <nuts_and_bolts.scad>;
 include <switch_clutch.scad>;
 
 module switch_clutch_fixture(
@@ -14,12 +15,17 @@ module switch_clutch_fixture(
     window_width = SWITCH_ACTUATOR_WIDTH,
     window_length = SWITCH_ACTUATOR_LENGTH,
 
+    fillet = 0,
+    chamfer = .6,
+
     include_screw_holes = false,
     screw_hole_distance = 0,
-    screw_hole_diameter = SCREW_DIAMETER,
-    screw_hole_chamfer = .6,
+    screw_hole_diameter = SCREW_DIAMETER - .4, // NOTE: intentionally tight
 
     debug = false,
+
+    color = undef,
+    cavity_color = undef,
 
     tolerance = .1
 ) {
@@ -40,54 +46,72 @@ module switch_clutch_fixture(
     }
 
     difference() {
-        cube([width, length, height]);
-
-        translate([
-            (width - window_width) / 2,
-            (length - window_length) / 2,
-            cavity_base_height - e
-        ]) {
-            cube([window_width, window_length, height - cavity_base_height + e * 2]);
+        color(color) {
+            rounded_cube([width, length, height], fillet);
         }
 
-        translate([
-            (width - cavity_base_width) / 2,
-            (length - cavity_base_length) / 2,
-            -e
-        ]) {
-            cube([cavity_base_width, cavity_base_length, cavity_base_height + e]);
-        }
+        color(cavity_color) {
+            translate([
+                (width - window_width) / 2,
+                (length - window_length) / 2,
+                cavity_base_height - e
+            ]) {
+                cube([window_width, window_length, height - cavity_base_height + e * 2]);
+            }
 
-        if (include_screw_holes) {
-            for (x_add = [-1, 1]) {
-                translate([
-                    width / 2 + screw_hole_distance / 2 * x_add,
-                    length / 2,
-                    -e
-                ]) {
-                    cylinder(
-                        d = screw_hole_diameter + tolerance * 2,
-                        h = cavity_base_height + e,
-                        $fn = 8
-                    );
+            translate([
+                (width - window_width) / 2,
+                (length - window_length) / 2,
+                height - chamfer
+            ]) {
+                flat_top_rectangular_pyramid(
+                    top_width = window_width + chamfer * 2,
+                    top_length = window_length + chamfer * 2,
+                    bottom_width = window_width,
+                    bottom_length = window_length,
+                    height = chamfer + e
+                );
+            }
 
-                    cylinder(
-                        d1 = screw_hole_diameter + tolerance * 2 + screw_hole_chamfer * 2,
-                        d2 = screw_hole_diameter + tolerance * 2,
-                        h = screw_hole_chamfer + e,
-                        $fn = 8
-                    );
+            translate([
+                (width - cavity_base_width) / 2,
+                (length - cavity_base_length) / 2,
+                -e
+            ]) {
+                cube([cavity_base_width, cavity_base_length, cavity_base_height + e]);
+            }
+
+            if (include_screw_holes) {
+                for (x_add = [-1, 1]) {
+                    translate([
+                        width / 2 + screw_hole_distance / 2 * x_add,
+                        length / 2,
+                        -e
+                    ]) {
+                        cylinder(
+                            d = screw_hole_diameter + tolerance * 2,
+                            h = cavity_base_height + e,
+                            $fn = 8
+                        );
+
+                        cylinder(
+                            d1 = screw_hole_diameter + tolerance * 2 + chamfer * 2,
+                            d2 = screw_hole_diameter + tolerance * 2,
+                            h = chamfer + e,
+                            $fn = 8
+                        );
+                    }
                 }
             }
-        }
 
-        if (debug) {
-            translate([width / 2, -e, -e]) {
-                cube([
-                    width / 2 + e,
-                    length + e * 2,
-                    height + e * 2
-                ]);
+            if (debug) {
+                translate([width / 2, -e, -e]) {
+                    cube([
+                        width / 2 + e,
+                        length + e * 2,
+                        height + e * 2
+                    ]);
+                }
             }
         }
     }
@@ -96,26 +120,36 @@ module switch_clutch_fixture(
 module demo(
     count = 3,
     plot = 5.8,
+    fixture_width = 28,
+    fixture_length = 20,
+    fixture_height = 10,
     screw_hole_distance = 21.59,
-    switch_clutch_clearance = .4,
-    vertical_clearance = .2,
-    tolerance = .1
+    actuator_exposure = 4,
+    switch_clutch_base_height = 8,
+    switch_clutch_clearance = .6,
+    vertical_clearance = .6,
+    fillet = 1,
+    tolerance = .1,
+    debug = false
 ) {
     switch_clearance = plot - SWITCH_BASE_WIDTH;
     switches_width = SWITCH_BASE_WIDTH * count + switch_clearance * (count - 1);
 
     // clutch rests on switch, not PCB
     switch_clutch_width = plot - switch_clutch_clearance; // TODO: tolerance?
-    switch_clutch_base_length = SWITCH_CLUTCH_MIN_BASE_LENGTH;
-    switch_clutch_base_height = 7;
-
-    actuator_length = SWITCH_CLUTCH_MIN_ACTUATOR_LENGTH;
+    switch_clutch_base_length = max(
+        fixture_length - SWITCH_ACTUATOR_TRAVEL - fillet,
+        SWITCH_CLUTCH_MIN_BASE_LENGTH
+    );
 
     window_width = switch_clutch_width * count + switch_clutch_clearance * (count + 1);
 
-    fixture_width = screw_hole_distance + 5;
-    fixture_length = switch_clutch_base_length + SWITCH_ACTUATOR_TRAVEL
-        + .01;
+    x_gutter = (fixture_width - window_width) / 2;
+
+    actuator_length = max(
+        fixture_length - x_gutter * 2 - SWITCH_ACTUATOR_TRAVEL,
+        SWITCH_CLUTCH_MIN_ACTUATOR_LENGTH
+    );
 
     translate([
         SWITCH_ORIGIN.x - (switch_clutch_width - SWITCH_BASE_WIDTH) / 2
@@ -127,7 +161,7 @@ module demo(
         switch_clutch_fixture(
             width = fixture_width,
             length = fixture_length,
-            height = switch_clutch_base_height + vertical_clearance + ENCLOSURE_FLOOR_CEILING,
+            height = fixture_height,
 
             cavity_base_width = window_width,
             cavity_base_length = fixture_length + 10,
@@ -136,10 +170,17 @@ module demo(
             window_width = window_width,
             window_length = actuator_length + SWITCH_ACTUATOR_TRAVEL,
 
+            fillet = fillet, $fn = 8,
+
             include_screw_holes = true,
             screw_hole_distance = screw_hole_distance,
 
-            tolerance = tolerance
+            tolerance = tolerance,
+
+            color = "#FF69B4",
+            cavity_color = "#CC5490",
+
+            debug = debug
         );
     }
 
@@ -156,19 +197,22 @@ module demo(
 
                 actuator_width = switch_clutch_width,
                 actuator_length = actuator_length,
-                actuator_height = 4,
+                actuator_height = fixture_height - switch_clutch_base_height
+                    + actuator_exposure,
 
                 position = round($t * count) == i ? 1 : 0,
 
-                cavity_base_width = 100, chamfer_cavity_top = 0,
+                cavity_base_width = switch_clutch_width,
 
-                fillet = 1, $fn = 6,
+                fillet = fillet, $fn = 6,
 
                 color = "#FFFFFF",
                 cavity_color = "#EEEEEE",
 
-                clearance = 0,
-                tolerance = tolerance
+                clearance = 0.4,
+                tolerance = tolerance,
+
+                debug = debug
             );
 
             % translate([0,0,-.01]) switch(position = round($t * count) == i ? 1 : 0);
