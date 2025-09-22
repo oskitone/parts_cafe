@@ -126,35 +126,36 @@ module demo(
     screw_hole_distance = 21.59,
     actuator_exposure = 4,
     switch_clutch_base_height = 8,
-    switch_clutch_clearance = .6,
-    vertical_clearance = .6,
+    clearance = [.2, .4, .4],
     fillet = 1,
     tolerance = .1,
     debug = false
 ) {
-    switch_clearance = plot - SWITCH_BASE_WIDTH;
-    switches_width = SWITCH_BASE_WIDTH * count + switch_clearance * (count - 1);
+    switches_width = plot * (count - 1) + SWITCH_BASE_WIDTH;
 
     // clutch rests on switch, not PCB
-    switch_clutch_width = plot - switch_clutch_clearance; // TODO: tolerance?
+    switch_clutch_width = plot - clearance.x;
     switch_clutch_base_length = max(
         fixture_length - SWITCH_ACTUATOR_TRAVEL - fillet,
         SWITCH_CLUTCH_MIN_BASE_LENGTH
     );
 
-    window_width = switch_clutch_width * count + switch_clutch_clearance * (count + 1);
-
+    window_width = switch_clutch_width * count + clearance.x * (count + 1);
     x_gutter = (fixture_width - window_width) / 2;
 
     actuator_length = max(
-        fixture_length - x_gutter * 2 - SWITCH_ACTUATOR_TRAVEL,
+        fixture_length - x_gutter * 2 - SWITCH_ACTUATOR_TRAVEL
+            - clearance.y * 2,
         SWITCH_CLUTCH_MIN_ACTUATOR_LENGTH
     );
+
+    window_length = actuator_length + SWITCH_ACTUATOR_TRAVEL
+        + clearance.y * 2;
 
     translate([
         SWITCH_ORIGIN.x - (switch_clutch_width - SWITCH_BASE_WIDTH) / 2
             - (fixture_width - window_width) / 2
-            - switch_clutch_clearance,
+            - clearance.x,
         fixture_length / -2,
         0
     ]) {
@@ -165,10 +166,10 @@ module demo(
 
             cavity_base_width = window_width,
             cavity_base_length = fixture_length + 10,
-            cavity_base_height = switch_clutch_base_height + vertical_clearance,
+            cavity_base_height = switch_clutch_base_height + clearance.z,
 
             window_width = window_width,
-            window_length = actuator_length + SWITCH_ACTUATOR_TRAVEL,
+            window_length = window_length,
 
             fillet = fillet, $fn = 8,
 
@@ -186,23 +187,23 @@ module demo(
 
     for (i = [0 : count - 1]) {
         translate([
-            (SWITCH_BASE_WIDTH + switch_clearance) * i,
+            plot * i,
             -SWITCH_ORIGIN.y - SWITCH_BASE_LENGTH / 2,
             0
         ]) {
             switch_clutch(
                 base_height = switch_clutch_base_height,
-                base_width = switch_clutch_width,
+                base_width = switch_clutch_width - tolerance * 2,
                 base_length = switch_clutch_base_length,
 
-                actuator_width = switch_clutch_width,
+                actuator_width = switch_clutch_width - tolerance * 2,
                 actuator_length = actuator_length,
                 actuator_height = fixture_height - switch_clutch_base_height
                     + actuator_exposure,
 
                 position = round($t * count) == i ? 1 : 0,
 
-                cavity_base_width = switch_clutch_width,
+                cavity_base_width = switch_clutch_width - tolerance * 2,
 
                 fillet = fillet, $fn = 6,
 
