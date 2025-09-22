@@ -5,6 +5,7 @@ include <ring.scad>;
 
 SPEAKER_DIAMETER = 39.7;
 SPEAKER_HEIGHT = 5.4;
+SPEAKER_RIM = 3;
 
 SPEAKER_FIXTURE_WALL = 1.2; // ENCLOSURE_INNER_WALL
 
@@ -26,10 +27,16 @@ function get_speaker_fixture_diameter(
 module speaker_fixture(
     height = SPEAKER_HEIGHT,
     wall = SPEAKER_FIXTURE_WALL,
+
     tab_cavity_count = 1,
     tab_cavity_rotation = 90,
     tab_cavity_size = 15,
+
+    support_rim_depth = SPEAKER_RIM - 1,
+    min_support_rim_height = .4,
+
     tolerance = 0,
+
     quick_preview = true
 ) {
     e = .053;
@@ -38,12 +45,23 @@ module speaker_fixture(
     diameter = get_speaker_fixture_diameter(tolerance, wall);
 
     difference() {
-        ring(
-            diameter = diameter,
-            height = height,
-            thickness = wall,
-            $fn = quick_preview ? undef : 120
-        );
+        union() {
+            ring(
+                diameter = diameter,
+                height = height,
+                thickness = wall,
+                $fn = quick_preview ? undef : 120
+            );
+
+            if (height - SPEAKER_HEIGHT >= min_support_rim_height) {
+                ring(
+                    diameter = diameter - e * 2,
+                    height = height - SPEAKER_HEIGHT,
+                    inner_diameter = diameter - (wall + support_rim_depth) * 2,
+                    $fn = quick_preview ? undef : 120
+                );
+            }
+        }
 
         for (i = [0 : tab_cavity_count]) {
             rotation = tab_cavity_rotation + i * (360 / tab_cavity_count);
