@@ -1,6 +1,8 @@
-include <pcb.scad>;
+include <enclosure.scad>;
 include <pcb_mount_post.scad>;
 include <pcb_stool.scad>;
+include <pcb.scad>;
+include <rounded_xy_cube.scad>;
 
 PCB_BASE_BASE_HEIGHT = 2.5;
 
@@ -47,6 +49,8 @@ module pcb_base(
 
     screw_positions = [],
     stool_positions = [],
+
+    fillet = ENCLOSURE_FILLET,
 
     tolerance = 0,
 
@@ -115,7 +119,7 @@ module pcb_base(
     }
 
     difference() {
-        cube([width, length, base_height]);
+        rounded_xy_cube([width, length, base_height], fillet, $fn = 12);
         _screw_exits();
     }
     _posts_and_stools();
