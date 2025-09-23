@@ -109,6 +109,7 @@ module keys(
     cantilever_recession = KEY_CANTILEVER_RECESSION,
     cantilever_z = 0,
 
+    mount_width = undef,
     mount_length = KEYS_MOUNT_LENGTH,
     mount_height = 2,
     mount_hole_xs = [],
@@ -142,21 +143,25 @@ module keys(
     module _mount() {
         y = natural_length + cantilever_length - cantilever_recession;
 
-        width = get_keys_total_width(
+        total_width = get_keys_total_width(
             count = count,
             starting_note_index =
                 get_starting_note_index(starting_natural_key_index),
             natural_width = natural_width,
             gutter = gutter
         );
+        width = mount_width != undef
+            ? mount_width
+            : total_width;
+        x = (total_width - width) / 2;
 
         difference() {
-            translate([0, y, 0]) {
+            translate([x, y, 0]) {
                 cube([width, mount_length, mount_height]);
             }
 
-            for (x = mount_hole_xs) {
-                translate([x, y + mount_length / 2, -e]) {
+            for (hole_x = mount_hole_xs) {
+                translate([x + hole_x, y + mount_length / 2, -e]) {
                     cylinder(
                         d = mount_hole_diameter + tolerance * 2,
                         h = mount_height + e * 2,
