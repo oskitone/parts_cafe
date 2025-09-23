@@ -103,9 +103,11 @@ module keys(
 
     gutter = KEY_GUTTER,
 
+    cantilever_width = undef,
     cantilever_length = KEY_CANTILEVER_LENGTH,
     cantilever_height = KEY_CANTILEVER_HEIGHT,
     cantilever_recession = KEY_CANTILEVER_RECESSION,
+    cantilever_z = 0,
 
     mount_length = KEYS_MOUNT_LENGTH,
     mount_height = 2,
@@ -129,10 +131,12 @@ module keys(
     e = 0.04567;
 
     index_offset = [0,2,4,5,7,9,11][starting_natural_key_index];
-    cantilever_width = min(
-        accidental_width,
-        natural_width - ((accidental_width - gutter) / 2) * 2 - gutter * 2
-    );
+    cantilever_width = cantilever_width != undef
+        ? cantilever_width
+        : min(
+            accidental_width,
+            natural_width - ((accidental_width - gutter) / 2) * 2 - gutter * 2
+        );
     cantilever_length = cantilever_length + tolerance * 2;
 
     module _mount() {
@@ -314,7 +318,7 @@ module keys(
              translate([
                  (dimensions[0] - cantilever_width) / 2,
                  dimensions[1] - cantilever_recession - e,
-                 0
+                 cantilever_z
              ]) {
                  linear_extrude(cantilever_height) {
                      polygon(
