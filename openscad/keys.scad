@@ -204,6 +204,7 @@ module keys(
                     render() donut(
                         front_fillet * 2,
                         sides_fillet,
+                        segments = 12,
                         coverage = 90,
                         starting_angle = 180
                     );
@@ -240,16 +241,16 @@ module keys(
                 }
 
                 // back top left
-                translate([sides_fillet, length, height - sides_fillet]) {
+                translate([sides_fillet / 2, length, height - sides_fillet / 2]) {
                     rotate([90, 0, 0]) {
-                        cylinder(r = sides_fillet, h = e);
+                        cylinder(r = front_fillet / 2, h = e, $fn = 12);
                     }
                 }
 
                 // back top right
-                translate([width - sides_fillet, length, height - sides_fillet]) {
+                translate([width - sides_fillet / 2, length, height - sides_fillet / 2]) {
                     rotate([90, 0, 0]) {
-                        cylinder(r = sides_fillet, h = e);
+                        cylinder(r = front_fillet / 2, h = e, $fn = 12);
                     }
                 }
             }
