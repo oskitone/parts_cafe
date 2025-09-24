@@ -60,7 +60,7 @@ module cap_blank(
     }
 
     hull() {
-        _layer(flat = true, z = brim_dimensions.z - e);
+        _layer(flat = true, z = brim_dimensions.z);
         _layer(z = base_height);
 
         _layer(
