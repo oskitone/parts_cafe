@@ -7,10 +7,10 @@ include <ring.scad>;
 module wheel(
     diameter = 20,
     height = 10,
-    ring = 4,
 
-    hub_ceiling = 1.8, // ENCLOSURE_FLOOR_CEILING
-    hub_diameter = PTV09A_POT_ACTUATOR_DIAMETER + 1.2 * 2, // ENCLOSURE_INNER_WALL
+    fillet = 4,
+
+    ceiling = 1.8, // ENCLOSURE_FLOOR_CEILING
 
     brodie_knob_diameter = 4,
     brodie_knob_stilt = 0,
@@ -21,6 +21,7 @@ module wheel(
     dimple_depth = 1,
     dimple_y = undef,
 
+    spokes_hub_diameter = PTV09A_POT_ACTUATOR_DIAMETER + 1.2 * 2, // ENCLOSURE_INNER_WALL
     spokes_count = 6,
     spokes_width = 2,
     spokes_height = 5,
@@ -55,13 +56,13 @@ module wheel(
             diameter * PI / (DEFAULT_RIB_SIZE + DEFAULT_RIB_GUTTER)
         );
 
-    module _hub() {
+    module _spokes_hub() {
         if (!test_fit) {
-            translate([0, 0, height - ring / 2]) {
+            translate([0, 0, height - fillet / 2]) {
                 hull() {
                     donut(
-                        diameter = hub_diameter,
-                        thickness = ring,
+                        diameter = spokes_hub_diameter,
+                        thickness = fillet,
                         segments = $fn != undef ? $fn : 24
                     );
                 }
@@ -69,8 +70,8 @@ module wheel(
         }
 
         cylinder(
-            d = hub_diameter,
-            h = height - ring / 2
+            d = spokes_hub_diameter,
+            h = height - fillet / 2
         );
     }
 
@@ -80,23 +81,23 @@ module wheel(
                 translate([0, 0, z]) {
                     donut(
                         diameter = diameter,
-                        thickness = ring,
+                        thickness = fillet,
                         segments = $fn != undef ? $fn : 24
                     );
                 }
             }
 
             if (round_bottom) {
-                _end(ring / 2);
+                _end(fillet / 2);
             } else {
                 ring(
                     diameter = diameter,
                     height = e,
-                    thickness = ring
+                    thickness = fillet
                 );
             }
 
-            _end(height - ring / 2);
+            _end(height - fillet / 2);
         }
 
         difference() {
@@ -109,11 +110,12 @@ module wheel(
                     }
                 }
 
-                translate([0, 0, round_bottom ? ring / 2 : 0]) {
+                // TODO: tidy. Seems this is only used for round_bottom
+                translate([0, 0, round_bottom ? fillet / 2 : 0]) {
                     ring(
                         diameter = diameter,
-                        height = round_bottom ? height - ring : height - ring / 2,
-                        thickness = ring
+                        height = round_bottom ? height - fillet : height - fillet / 2,
+                        thickness = fillet
                     );
                 }
             }
@@ -144,7 +146,7 @@ module wheel(
         }
 
         module _grips() {
-            _height = height - hub_ceiling;
+            _height = height - ceiling;
             z = shaft_type == POT_SHAFT_TYPE_SPLINED
                 ? _height - PTV09A_POT_ACTUATOR_SPLINED_SHAFT_HEIGHT
                 : 0;
@@ -160,15 +162,15 @@ module wheel(
             }
         }
 
-        module _pot() {
+        module _pot(diameter_bleed = 0) {
             // Cavity is full available height, regardless of actual usage
             z = -(e + PTV09A_POT_BASE_HEIGHT_FROM_PCB);
 
             translate([0, 0, z]) {
                 pot(
                     show_base = debug,
-                    actuator_height = height - hub_ceiling + e,
-                    diameter_bleed = tolerance,
+                    actuator_height = height - ceiling + e,
+                    diameter_bleed = diameter_bleed,
                     shaft_type = shaft_type,
                     $fn = $preview ? undef : 120
                 );
@@ -177,19 +179,23 @@ module wheel(
 
         _chamfer();
 
+        if (debug) {
+            # _pot();
+        }
+
         difference() {
-            if (debug) { # _pot(); } else { _pot(); }
+            _pot(tolerance);
             _grips();
         }
     }
 
     module _spokes() {
-        overlap = ring / 2;
+        overlap = fillet / 2;
 
         x = spokes_width / -2;
-        y = hub_diameter / 2 - overlap;
+        y = spokes_hub_diameter / 2 - overlap;
 
-        length = diameter / 2 - y - ring + overlap;
+        length = diameter / 2 - y - fillet + overlap;
 
         for (i = [0 : spokes_count - 1]) {
             rotate([0, 0, (i / spokes_count) * 360]) {
@@ -236,7 +242,7 @@ module wheel(
         for (i = [0 : dimple_count - 1]) {
             y = dimple_y != undef
                 ? dimple_y
-                : diameter / 2 - dimple_diameter / 2 - ring / 2;
+                : diameter / 2 - dimple_diameter / 2 - fillet / 2;
             rotation = i * (360 / dimple_count);
 
             rotate([0, 0, rotation]) {
@@ -262,7 +268,7 @@ module wheel(
         color(color) {
             union() {
                 if (spokes_count > 0) {
-                    _hub();
+                    _spokes_hub();
                 }
 
                 if (brim_diameter > 0 && brim_height > 0) {
