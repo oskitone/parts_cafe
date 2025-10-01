@@ -31,6 +31,7 @@ module pcb_mount_post(
 
     screw_diameter = SCREW_DIAMETER,
 
+    pcb_bottom_clearance = 0,
     nut_z_clearance = PCB_MOUNT_NUT_Z_CLEARANCE,
 
     tolerance = 0,
@@ -53,7 +54,7 @@ module pcb_mount_post(
         tolerance = tolerance
     );
 
-    nut_lock_z = height - ceiling - nut_lock_dimensions.z;
+    nut_lock_z = height - pcb_bottom_clearance - ceiling - nut_lock_dimensions.z;
 
     if (nut_lock_dimensions.x <= width && nut_lock_dimensions.y <= length) {
         echo("WARNING: pcb_mount_post nut lock is inaccesible");
@@ -75,7 +76,17 @@ module pcb_mount_post(
 
     translate([width / -2, length / -2, 0]) {
         difference() {
-            cube([width, length, height]);
+            union() {
+                cube([width, length, height - pcb_bottom_clearance]);
+
+                _recenter(z = height - pcb_bottom_clearance - e) {
+                    cylinder(
+                        d = min(width, length),
+                        h = pcb_bottom_clearance + e,
+                        $fn = quick_preview ? undef : 24
+                    );
+                }
+            }
 
             _recenter(z = -e) {
                 cylinder(
