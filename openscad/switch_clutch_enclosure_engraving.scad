@@ -8,7 +8,10 @@ SWITCH_CLUTCH_CLEARANCE = .4;
 SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_PRIMARY_TEXT_SIZE =
     ENCLOSURE_ENGRAVING_TEXT_SIZE;
 SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_SECONDARY_TEXT_SIZE =
-    ENCLOSURE_ENGRAVING_TEXT_SIZE;
+    ENCLOSURE_ENGRAVING_TEXT_SIZE * .666;
+SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_LENGTH =
+    SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_SECONDARY_TEXT_SIZE
+    + ENCLOSURE_ENGRAVING_GUTTER * 2;
 
 function get_switch_clutch_switch_position(
     actuator_window_dimensions = [0, 0]
@@ -26,14 +29,14 @@ function get_actuator_window_dimensions(
     width = SWITCH_CLUTCH_MIN_ACTUATOR_WIDTH,
     length = undef, // used if provided, otherwise derived from text + gutter
 
-    secondary_text_size = SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_SECONDARY_TEXT_SIZE,
+    engraving_length = SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_LENGTH,
     label_gutter = ENCLOSURE_ENGRAVING_GUTTER,
 
     control_clearance = SWITCH_CLUTCH_CLEARANCE
 ) = (
     [
         width + control_clearance * 2,
-        (length != undef ? length : secondary_text_size * 2 + label_gutter)
+        (length != undef ? length : engraving_length * 2 + label_gutter)
             + control_clearance * 2,
     ]
 );
@@ -54,43 +57,36 @@ module actuator_window(
     }
 }
 
-
 module switch_clutch_enclosure_engraving(
     labels = ["", ""],
+    width = 0,
+    length = 0,
     depth = ENCLOSURE_ENGRAVING_DEPTH,
     label_gutter = ENCLOSURE_ENGRAVING_GUTTER,
-    secondary_text_size = SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_SECONDARY_TEXT_SIZE,
-    actuator_window_dimensions = undef,
-    control_clearance = 0,
+    size = SWITCH_CLUTCH_ENCLOSURE_ENGRAVING_SECONDARY_TEXT_SIZE,
     quick_preview = true,
     position = [0, 0],
     enclosure_height = 1
 ) {
     e = .0931;
 
-    actuator_window_dimensions = actuator_window_dimensions != undef
-        ? actuator_window_dimensions
-        : get_actuator_window_dimensions(
-            secondary_text_size = secondary_text_size,
-            label_gutter = label_gutter,
-            control_clearance = control_clearance
-        );
-
     module _engraving(string, i = 0) {
-        half_length = actuator_window_dimensions.y / 2;
+        placard_length = (length - label_gutter) / 2;
         ys = [
-            (half_length - secondary_text_size) / 2,
-            (half_length - secondary_text_size) / 2 + half_length
+            placard_length / 2,
+            placard_length / 2 + placard_length + label_gutter
         ];
-        x = actuator_window_dimensions.x + label_gutter;
 
         enclosure_engraving(
             string = string,
-            size = secondary_text_size,
+            size = size,
             chamfer = ENCLOSURE_ENGRAVING_CHAMFER / 2,
+            position = [width / 2, ys[i]],
             depth = depth,
-            center = false,
-            position = [x, ys[i]],
+            placard = [
+                width,
+                placard_length
+            ],
             quick_preview = quick_preview,
             enclosure_height = enclosure_height
         );
@@ -126,8 +122,6 @@ module __demo_switch_clutch_enclosure_engraving(
     e = .0382;
 
     actuator_window_dimensions = get_actuator_window_dimensions(
-        width = SWITCH_CLUTCH_MIN_BASE_WIDTH,
-        secondary_text_size = secondary_text_size,
         label_gutter = label_gutter,
         control_clearance = control_clearance
     );
@@ -137,7 +131,7 @@ module __demo_switch_clutch_enclosure_engraving(
         wall_gutter + label_gutter + ENCLOSURE_ENGRAVING_LENGTH
     ];
 
-    width = 20 + wall_gutter * 2;
+    width = 24 + wall_gutter * 2;
     length = actuator_window_dimensions.y
         + switch_and_clutch_position.y
         + wall_gutter;
@@ -173,6 +167,11 @@ module __demo_switch_clutch_enclosure_engraving(
         }
     }
 
+    labels_position = [
+        switch_and_clutch_position.x + actuator_window_dimensions.x + label_gutter,
+        wall_gutter + ENCLOSURE_ENGRAVING_LENGTH + label_gutter
+    ];
+
     difference() {
         cube([width, length, enclosure_height]);
 
@@ -197,13 +196,13 @@ module __demo_switch_clutch_enclosure_engraving(
 
         switch_clutch_enclosure_engraving(
             ["NOPE", "YEP"],
+            width = width - labels_position.x - wall_gutter,
+            length = length - labels_position.y - wall_gutter,
             depth = depth,
             label_gutter = label_gutter,
-            secondary_text_size = secondary_text_size,
-            actuator_window_dimensions = actuator_window_dimensions,
-            control_clearance = control_clearance,
+            size = secondary_text_size,
             quick_preview = quick_preview,
-            position = switch_and_clutch_position,
+            position = labels_position,
             enclosure_height = enclosure_height
         );
     }

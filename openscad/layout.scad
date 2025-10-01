@@ -184,11 +184,16 @@ module control_and_label(
         }
 
         module _labels() {
-            switch_clutch_enclosure_engraving(
+            color("#fff") switch_clutch_enclosure_engraving(
                 labels = ["NO", "YES"],
-                actuator_window_dimensions = actuator_window_dimensions,
-                control_clearance = 0,
+                width = knob_diameter - actuator_window_dimensions.x - label_gutter,
+                label_gutter = label_gutter,
+                length = actuator_window_dimensions.y,
                 quick_preview = true,
+                position = [
+                    actuator_window_dimensions.x + label_gutter,
+                    0
+                ],
                 enclosure_height = 1
             );
         }
