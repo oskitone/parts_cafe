@@ -9,8 +9,8 @@ module pcb_mounting_columns(
     screw_head_clearance = 0,
     wall = 1.2, // ENCLOSURE_INNER_WALL
 
-    pcb_screw_hole_positions = [[0,0]],
-    pcb_post_hole_positions = [[0,0]],
+    pcb_screw_hole_positions = [], // [0,0]
+    pcb_post_hole_positions = [], // [0,0]
 
     tolerance = 0,
 
@@ -19,6 +19,7 @@ module pcb_mounting_columns(
     screw_head_diameter = SCREW_HEAD_DIAMETER,
     pcb_hole_diameter = 3.2, // PCB_HOLE_DIAMETER
 
+    registration_nub = true,
     registration_nub_height = 1.6, // PCB_HEIGHT
 
     support_web_length = undef,
@@ -56,7 +57,7 @@ module pcb_mounting_columns(
                 pcb_stool(
                     height = pcb_position.z - z,
                     support_web_length = support_web_length,
-                    registration_nub = true,
+                    registration_nub = registration_nub,
                     registration_nub_height = registration_nub_height,
                     tolerance = tolerance,
                     quick_preview = quick_preview

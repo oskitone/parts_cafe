@@ -55,7 +55,7 @@ module pcb_stool(
         }
     }
 
-    if (registration_nub) {
+    if (registration_nub || registration_nub_height > 0) {
         translate([0, 0, height - e]) {
             cylinder(
                 d = registration_nub_hole_diameter
