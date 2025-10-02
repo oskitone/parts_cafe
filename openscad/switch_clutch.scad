@@ -3,9 +3,9 @@ include <rib_cavities.scad>;
 include <rounded_cube.scad>;
 include <switch-OS102011MS2QN1.scad>;
 
-SWITCH_CLUTCH_MIN_BASE_HEIGHT = SWITCH_BASE_HEIGHT + 1;
-SWITCH_CLUTCH_MIN_BASE_WIDTH = SWITCH_BASE_WIDTH + 2;
+SWITCH_CLUTCH_MIN_BASE_WIDTH = SWITCH_BASE_WIDTH;
 SWITCH_CLUTCH_MIN_BASE_LENGTH = SWITCH_BASE_LENGTH + SWITCH_ACTUATOR_TRAVEL;
+SWITCH_CLUTCH_MIN_BASE_HEIGHT = SWITCH_BASE_HEIGHT;
 
 SWITCH_CLUTCH_MIN_ACTUATOR_WIDTH = SWITCH_CLUTCH_MIN_BASE_WIDTH;
 SWITCH_CLUTCH_MIN_ACTUATOR_LENGTH = SWITCH_ACTUATOR_LENGTH + 2;
@@ -23,9 +23,14 @@ function get_max_switch_clutch_actuator_length(
 );
 
 module switch_clutch(
-    base_height = SWITCH_CLUTCH_MIN_BASE_HEIGHT,
     base_width = SWITCH_CLUTCH_MIN_BASE_WIDTH,
     base_length = SWITCH_CLUTCH_MIN_BASE_LENGTH,
+    base_height = SWITCH_CLUTCH_MIN_BASE_HEIGHT,
+
+    plate_height = 0,
+    plate_width = 0,
+    plate_length = 0,
+    chamfer_base_to_plate = true,
 
     actuator_width = SWITCH_CLUTCH_MIN_ACTUATOR_WIDTH,
     actuator_length = SWITCH_CLUTCH_MIN_ACTUATOR_LENGTH,
@@ -100,9 +105,45 @@ module switch_clutch(
     }
 
     module _outer() {
+        chamfer = chamfer_base_to_plate
+            ? max(plate_width - base_width, plate_length - base_length) / 2
+            : 0;
+
         color(cavity_color) {
             translate(get_absolute_origin()) {
-                cube([base_width, base_length, base_height]);
+                cube([base_width, base_length, base_height - plate_height - chamfer + e]);
+            }
+
+            if (plate_height > 0) {
+                if (chamfer > 0) {
+                    translate(get_absolute_origin(
+                        base_width, base_length,
+                        z = base_height - plate_height - chamfer
+                    )) {
+                        flat_top_rectangular_pyramid(
+                            top_width = plate_width,
+                            top_length = plate_length,
+
+                            bottom_width = base_width,
+                            bottom_length = base_length,
+
+                            height = chamfer + e,
+
+                            top_x = undef,
+                            top_y = undef,
+
+                            top_weight_x = .5,
+                            top_weight_y = .5
+                        );
+                    }
+                }
+
+                translate(get_absolute_origin(
+                    plate_width, plate_length,
+                    z = base_height - plate_height
+                )) {
+                    cube([plate_width, plate_length, plate_height]);
+                }
             }
         }
 
