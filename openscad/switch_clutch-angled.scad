@@ -22,6 +22,9 @@ module switch_clutch_angled(
     grip_length = SWITCH_CLUTCH_GRIP_LENGTH,
     grip_height = SWITCH_CLUTCH_GRIP_HEIGHT,
 
+    switch_actuator_width = SWITCH_ACTUATOR_WIDTH,
+    switch_actuator_length = SWITCH_ACTUATOR_LENGTH,
+
     fillet = 0,
     chamfer = .6,
     side_overexposure = 2, // ? ENCLOSURE_SIDE_OVEREXPOSURE
@@ -118,8 +121,8 @@ module switch_clutch_angled(
     }
 
     module _actuator_cavity() {
-        width = SWITCH_ACTUATOR_WIDTH - web_x_gap + tolerance;
-        length = SWITCH_ACTUATOR_LENGTH + tolerance * 2;
+        width = switch_actuator_width - web_x_gap + tolerance;
+        length = switch_actuator_length + tolerance * 2;
 
         translate([-width, (web_length - length) / 2, -e]) {
             cube([width + e, length, web_height + e * 2]);
