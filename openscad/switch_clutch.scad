@@ -27,9 +27,9 @@ module switch_clutch(
     base_length = SWITCH_CLUTCH_MIN_BASE_LENGTH,
     base_height = SWITCH_CLUTCH_MIN_BASE_HEIGHT,
 
-    plate_height = 0,
     plate_width = 0,
     plate_length = 0,
+    plate_height = 0,
     chamfer_base_to_plate = true,
 
     actuator_width = SWITCH_CLUTCH_MIN_ACTUATOR_WIDTH,
@@ -106,7 +106,10 @@ module switch_clutch(
 
     module _outer() {
         chamfer = chamfer_base_to_plate
-            ? max(plate_width - base_width, plate_length - base_length) / 2
+            ? min(
+                base_height - plate_height,
+                max(plate_width - base_width, plate_length - base_length) / 2
+            )
             : 0;
 
         color(cavity_color) {
