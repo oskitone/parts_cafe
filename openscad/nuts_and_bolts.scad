@@ -47,32 +47,43 @@ module nuts(
     }
 }
 
-module screws(
-    positions = PCB_HOLE_POSITIONS,
-    pcb_position = [],
-    diameter = PCB_HOLE_DIAMETER - .2,
+module screw(
+    diameter = SCREW_DIAMETER,
     length = 3/4 * 25.4,
-    z = 0
+    head_on_bottom = true
 ) {
     e = .03;
 
+    translate([0, 0, head_on_bottom ? 0 : length]) {
+        cylinder(
+            d = SCREW_HEAD_DIAMETER,
+            h = SCREW_HEAD_HEIGHT
+        );
+    }
+
+    translate([0, 0, head_on_bottom ? SCREW_HEAD_HEIGHT - e : 0]) {
+        cylinder(
+            d = diameter,
+            h = length + e
+        );
+    }
+}
+
+module screws(
+    positions = PCB_HOLE_POSITIONS,
+    pcb_position = [],
+    diameter = SCREW_DIAMETER,
+    length = 3/4 * 25.4,
+    head_on_bottom = true,
+    z = 0
+) {
     for (xy = positions) {
         translate([
             pcb_position.x + xy.x,
             pcb_position.y + xy.y,
             z
         ]) {
-            cylinder(
-                d = SCREW_HEAD_DIAMETER,
-                h = SCREW_HEAD_HEIGHT
-            );
-
-            translate([0, 0, SCREW_HEAD_HEIGHT - e]) {
-                cylinder(
-                    d = diameter,
-                    h = length + e
-                );
-            }
+            screw(diameter, length, head_on_bottom);
         }
     }
 }
