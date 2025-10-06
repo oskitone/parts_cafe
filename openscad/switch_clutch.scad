@@ -58,7 +58,9 @@ module switch_clutch(
 
     debug = false,
 
-    chamfer_cavity_top = true, // for DFM when printed standing up
+    // For DFM when printed standing up
+    chamfer_cavity_top = true,       // with base
+    chamfer_cavity_entrance = false, // no base, just actuator
 
     clearance = 0,
     tolerance = .1
@@ -193,6 +195,22 @@ module switch_clutch(
                     bottom_width = width,
                     bottom_length = length,
                     height = width / 3
+                );
+            }
+        } else if (chamfer_cavity_entrance) {
+            chamfer = cavity_actuator_height / 4;
+
+            translate(get_absolute_origin(
+                cavity_actuator_width + chamfer * 2,
+                cavity_actuator_length + chamfer * 2,
+                cavity_base_height - e
+            )) {
+                flat_top_rectangular_pyramid(
+                    top_width = cavity_actuator_width,
+                    top_length = cavity_actuator_length,
+                    bottom_width = cavity_actuator_width + chamfer * 2,
+                    bottom_length = cavity_actuator_length + chamfer * 2,
+                    height = chamfer
                 );
             }
         }
