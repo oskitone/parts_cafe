@@ -231,11 +231,14 @@ module switch_clutch(
             }
 
             if (debug) {
-                translate([0, get_absolute_origin().y - e, -e]) {
+                width = max(base_width, plate_width);
+                length = max(base_length, plate_length);
+
+                translate([0, get_absolute_origin(width, length).y - e, -e]) {
                     color(cavity_color) {
                         cube([
-                            base_width / 2 + e,
-                            base_length + e * 2,
+                            width / 2 + e,
+                            length + e * 2,
                             base_height + actuator_height + e * 2
                         ]);
                     }
