@@ -1,20 +1,49 @@
-module rounded_cube(dimensions, radius = 0) {
-    positions = [
-        [radius, radius, radius],
-        [dimensions.x - radius, radius, radius],
-        [dimensions.x - radius, dimensions.y - radius, radius],
-        [radius, dimensions.y - radius, radius],
-        [radius, radius, dimensions.z - radius],
-        [dimensions.x - radius, radius, dimensions.z - radius],
-        [dimensions.x - radius, dimensions.y - radius, dimensions.z - radius],
-        [radius, dimensions.y - radius, dimensions.z - radius],
-    ];
+function get_rounded_cube_corner_positions(
+    dimensions, radius = 0, z = undef
+) = (
+    let (z = z != undef ? z : radius)
 
+    [
+        [radius, radius, z],
+        [dimensions.x - radius, radius, z],
+        [dimensions.x - radius, dimensions.y - radius, z],
+        [radius, dimensions.y - radius, z],
+    ]
+);
+
+module rounded_cube_corners(
+    dimensions, radius = 0, z = undef,
+    flat = false
+) {
+    positions = get_rounded_cube_corner_positions(dimensions, radius, z);
+
+    for (position = positions) {
+        translate(position) {
+            if (flat) {
+                cylinder(r = radius);
+            } else {
+                sphere(r = radius);
+            };
+        }
+    }
+}
+
+module rounded_cube(dimensions, radius = 0) {
     if (radius > 0) {
         hull() {
-            for (position = positions) {
-                translate(position) sphere(r = radius);
-            }
+            rounded_cube_corners(dimensions, radius);
+            rounded_cube_corners(dimensions, radius, dimensions.z - radius);
+        }
+    } else {
+        cube(dimensions);
+    }
+}
+
+module rounded_top_cube(dimensions, radius = 0) {
+    if (radius > 0) {
+        hull() {
+            rounded_cube_corners(dimensions, radius, 0, flat = true);
+            rounded_cube_corners(dimensions, radius, dimensions.z - radius);
         }
     } else {
         cube(dimensions);
