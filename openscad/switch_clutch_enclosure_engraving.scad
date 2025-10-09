@@ -59,6 +59,8 @@ module actuator_window(
 
 module switch_clutch_enclosure_engraving(
     labels = ["", ""],
+    svg = undef, svg_rotations = [180, 0],
+    resize = undef,
     width = 0,
     length = 0,
     depth = ENCLOSURE_ENGRAVING_DEPTH,
@@ -70,31 +72,29 @@ module switch_clutch_enclosure_engraving(
 ) {
     e = .0931;
 
-    module _engraving(string, i = 0) {
-        placard_length = (length - label_gutter) / 2;
-        ys = [
-            placard_length / 2,
-            placard_length / 2 + placard_length + label_gutter
-        ];
-
-        enclosure_engraving(
-            string = string,
-            size = size,
-            chamfer = ENCLOSURE_ENGRAVING_CHAMFER / 2,
-            position = [width / 2, ys[i]],
-            depth = depth,
-            placard = [
-                width,
-                placard_length
-            ],
-            quick_preview = quick_preview,
-            enclosure_height = enclosure_height
-        );
-    }
+    placard_length = (length - label_gutter) / 2;
+    ys = [
+        placard_length / 2,
+        placard_length / 2 + placard_length + label_gutter
+    ];
 
     translate([position.x, position.y, 0]) {
         for (i = [0 : 1]) {
-            _engraving(labels[i], i);
+            enclosure_engraving(
+                string = labels[i],
+                svg = svg, svg_rotation = svg_rotations[i],
+                resize = resize,
+                size = size,
+                chamfer = ENCLOSURE_ENGRAVING_CHAMFER / 2,
+                position = [width / 2, ys[i]],
+                depth = depth,
+                placard = [
+                    width,
+                    placard_length
+                ],
+                quick_preview = quick_preview,
+                enclosure_height = enclosure_height
+            );
         }
     }
 }

@@ -15,6 +15,8 @@ ENCLOSURE_ENGRAVING_GUTTER = (
 ENCLOSURE_ENGRAVING_BLEED = -.1;
 ENCLOSURE_ENGRAVING_CHAMFER = .4;
 
+BRANDING_SVG = "../../parts_cafe/images/branding.svg";
+
 function get_branding_model_length(
     gutter = 0,
     make_to_model_ratio = .5,
@@ -40,6 +42,8 @@ function get_branding_make_length(
 
 module enclosure_engraving(
     string,
+    svg = BRANDING_SVG, svg_rotation = 0,
+    resize = undef,
     size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
     bleed = ENCLOSURE_ENGRAVING_BLEED,
     chamfer = ENCLOSURE_ENGRAVING_CHAMFER,
@@ -62,6 +66,12 @@ module enclosure_engraving(
     enclosure_height = 1
 ) {
     e = .0135;
+
+    resize = string
+        ? undef
+        : svg == BRANDING_SVG
+            ? [size / OSKITONE_LENGTH_WIDTH_RATIO, size]
+            : resize;
 
     translate([
         position.x,
@@ -93,12 +103,10 @@ module enclosure_engraving(
                 translate(placard ? [0, 0, -e] : [0, 0, 0]) {
                     engraving(
                         string = string ? string : undef,
-                        svg = string ? undef : "../../parts_cafe/images/branding.svg",
+                        svg = svg, svg_rotation = svg_rotation,
                         font = font,
                         size = string ? size : undef,
-                        resize = string
-                            ? undef
-                            : [size / OSKITONE_LENGTH_WIDTH_RATIO, size],
+                        resize = resize,
                         bleed = quick_preview ? 0 : bleed,
                         height = placard ? depth + e * 3 : depth + e,
                         center = center,

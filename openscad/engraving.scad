@@ -2,7 +2,7 @@ ENGRAVING_FONT = "Orbitron:style=Black";
 
 module engraving(
     string = undef,
-    svg = undef,
+    svg = undef, svg_rotation = 0,
     resize = undef,
     font = ENGRAVING_FONT,
     size = 10,
@@ -25,7 +25,7 @@ module engraving(
                     valign = center ? "center" : "baseline"
                 );
             } else if (svg != undef) {
-                import(
+                rotate([0, 0, svg_rotation]) import(
                     file = svg,
                     center = center
                 );
