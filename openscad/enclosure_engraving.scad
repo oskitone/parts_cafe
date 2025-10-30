@@ -40,6 +40,44 @@ function get_branding_make_length(
     (available_length - gutter) * make_to_model_ratio
 );
 
+module enclosure_engraving_placard(
+    dimensions = [0,0],
+    depth = ENCLOSURE_ENGRAVING_DEPTH,
+    chamfer_top = false,
+    chamfer = ENCLOSURE_ENGRAVING_CHAMFER
+) {
+    e = .0678;
+
+    module _section(top_dimensions = dimensions, _depth = depth) {
+        flat_top_rectangular_pyramid(
+            top_width = top_dimensions.x,
+            top_length = chamfer_top
+                ? top_dimensions.y + dimensions.z / 2
+                : top_dimensions.y,
+            bottom_width = dimensions.x,
+            bottom_length = chamfer_top
+                ? dimensions.y - dimensions.z / 2
+                : dimensions.y,
+            height = _depth + e,
+            top_weight_y = chamfer_top ? 0 : .5
+        );
+    }
+
+    _section();
+
+    if (chamfer > 0) {
+        translate([0, 0, depth - chamfer]) {
+            _section(
+                [
+                    dimensions.x + chamfer * 2,
+                    dimensions.y + chamfer * 2
+                ],
+                chamfer
+            );
+        }
+    }
+}
+
 module enclosure_engraving(
     string,
     svg = BRANDING_SVG, svg_rotation = 0,
@@ -85,17 +123,11 @@ module enclosure_engraving(
                         placard.x / (center ? -2 : 1),
                         placard.y / (center ? -2 : 1)
                     ]) {
-                        flat_top_rectangular_pyramid(
-                            top_width = placard.x,
-                            top_length = chamfer_placard_top
-                                ? placard.y + depth / 2
-                                : placard.y,
-                            bottom_width = placard.x,
-                            bottom_length = chamfer_placard_top
-                                ? placard.y - depth / 2
-                                : placard.y,
-                            height = depth + e,
-                            top_weight_y = 0
+                        enclosure_engraving_placard(
+                            placard,
+                            depth,
+                            chamfer_placard_top,
+                            quick_preview ? 0 : chamfer
                         );
                     }
                 }
