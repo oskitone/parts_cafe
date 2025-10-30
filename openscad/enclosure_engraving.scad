@@ -85,7 +85,7 @@ module enclosure_engraving(
     size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
     bleed = ENCLOSURE_ENGRAVING_BLEED,
     chamfer = ENCLOSURE_ENGRAVING_CHAMFER,
-    center = true, // TODO: is this working as expected?
+    center = true,
     position = [0, 0],
     font = ENGRAVING_FONT,
     depth = ENCLOSURE_ENGRAVING_DEPTH,
@@ -96,6 +96,9 @@ module enclosure_engraving(
     // Use to prevent drooping when printing vertically!
     chamfer_placard_top = false,
 
+    include_wordmark = false,
+    wordmark_gutter = [ENCLOSURE_ENGRAVING_GUTTER * 2, ENCLOSURE_ENGRAVING_GUTTER * 2],
+
     rotation = 0,
 
     bottom = false,
@@ -105,11 +108,33 @@ module enclosure_engraving(
 ) {
     e = .0135;
 
-    resize = string
-        ? undef
-        : svg == BRANDING_SVG
-            ? [size / OSKITONE_LENGTH_WIDTH_RATIO, size]
-            : resize;
+    wordmark_length = placard
+        ? (placard.x - wordmark_gutter.x * 2) * OSKITONE_LENGTH_WIDTH_RATIO
+        : size;
+
+    inner_length = include_wordmark
+        ? wordmark_length + wordmark_gutter.y + size
+        : 0;
+
+    module _engraving(_string, _size) {
+        resize = _string
+            ? undef
+            : svg == BRANDING_SVG
+                ? [_size / OSKITONE_LENGTH_WIDTH_RATIO, _size]
+                : resize;
+
+        engraving(
+            string = _string,
+            svg = svg, svg_rotation = svg_rotation,
+            font = font,
+            size = _string ? size : undef,
+            resize = resize,
+            bleed = quick_preview ? 0 : bleed,
+            height = placard ? depth + e * 3 : depth + e,
+            center = center,
+            chamfer =  quick_preview ? 0 : (placard ? 0 : chamfer)
+        );
+    }
 
     translate([
         position.x,
@@ -132,18 +157,24 @@ module enclosure_engraving(
                     }
                 }
 
-                translate(placard ? [0, 0, -e] : [0, 0, 0]) {
-                    engraving(
-                        string = string ? string : undef,
-                        svg = svg, svg_rotation = svg_rotation,
-                        font = font,
-                        size = string ? size : undef,
-                        resize = resize,
-                        bleed = quick_preview ? 0 : bleed,
-                        height = placard ? depth + e * 3 : depth + e,
-                        center = center,
-                        chamfer =  quick_preview ? 0 : (placard ? 0 : chamfer)
-                    );
+                union() {
+                    if (include_wordmark) {
+                        translate([
+                            0,
+                            inner_length / 2 - wordmark_length / 2,
+                            placard ? -e : 0
+                        ]) {
+                            _engraving(undef, wordmark_length);
+                        }
+                    }
+
+                    translate([
+                        0,
+                        include_wordmark ? inner_length / -2 + size / 2: 0,
+                        placard ? -e : 0
+                    ]) {
+                        _engraving(string ? string : undef, size);
+                    }
                 }
             }
         }
