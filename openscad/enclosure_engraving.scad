@@ -11,6 +11,7 @@ ENCLOSURE_ENGRAVING_GUTTER = (
     ENCLOSURE_ENGRAVING_LENGTH
     - ENCLOSURE_ENGRAVING_TEXT_SIZE
 ) / 2;
+ENCLOSURE_ENGRAVING_LINE_GUTTER = ENCLOSURE_ENGRAVING_GUTTER / 2;
 
 ENCLOSURE_ENGRAVING_BLEED = -.1;
 ENCLOSURE_ENGRAVING_CHAMFER = .4;
@@ -83,6 +84,7 @@ module enclosure_engraving(
     svg = BRANDING_SVG, svg_rotation = 0,
     resize = undef,
     size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
+    line_gutter = ENCLOSURE_ENGRAVING_LINE_GUTTER,
     bleed = ENCLOSURE_ENGRAVING_BLEED,
     chamfer = ENCLOSURE_ENGRAVING_CHAMFER,
     center = true,
@@ -108,32 +110,54 @@ module enclosure_engraving(
 ) {
     e = .0135;
 
+    // https://github.com/openscad/openscad/issues/5719#issuecomment-2692896730v
+    function substr(vs, r) = is_string(vs)
+        ? let(join = function(v, s="", i=0) i>=len(v) ? s : join(v, str(s, v[i]), i+1))
+            join([for (i=r) vs[i]])
+        : [for (i=r) vs[i]];
+
+    function split(haystack, needle) = (
+        let(indexes = is_string(haystack) ? search(needle, haystack, 0)[0] : 0)
+
+        len(indexes) == 0 ? [haystack] : [for (i = [0:len(indexes)])
+            i == 0
+                ? substr(haystack, [0:indexes[0] - 1])
+                : substr(haystack, [indexes[i - 1] + 1:(
+                    i == len(indexes) ? len(haystack) - 1 : indexes[i] - 1
+                )])]
+    );
+
+    lines = string ? split(string, "\n") : [undef];
+    line_height = size + line_gutter;
+
     wordmark_length = placard
         ? (placard.x - wordmark_gutter.x * 2) * OSKITONE_LENGTH_WIDTH_RATIO
         : size;
 
-    inner_length = include_wordmark
-        ? wordmark_length + wordmark_gutter.y + size
-        : 0;
+    inner_length =
+        (include_wordmark ? wordmark_length + wordmark_gutter.y : 0)
+        + line_height * len(lines) - line_gutter;
 
-    module _engraving(_string, _size) {
+    module _engraving(_string, _size, y = 0) {
         resize = _string
             ? undef
             : svg == BRANDING_SVG
                 ? [_size / OSKITONE_LENGTH_WIDTH_RATIO, _size]
                 : resize;
 
-        engraving(
-            string = _string,
-            svg = svg, svg_rotation = svg_rotation,
-            font = font,
-            size = _string ? size : undef,
-            resize = resize,
-            bleed = quick_preview ? 0 : bleed,
-            height = placard ? depth + e * 3 : depth + e,
-            center = center,
-            chamfer =  quick_preview ? 0 : (placard ? 0 : chamfer)
-        );
+        translate([0, y, placard ? -e : 0]) {
+            engraving(
+                string = _string,
+                svg = svg, svg_rotation = svg_rotation,
+                font = font,
+                size = _string ? size : undef,
+                resize = resize,
+                bleed = quick_preview ? 0 : bleed,
+                height = placard ? depth + e * 3 : depth + e,
+                center = center,
+                chamfer =  quick_preview ? 0 : (placard ? 0 : chamfer)
+            );
+        }
     }
 
     translate([
@@ -159,21 +183,21 @@ module enclosure_engraving(
 
                 union() {
                     if (include_wordmark) {
-                        translate([
-                            0,
-                            inner_length / 2 - wordmark_length / 2,
-                            placard ? -e : 0
-                        ]) {
-                            _engraving(undef, wordmark_length);
-                        }
+                        _engraving(
+                            undef,
+                            wordmark_length,
+                            inner_length / 2 - wordmark_length / 2
+                        );
                     }
 
-                    translate([
-                        0,
-                        include_wordmark ? inner_length / -2 + size / 2: 0,
-                        placard ? -e : 0
-                    ]) {
-                        _engraving(string ? string : undef, size);
+                    for (i = [0 : len(lines) - 1]) {
+                        _engraving(
+                            lines[i],
+                            size,
+                            inner_length / -2 + size / 2
+                                + line_height * (len(lines) - 1)
+                                + i * -line_height
+                        );
                     }
                 }
             }
