@@ -6,9 +6,9 @@ include <rounded_cube.scad>;
 
 module dice(
     size = 16,
-    fillet = 2,
+    fillet = 1,
     pips = [1,2,3,4,5,6],
-    engraving_depth = 1,
+    engraving_depth = 2,
     center = true
 ) {
     e = 0.0124;
@@ -30,43 +30,40 @@ module dice(
         [0, -90, 0], // right
     ];
 
-    difference() {
-        rounded_cube(
-            [size, size, size],
-            radius = fillet,
-            center = center
-        );
+    intersection() {
+        difference() {
+            rounded_cube(
+                [size, size, size],
+                radius = fillet,
+                center = center
+            );
 
-        for (i = [0 : len(pips) - 1]) {
-            translate(positions[i]) {
-                rotate(rotations[i]) {
-                    linear_extrude(height = engraving_depth + e) {
-                        dice_pips(
-                            count = pips[i],
-                            diameter = size / 5,
-                            size = size / 2,
-                            center = true
-                        );
+            for (i = [0 : len(pips) - 1]) {
+                translate(positions[i]) {
+                    rotate(rotations[i]) {
+                        linear_extrude(height = engraving_depth + e) {
+                            dice_pips(
+                                count = pips[i],
+                                diameter = size / 5,
+                                size = size / 2,
+                                center = true
+                            );
+                        }
                     }
                 }
             }
         }
+
+        translate([0, 0, size / 2]) {
+            sphere(
+                r = sqrt(2 * pow(size / 2, 2)),
+                $fn = 36
+            );
+        }
     }
 }
 
-* dice(
-    $fn = 12,
-    pips = [0,0,1,5,6,6]
-);
-
-translate([20, 0, 0])
-* dice(
-    $fn = 12,
-    pips = [3,3,3,3,3,3]
-);
-
-translate([20 * 2, 0, 0])
-* dice(
-    $fn = 12,
-    pips = [3,4,5,6]
-);
+* translate([20 * 0, 0, 0]) dice();
+* translate([20 * 1, 0, 0]) dice(pips = [0,0,1,5,6,6]);
+* translate([20 * 2, 0, 0]) dice(pips = [3,3,3,3,3,3]);
+* translate([20 * 3, 0, 0]) dice(pips = [3,4,5,6]);
