@@ -55,8 +55,8 @@ module rounded_cube(dimensions, radius = 0, center = false) {
 module rounded_top_cube(dimensions, radius = 0, center = false) {
     if (radius > 0) {
         hull() {
-            rounded_cube_corners(dimensions, radius, 0, flat = true, center);
-            rounded_cube_corners(dimensions, radius, dimensions.z - radius, center);
+            rounded_cube_corners(dimensions, radius, 0, true, center);
+            rounded_cube_corners(dimensions, radius, dimensions.z - radius, false, center);
         }
     } else {
         cube(dimensions);
