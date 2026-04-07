@@ -4,7 +4,7 @@ include <donut.scad>;
 include <nuts_and_bolts.scad>;
 include <perfboard.scad>;
 include <ring.scad>;
-include <speaker.scad>;
+include <speaker-TR-050F-8OHM-R.scad>;
 
 function get_speaker_pocket_outer_diameter(
     speaker_diameter,
@@ -199,7 +199,10 @@ module speaker_pocket(
         union() {
             _outer_wall();
             _brim();
-            _anchor_mounts();
+
+            if (anchor_mount_count > 0) {
+                _anchor_mounts();
+            }
 
             if (show_floor && floor_depth > 0) {
                 _floor();
@@ -224,7 +227,7 @@ module speaker_pocket(
         }
     }
 
-    if (show_speaker) {
+    if (show_speaker || debug) {
         translate([0, 0, floor_depth]) {
             % speaker(
                 speaker_diameter,
@@ -264,19 +267,12 @@ module perfboard_speaker_pocket(
     speaker_total_height = SPEAKER_TOTAL_HEIGHT,
     speaker_cone_height = SPEAKER_CONE_HEIGHT,
 ) {
-    function even_up(
-        n
-    ) = (
-        n + (n % 2)
-    );
-
     rotated_grid = sqrt(2 * pow(grid, 2));
     outer_diameter = get_speaker_pocket_outer_diameter(
         speaker_diameter,
         tolerance,
         wall
     );
-    minimum_outer_diameter = outer_diameter + ANCHOR_MOUNT_MIN_NUT_DISTANCE * 2;
 
     speaker_pocket(
         tolerance = tolerance,
