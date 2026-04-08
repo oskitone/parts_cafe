@@ -18,23 +18,23 @@ module speaker(
     total_height = SPEAKER_TOTAL_HEIGHT,
     cone_height = SPEAKER_CONE_HEIGHT
 ) {
-    e = .043;
+    e = .0043;
 
 
     cylinder(
         d = magnet_diameter,
-        h = magnet_height
+        h = magnet_height + e
     );
 
-    translate([0, 0, magnet_height - e]) {
+    translate([0, 0, magnet_height]) {
         cylinder(
             d1 = magnet_diameter,
             d2 = diameter - brim_depth * 2,
-            h = cone_height + e * 2
+            h = cone_height + e
         );
     };
 
-    translate([0, 0, magnet_height + cone_height - e]) {
+    translate([0, 0, magnet_height + cone_height]) {
         cylinder(
             d = diameter,
             h = brim_height
