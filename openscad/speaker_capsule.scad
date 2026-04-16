@@ -7,7 +7,7 @@ module speaker_capsule(
     floor_ceiling = ENCLOSURE_FLOOR_CEILING,
 
     tolerance = .1,
-    thread_clearance = .1, // TODO: confirm
+    speaker_diameter_clearance = .2,
     speaker_bottom_clearance = 1,
 
     wire_access_diameter = 2,
@@ -24,7 +24,9 @@ module speaker_capsule(
 
     z_separation = 3,
 
-    threaded_height = 4, // TODO: try bigger threads too
+    threaded_height = 4,
+    thread_clearance = .1,
+    thread_pitch = 1.4,
 
     speaker_diameter = SPEAKER_DIAMETER,
     speaker_brim_height = SPEAKER_BRIM_HEIGHT,
@@ -36,7 +38,7 @@ module speaker_capsule(
 ) {
     e = .0235;
 
-    inner_top_diameter = speaker_diameter + tolerance * 2;
+    inner_top_diameter = speaker_diameter + (tolerance + speaker_diameter_clearance) * 2;
     inner_bottom_diameter = speaker_diameter - speaker_brim_depth * 2 + tolerance * 2;
     inner_total_height = speaker_total_height + speaker_bottom_clearance;
 
@@ -87,8 +89,10 @@ module speaker_capsule(
 
             metric_thread(
                 diameter = diameter,
+                pitch = thread_pitch,
                 length = threaded_height + e,
-                internal = !cavity,
+                internal = cavity,
+                leadin = 1,
                 n_starts = 6
             );
         }
