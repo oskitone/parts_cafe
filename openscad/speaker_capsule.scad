@@ -1,3 +1,4 @@
+include <cylinder_grip.scad>;
 include <enclosure.scad>;
 include <speaker-TR-050F-8OHM-R.scad>;
 include <threads.scad>;
@@ -34,7 +35,9 @@ module speaker_capsule(
     speaker_magnet_height = SPEAKER_MAGNET_HEIGHT,
     speaker_magnet_diameter = SPEAKER_MAGNET_DIAMETER,
     speaker_total_height = SPEAKER_TOTAL_HEIGHT,
-    speaker_cone_height = SPEAKER_CONE_HEIGHT
+    speaker_cone_height = SPEAKER_CONE_HEIGHT,
+
+    outer_segments = 24
 ) {
     e = .0235;
 
@@ -108,8 +111,22 @@ module speaker_capsule(
                 translate([0, 0, top ? outer_bottom_height : 0]) {
                     cylinder(
                         d = outer_diameter,
-                        h = height
+                        h = height,
+                        $fn = outer_segments
                     );
+                }
+
+                if (top) {
+                    translate([0, 0, outer_bottom_height]) {
+                        cylinder_grip(
+                            diameter = outer_diameter,
+                            height = outer_top_height,
+                            count = outer_segments,
+                            rotation_offset = 0,
+                            size = 2,
+                            $fn = 6
+                        );
+                    }
                 }
 
                 if (!top) {
@@ -127,7 +144,8 @@ module speaker_capsule(
                 translate([0, 0, -e]) {
                     cylinder(
                         d = outer_diameter + e * 2,
-                        h = outer_bottom_height - floor_ceiling + e
+                        h = outer_bottom_height - floor_ceiling + e,
+                        $fn = outer_segments
                     );
                 }
             }
