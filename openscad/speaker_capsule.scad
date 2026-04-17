@@ -17,7 +17,9 @@ module speaker_capsule(
     fillet = 1, // TODO
 
     show_top = true,
+    show_middle = true,
     show_bottom = true,
+
     show_speaker = false,
     show_threads = true,
 
@@ -43,57 +45,65 @@ module speaker_capsule(
 ) {
     e = .0235;
 
-    inner_top_diameter = speaker_diameter + (tolerance + speaker_diameter_clearance) * 2;
-    inner_bottom_diameter = speaker_diameter - speaker_brim_depth * 2 + tolerance * 2;
-    inner_total_height = speaker_total_height + speaker_bottom_clearance;
+    inner_cap_diameter = speaker_diameter + (tolerance + speaker_diameter_clearance) * 2;
+    inner_middle_diameter = speaker_diameter - speaker_brim_depth * 2 + tolerance * 2;
+    inner_total_height = test_print
+        ? threaded_height * 3
+        : speaker_total_height + speaker_bottom_clearance;
 
-    outer_diameter = inner_top_diameter + wall * 2;
+    outer_diameter = inner_cap_diameter + wall * 2;
     outer_height = inner_total_height + floor_ceiling * 2;
-    outer_bottom_height = floor_ceiling + speaker_bottom_clearance
-        + (speaker_total_height - threaded_height);
-    outer_top_height = outer_height - outer_bottom_height;
 
-    speaker_z = floor_ceiling + speaker_bottom_clearance;
+    outer_cap_height = floor_ceiling + threaded_height;
+    outer_middle_height = outer_height - outer_cap_height * 2;
 
-    module _inner_cavities(top = true) {
-        brim_z = outer_bottom_height + (threaded_height - speaker_brim_height);
+    module _inner_cavities(cap = true) {
+        // Main block
         translate([0, 0, floor_ceiling]) {
             cylinder(
-                d = inner_bottom_diameter,
+                d = inner_middle_diameter,
                 h = inner_total_height
             );
         }
 
-        translate([0, 0, brim_z - (top ? e : 0)]) {
-            cylinder(
-                d = inner_top_diameter,
-                h = speaker_brim_height + e
-            );
+        // Redundant speaker brim supports
+        for (z = [
+            floor_ceiling - e,
+            outer_height - floor_ceiling - speaker_brim_height
+        ]) {
+            translate([0, 0, z]) {
+                cylinder(
+                    d = inner_cap_diameter,
+                    h = speaker_brim_height + e
+                );
+            }
         }
 
-        translate([0, 0, outer_height - floor_ceiling - e]) {
+        // Speaker exposure
+        // TODO: grill
+        translate([0, 0, test_print ? -e : outer_height - floor_ceiling - e]) {
             cylinder(
-                d = inner_bottom_diameter,
-                h = floor_ceiling + e * 2
+                d = inner_middle_diameter,
+                h = outer_height * 2
             );
         }
     }
 
-    module threads(cavity = true) {
+    module _threads(cavity = true, z = 0) {
         bleed = tolerance + thread_clearance;
 
         diameter = outer_diameter
-            - (outer_diameter - inner_top_diameter) / 2
+            - (outer_diameter - inner_cap_diameter) / 2
             + (cavity ? bleed * 2 : bleed * -2);
         
-        translate([0, 0, outer_bottom_height - e]) {
+        translate([0, 0, z]) {
             if (show_threads) {
                 metric_thread(
                     diameter = diameter,
                     pitch = thread_pitch,
                     length = threaded_height + e,
                     internal = cavity,
-                    leadin = 1,
+                    leadin = 2,
                     n_starts = 6
                 );
             } else {
@@ -105,14 +115,20 @@ module speaker_capsule(
         }
     }
 
-    module _half(top = false) {
-        height = top
-            ? outer_top_height
-            : outer_bottom_height;
+    module _section(top_cap = false, bottom_cap = false) {
+        cap = top_cap || bottom_cap;
+
+        height = cap
+            ? outer_cap_height
+            : outer_middle_height;
+
+        cylinder_z = cap
+            ? (top_cap ? outer_cap_height + outer_middle_height : 0)
+            : outer_cap_height;
 
         difference() {
             union() {
-                translate([0, 0, top ? outer_bottom_height : 0]) {
+                translate([0, 0, cylinder_z]) {
                     cylinder(
                         d = outer_diameter,
                         h = height,
@@ -120,11 +136,11 @@ module speaker_capsule(
                     );
                 }
 
-                if (top) {
-                    translate([0, 0, outer_bottom_height]) {
+                if (cap) {
+                    translate([0, 0, bottom_cap ? 0 : outer_height - outer_cap_height]) {
                         cylinder_grip(
                             diameter = outer_diameter,
-                            height = outer_top_height,
+                            height = outer_cap_height,
                             count = grip_count,
                             rotation_offset = 0,
                             size = 2,
@@ -133,25 +149,25 @@ module speaker_capsule(
                     }
                 }
 
-                if (!top) {
-                    threads(cavity = false);
+                if (!cap) {
+                    for (z = [
+                        outer_height - floor_ceiling - threaded_height - e,
+                        floor_ceiling
+                    ]) {
+                        _threads(cavity = false, z = z);
+                    }
                 }
             }
 
-            _inner_cavities(top = top);
+            _inner_cavities(cap = cap);
 
-            if (top) {
-                threads(cavity = true);
-            }
-
-            if (test_print) {
-                translate([0, 0, -e]) {
-                    cylinder(
-                        d = outer_diameter + e * 2,
-                        h = outer_bottom_height - floor_ceiling + e,
-                        $fn = outer_segments
-                    );
-                }
+            if (cap) {
+                _threads(
+                    cavity = true,
+                    z = top_cap
+                        ? outer_height - floor_ceiling - threaded_height - e
+                        : floor_ceiling
+                );
             }
         }
     }
@@ -159,12 +175,21 @@ module speaker_capsule(
     intersection() {
         union() {
             if (show_top) {
-                translate([0, 0, z_separation]) {
-                    _half(top = true);
+                translate([0, 0, z_separation * 2]) {
+                    _section(top_cap = true);
                 }
             }
+
+            if (show_middle) {
+                translate([0, 0, z_separation * 1]) {
+                    _section();
+                }
+            }
+
             if (show_bottom) {
-                _half(top = false);
+                translate([0, 0, z_separation * 0]) {
+                    _section(bottom_cap = true);
+                }
             }
         }
 
@@ -173,14 +198,16 @@ module speaker_capsule(
                 cube([
                     e,
                     outer_diameter + e * 2,
-                    outer_height + e * 2 + z_separation
+                    outer_height + e * 2 + z_separation * 2
                 ]);
             }
         }
     }
 
     if (show_speaker) {
-        translate([0, 0, speaker_z + e]) {
+        z = outer_height - floor_ceiling - speaker_total_height;
+
+        translate([0, 0, z + z_separation * 2]) {
             % speaker();
         }
     }
@@ -188,6 +215,7 @@ module speaker_capsule(
 
 speaker_capsule(
     show_top = true,
+    show_middle = true,
     show_bottom = true,
     show_speaker = true,
     debug = $preview,
