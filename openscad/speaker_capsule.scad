@@ -11,8 +11,7 @@ module speaker_capsule(
     speaker_diameter_clearance = .2,
     speaker_bottom_clearance = 1,
 
-    wire_access_diameter = 2,
-    wire_access_rotation = 0,
+    wire_access_width = 4,
 
     fillet = 1, // TODO
 
@@ -168,6 +167,12 @@ module speaker_capsule(
                         ? outer_height - floor_ceiling - threaded_height - e
                         : floor_ceiling
                 );
+            }
+
+            if (bottom_cap) {
+                translate([wire_access_width / -2, 0, floor_ceiling]) {
+                    cube([wire_access_width, outer_diameter * 2, outer_cap_height]);
+                }
             }
         }
     }
