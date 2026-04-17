@@ -19,6 +19,7 @@ module speaker_capsule(
     show_top = true,
     show_bottom = true,
     show_speaker = false,
+    show_threads = true,
 
     debug = false,
     test_print = false,
@@ -37,7 +38,8 @@ module speaker_capsule(
     speaker_total_height = SPEAKER_TOTAL_HEIGHT,
     speaker_cone_height = SPEAKER_CONE_HEIGHT,
 
-    outer_segments = 24
+    outer_segments = undef,
+    grip_count = undef
 ) {
     e = .0235;
 
@@ -85,19 +87,21 @@ module speaker_capsule(
             + (cavity ? bleed * 2 : bleed * -2);
         
         translate([0, 0, outer_bottom_height - e]) {
-            * cylinder(
-                d = diameter,
-                h = threaded_height + e
-            );
-
-            metric_thread(
-                diameter = diameter,
-                pitch = thread_pitch,
-                length = threaded_height + e,
-                internal = cavity,
-                leadin = 1,
-                n_starts = 6
-            );
+            if (show_threads) {
+                metric_thread(
+                    diameter = diameter,
+                    pitch = thread_pitch,
+                    length = threaded_height + e,
+                    internal = cavity,
+                    leadin = 1,
+                    n_starts = 6
+                );
+            } else {
+                cylinder(
+                    d = diameter,
+                    h = threaded_height + e
+                );
+            }
         }
     }
 
@@ -121,7 +125,7 @@ module speaker_capsule(
                         cylinder_grip(
                             diameter = outer_diameter,
                             height = outer_top_height,
-                            count = outer_segments,
+                            count = grip_count,
                             rotation_offset = 0,
                             size = 2,
                             $fn = 6
@@ -164,7 +168,6 @@ module speaker_capsule(
             }
         }
 
-
         if (debug) {
             translate([-e, -(outer_diameter / 2 + e), -e]) {
                 cube([
@@ -188,6 +191,9 @@ speaker_capsule(
     show_bottom = true,
     show_speaker = true,
     debug = $preview,
+    show_threads = true,
     test_print = false,
-    z_separation = .1
+    z_separation = $preview ? .1 : 5,
+    outer_segments = $preview ? 12 : 60,
+    grip_count = 12
 );
