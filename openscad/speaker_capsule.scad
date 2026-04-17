@@ -25,7 +25,7 @@ module speaker_capsule(
     z_separation = 3,
 
     threaded_height = 4,
-    thread_clearance = .1,
+    thread_clearance = .2,
     thread_pitch = 1.4,
 
     speaker_diameter = SPEAKER_DIAMETER,
