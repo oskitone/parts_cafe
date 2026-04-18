@@ -4,7 +4,8 @@ module diagonal_grill(
     width, length, height,
     size = DIAGONAL_GRILL_SIZE,
     offset = 0,
-    angle = 45
+    angle = 45,
+    center = false
 ) {
     e = 0.0049;
     plot_width = size * 2;
@@ -28,9 +29,11 @@ module diagonal_grill(
         }
     }
 
-    difference() {
-        cube([width, length, height]);
-        _cavities();
+    translate([width * (center ? -1/2 : 0), length * (center ? -1/2 : 0), 0]) {
+        difference() {
+            cube([width, length, height]);
+            _cavities();
+        }
     }
 }
 
