@@ -1,4 +1,5 @@
 include <cylinder_grip.scad>;
+include <donut.scad>;
 include <enclosure.scad>;
 include <speaker-TR-050F-8OHM-R.scad>;
 include <threads.scad>;
@@ -13,7 +14,7 @@ module speaker_capsule(
 
     wire_access_width = 4,
 
-    fillet = 1, // TODO
+    fillet = ENCLOSURE_FILLET,
 
     show_top = true,
     show_middle = true,
@@ -128,27 +129,34 @@ module speaker_capsule(
             ? (top_cap ? outer_cap_height + outer_middle_height : 0)
             : outer_cap_height;
 
-        middle_outer_diameter = get_threads_diameter(cavity = false);
+        module _cap() {
+            module _end() {
+                donut(
+                    diameter = outer_cap_diameter,
+                    thickness = fillet * 2,
+                    segments = outer_segments, $fn = outer_segments
+                );
+            }
+
+            render() hull() {
+                for (z = [fillet, height - fillet]) {
+                    translate([0, 0, z]) {
+                        _end();
+                    }
+                }
+            }
+        }
 
         difference() {
             union() {
                 translate([0, 0, cylinder_z]) {
-                    cylinder(
-                        d = cap ? outer_cap_diameter : middle_outer_diameter,
-                        h = height,
-                        $fn = outer_segments
-                    );
-                }
-
-                if (cap) {
-                    translate([0, 0, bottom_cap ? 0 : outer_height - outer_cap_height]) {
-                        cylinder_grip(
-                            diameter = outer_cap_diameter,
-                            height = outer_cap_height,
-                            count = grip_count,
-                            rotation_offset = 0,
-                            size = 2,
-                            $fn = 6
+                    if (cap) {
+                        _cap();
+                    } else {
+                        cylinder(
+                            d = get_threads_diameter(cavity = false),
+                            h = height,
+                            $fn = outer_segments
                         );
                     }
                 }
@@ -173,6 +181,17 @@ module speaker_capsule(
             _inner_cavities(cap = cap);
 
             if (cap) {
+                translate([0, 0, bottom_cap ? 0 : outer_height - outer_cap_height]) {
+                    cylinder_grip(
+                        diameter = outer_cap_diameter,
+                        height = outer_cap_height,
+                        count = grip_count,
+                        rotation_offset = 0,
+                        size = 2,
+                        $fn = 6
+                    );
+                }
+
                 _threads(
                     cavity = true,
                     z = top_cap
