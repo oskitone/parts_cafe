@@ -1,6 +1,8 @@
 include <cylinder_grip.scad>;
+include <diagonal_grill.scad>;
 include <donut.scad>;
 include <enclosure.scad>;
+include <ring.scad>;
 include <speaker-TR-050F-8OHM-R.scad>;
 include <threads.scad>;
 
@@ -31,6 +33,10 @@ module speaker_capsule(
     threaded_height = 4,
     thread_clearance = .2,
     thread_pitch = 1.4,
+
+    outline_gutter = .5,
+    outline_depth = .6,
+    outline_length = 1,
 
     speaker_diameter = SPEAKER_DIAMETER,
     speaker_brim_height = SPEAKER_BRIM_HEIGHT,
@@ -97,11 +103,29 @@ module speaker_capsule(
         }
 
         // Speaker exposure
-        // TODO: grill
-        translate([0, 0, test_print ? -e : outer_height - floor_ceiling - e]) {
-            cylinder(
-                d = speaker_inner_brim_diameter,
-                h = outer_height * 2
+        translate([0, 0, outer_height - floor_ceiling - e]) {
+            intersection() {
+                cylinder(
+                    d = speaker_inner_brim_diameter,
+                    h = floor_ceiling + e * 2
+                );
+
+
+                render() diagonal_grill(
+                    speaker_inner_brim_diameter + e * 2,
+                    speaker_inner_brim_diameter + e * 2,
+                    floor_ceiling + e * 2,
+                    center = true
+                );
+            }
+        }
+
+        translate([0, 0, outer_height - outline_depth]) {
+            ring(
+                diameter = speaker_inner_brim_diameter + outline_gutter * 2
+                    + outline_length * 2,
+                inner_diameter = speaker_inner_brim_diameter + outline_gutter * 2,
+                height = outline_depth + e
             );
         }
     }
