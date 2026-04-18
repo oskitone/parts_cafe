@@ -6,7 +6,7 @@ module cylinder_grip(
     size = 1,
     $fn = $fn
 ) {
-    if (size > 0) {
+    if (size > 0 && count > 0) {
         count = count != undef
             ? count
             : floor((diameter * PI) / size / 2);
