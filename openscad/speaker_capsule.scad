@@ -5,7 +5,7 @@ include <speaker-TR-050F-8OHM-R.scad>;
 include <threads.scad>;
 
 module speaker_capsule(
-    wall = ENCLOSURE_WALL * 1.5, // TODO: decouple threads vs body
+    wall = ENCLOSURE_WALL * 1.5,
     floor_ceiling = ENCLOSURE_FLOOR_CEILING,
 
     tolerance = .1,
@@ -45,8 +45,10 @@ module speaker_capsule(
 ) {
     e = .0235;
 
-    inner_cap_diameter = speaker_diameter + (tolerance + speaker_diameter_clearance) * 2;
-    inner_middle_diameter = speaker_diameter - speaker_brim_depth * 2 + tolerance * 2;
+    speaker_cavity_diameter = speaker_diameter
+        + (tolerance + speaker_diameter_clearance) * 2;
+    speaker_inner_brim_diameter = speaker_diameter
+        - speaker_brim_depth * 2 + tolerance * 2;
     inner_total_height = test_print
         ? threaded_height * 3
         : speaker_total_height + speaker_bottom_clearance;
@@ -56,26 +58,40 @@ module speaker_capsule(
     outer_cap_height = floor_ceiling + threaded_height;
     outer_middle_height = outer_height - outer_cap_height * 2;
 
-    outer_cap_diameter = inner_cap_diameter + wall * 2;
+    outer_cap_diameter = speaker_cavity_diameter + wall * 2;
 
     function get_threads_diameter(cavity) = (
         outer_cap_diameter
-            - (outer_cap_diameter - inner_cap_diameter) / 2
+            - (outer_cap_diameter - speaker_cavity_diameter) / 2
             + (tolerance + thread_clearance) * (cavity ? 2 : -2)
     );
 
     module _inner_cavities(cap = true) {
-        // Main block
+        brim_z = outer_height - floor_ceiling - speaker_brim_height;
+        chamfer = (speaker_cavity_diameter - speaker_inner_brim_diameter) / 2;
+        bottom_cavity_height = inner_total_height - speaker_brim_height - chamfer;
+
+        // Bottom
         translate([0, 0, floor_ceiling]) {
             cylinder(
-                d = inner_middle_diameter,
-                h = inner_total_height
+                d = speaker_cavity_diameter,
+                h = bottom_cavity_height
             );
         }
 
-        translate([0, 0, outer_height - floor_ceiling - speaker_brim_height]) {
+        // Chamfer from bottom to speaker brim
+        translate([0, 0, floor_ceiling + bottom_cavity_height - e]) {
             cylinder(
-                d = inner_cap_diameter,
+                d1 = speaker_cavity_diameter,
+                d2 = speaker_inner_brim_diameter,
+                h = chamfer + e * 2
+            );
+        }
+
+        // Speaker brim
+        translate([0, 0, brim_z]) {
+            cylinder(
+                d = speaker_cavity_diameter,
                 h = speaker_brim_height + e
             );
         }
@@ -84,7 +100,7 @@ module speaker_capsule(
         // TODO: grill
         translate([0, 0, test_print ? -e : outer_height - floor_ceiling - e]) {
             cylinder(
-                d = inner_middle_diameter,
+                d = speaker_inner_brim_diameter,
                 h = outer_height * 2
             );
         }
