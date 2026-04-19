@@ -6,4 +6,5 @@ Common parts used in Oskitone projects
 
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
-* audio-jack based on AUDIO-JACK from [SparkFun-KiCad-Libraries](https://github.com/sparkfun/SparkFun-KiCad-Libraries)
+- audio-jack based on AUDIO-JACK from [SparkFun-KiCad-Libraries](https://github.com/sparkfun/SparkFun-KiCad-Libraries)
+- threads.scad is by [Dan Kirshner](https://dkprojects.net/openscad-threads/) under the GNU General Public License
