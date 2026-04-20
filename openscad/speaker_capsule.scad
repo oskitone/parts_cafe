@@ -14,7 +14,8 @@ module speaker_capsule(
     speaker_diameter_clearance = .2,
     speaker_bottom_clearance = 1,
 
-    wire_access_width = 4,
+    wire_access_width = 3,
+    wire_access_height = 1,
 
     fillet = ENCLOSURE_FILLET,
 
@@ -30,7 +31,7 @@ module speaker_capsule(
 
     z_separation = 3,
 
-    threaded_height = 4,
+    threaded_height = 5,
     thread_clearance = .2,
     thread_pitch = 1.4,
 
@@ -130,7 +131,13 @@ module speaker_capsule(
         }
     }
 
-    module _threads(cavity = true, z = 0, chamfer_top = false, chamfer_bottom = false) {
+    module _threads(
+        cavity = true,
+        height = threaded_height,
+        z = 0,
+        chamfer_top = false,
+        chamfer_bottom = false
+    ) {
         diameter = get_threads_diameter(cavity);
 
         leadin = (chamfer_top && chamfer_bottom)
@@ -144,7 +151,7 @@ module speaker_capsule(
                 metric_thread(
                     diameter = diameter,
                     pitch = thread_pitch,
-                    length = threaded_height + e,
+                    length = height + e,
                     internal = cavity,
                     leadin = leadin,
                     n_starts = 6
@@ -152,7 +159,7 @@ module speaker_capsule(
             } else {
                 cylinder(
                     d = diameter,
-                    h = threaded_height + e
+                    h = height + e
                 );
             }
         }
@@ -202,15 +209,17 @@ module speaker_capsule(
                 }
 
                 if (!cap) {
-                    zs = [
-                        outer_height - floor_ceiling - threaded_height - e,
-                        floor_ceiling
-                    ];
-
                     for (i = [0, 1]) {
+                        is_bottom = i == 1;
+
                         _threads(
                             cavity = false,
-                            z = zs[i],
+                            height = is_bottom
+                                ? threaded_height - wire_access_height
+                                : threaded_height,
+                            z = is_bottom
+                                ? floor_ceiling + wire_access_height
+                                : outer_height - floor_ceiling - threaded_height - e,
                             chamfer_top = i == 0,
                             chamfer_bottom = i == 1
                         );
@@ -234,15 +243,20 @@ module speaker_capsule(
 
                 _threads(
                     cavity = true,
+                    height = top_cap
+                        ? threaded_height
+                        : threaded_height- wire_access_height,
                     z = top_cap
                         ? outer_height - floor_ceiling - threaded_height - e
-                        : floor_ceiling
+                        : floor_ceiling + wire_access_height
                 );
             }
 
             if (bottom_cap) {
-                translate([wire_access_width / -2, 0, floor_ceiling]) {
-                    cube([wire_access_width, outer_cap_diameter * 2, outer_cap_height]);
+                width = wire_access_width + tolerance * 2;
+
+                translate([width / -2, 0, floor_ceiling]) {
+                    cube([width, outer_cap_diameter * 2, outer_cap_height]);
                 }
             }
         }
