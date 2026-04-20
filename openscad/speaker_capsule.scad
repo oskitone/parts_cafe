@@ -6,9 +6,12 @@ include <ring.scad>;
 include <speaker-TR-050F-8OHM-R.scad>;
 include <threads.scad>;
 
+SPEAKER_CAPSULE_FLOOR_CEILING = ENCLOSURE_FLOOR_CEILING;
+SPEAKER_CAPSULE_FILLET = ENCLOSURE_FILLET;
+
 module speaker_capsule(
     wall = ENCLOSURE_WALL * 1.5,
-    floor_ceiling = ENCLOSURE_FLOOR_CEILING,
+    floor_ceiling = SPEAKER_CAPSULE_FLOOR_CEILING,
 
     tolerance = .1,
     speaker_diameter_clearance = .2,
@@ -16,8 +19,9 @@ module speaker_capsule(
 
     wire_access_width = 3,
     wire_access_height = 1,
+    wire_access_rotation = 0,
 
-    fillet = ENCLOSURE_FILLET,
+    fillet = SPEAKER_CAPSULE_FILLET,
 
     show_top = true,
     show_middle = true,
@@ -29,7 +33,7 @@ module speaker_capsule(
     debug = false,
     test_print = false,
 
-    z_separation = 3,
+    z_separation = 0,
 
     threaded_height = 5,
     thread_clearance = .2,
@@ -47,7 +51,7 @@ module speaker_capsule(
     speaker_total_height = SPEAKER_TOTAL_HEIGHT,
     speaker_cone_height = SPEAKER_CONE_HEIGHT,
 
-    outer_segments = undef,
+    outer_segments = $preview ? 12 : 60,
     grip_count = 0
 ) {
     e = .0235;
@@ -273,12 +277,14 @@ module speaker_capsule(
                 width = wire_access_width + tolerance * 2;
                 z = floor_ceiling > 0 ? floor_ceiling : -e;
 
-                translate([width / -2, 0, z]) {
-                    cube([
-                        width,
-                        outer_cap_diameter * 2,
-                        outer_cap_height + (floor_ceiling > 0 ? 0 : e * 2)
-                    ]);
+                rotate([0, 0, wire_access_rotation]) {
+                    translate([width / -2, 0, z]) {
+                        cube([
+                            width,
+                            outer_cap_diameter * 2,
+                            outer_cap_height + (floor_ceiling > 0 ? 0 : e * 2)
+                        ]);
+                    }
                 }
             }
         }
@@ -325,7 +331,7 @@ module speaker_capsule(
     }
 }
 
-speaker_capsule(
+* speaker_capsule(
     show_top = true,
     show_middle = true,
     show_bottom = true,
@@ -334,6 +340,5 @@ speaker_capsule(
     show_threads = true,
     test_print = false,
     z_separation = $preview ? .1 : 5,
-    outer_segments = $preview ? 12 : 60,
     grip_count = 12
 );
