@@ -7,7 +7,7 @@ include <speaker-TR-050F-8OHM-R.scad>;
 include <threads.scad>;
 
 SPEAKER_CAPSULE_FLOOR_CEILING = ENCLOSURE_FLOOR_CEILING;
-SPEAKER_CAPSULE_FILLET = ENCLOSURE_FILLET;
+SPEAKER_CAPSULE_FILLET = 1.25;
 
 module speaker_capsule(
     wall = ENCLOSURE_WALL * 1.5,
