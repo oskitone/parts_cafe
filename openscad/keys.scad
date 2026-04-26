@@ -127,7 +127,8 @@ module keys(
     natural_color = "#fff",
     natural_color_cavity = "#eee",
 
-    quick_preview = $preview
+    quick_preview = $preview,
+    debug = false
 ) {
     e = 0.04567;
 
@@ -212,8 +213,8 @@ module keys(
                 module _donut() {
                     render() donut(
                         front_fillet * 2,
-                        sides_fillet,
-                        segments = 12,
+                        sides_fillet * 2,
+                        segments = 24,
                         coverage = 90,
                         starting_angle = 180
                     );
@@ -221,22 +222,22 @@ module keys(
 
                 // front bottom left
                 translate([sides_fillet, sides_fillet, 0]) {
-                    cylinder(r = sides_fillet, h = e);
+                    cylinder(r = sides_fillet, h = e, $fn = 12);
                 }
 
                 // front top left
-                translate([sides_fillet / 2, front_fillet, height - front_fillet]) {
-                    rotate([0, 90, 0]) _donut();;
+                translate([sides_fillet, front_fillet, height - front_fillet]) {
+                    rotate([0, 90, 0]) _donut();
                 }
 
                 // front bottom right
                 translate([width - sides_fillet, sides_fillet, 0]) {
-                    cylinder(r = sides_fillet, h = e);
+                    cylinder(r = sides_fillet, h = e, $fn = 12);
                 }
 
                 // front top right
-                translate([width - sides_fillet / 2, front_fillet, height - front_fillet]) {
-                    rotate([0, 90, 0]) _donut();;
+                translate([width - sides_fillet, front_fillet, height - front_fillet]) {
+                    rotate([0, 90, 0]) _donut();
                 }
 
                 // back bottom left
@@ -250,38 +251,29 @@ module keys(
                 }
 
                 // back top left
-                translate([sides_fillet / 2, length, height - sides_fillet / 2]) {
+                translate([sides_fillet, length, height - sides_fillet]) {
                     rotate([90, 0, 0]) {
-                        cylinder(r = front_fillet / 2, h = e, $fn = 12);
+                        cylinder(r = sides_fillet, h = e, $fn = 12);
                     }
                 }
 
                 // back top right
-                translate([width - sides_fillet / 2, length, height - sides_fillet / 2]) {
+                translate([width - sides_fillet, length, height - sides_fillet]) {
                     rotate([90, 0, 0]) {
-                        cylinder(r = front_fillet / 2, h = e, $fn = 12);
+                        cylinder(r = sides_fillet, h = e, $fn = 12);
                     }
                 }
             }
 
             if (front_fillet + sides_fillet > 0) {
-                hull() _points();
+                if (debug && $preview) {
+                    # hull() _points();
+                    _points();
+                } else {
+                    hull() _points();
+                }
             } else {
                 cube(dimensions);
-            }
-        }
-
-        module _fillet() {
-            if (front_fillet > 0) {
-                translate([0, front_fillet, height - front_fillet]) {
-                    rotate([0, 90, 0]) {
-                        rounded_corner_cutoff(
-                            height = width,
-                            radius = front_fillet,
-                            angle = 180
-                        );
-                    }
-                }
             }
         }
 
@@ -315,7 +307,6 @@ module keys(
 
         difference() {
             _base();
-            _fillet();
             _cantilever_recession_cavity();
         }
 
