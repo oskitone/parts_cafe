@@ -273,7 +273,7 @@ module speaker_capsule(
                 );
             }
 
-            if (bottom_cap) {
+            if (bottom_cap && wire_access_height > 0) {
                 width = wire_access_width + tolerance * 2;
                 z = floor_ceiling > 0 ? floor_ceiling : -e;
 
