@@ -6,15 +6,37 @@ include <ring.scad>;
 include <speaker-TR-050F-8OHM-R.scad>;
 include <threads.scad>;
 
+SPEAKER_CAPSULE_WALL = ENCLOSURE_WALL * 1.5;
 SPEAKER_CAPSULE_FLOOR_CEILING = ENCLOSURE_FLOOR_CEILING;
 SPEAKER_CAPSULE_FILLET = 1.25;
+SPEAKER_CAPSULE_DIAMETER_CLEARANCE = .2;
+
+function get_speaker_capsule_speaker_cavity_diameter(
+    speaker_diameter = SPEAKER_DIAMETER,
+    speaker_diameter_clearance = SPEAKER_CAPSULE_DIAMETER_CLEARANCE,
+    tolerance = 0
+) = (
+    speaker_diameter
+    + (speaker_diameter_clearance + tolerance) * 2
+);
+
+function get_speaker_capsule_cap_diameter(
+    speaker_diameter = SPEAKER_DIAMETER,
+    speaker_diameter_clearance = SPEAKER_CAPSULE_DIAMETER_CLEARANCE,
+    wall = SPEAKER_CAPSULE_WALL,
+    tolerance = 0
+) = (
+    get_speaker_capsule_speaker_cavity_diameter(
+        speaker_diameter, speaker_diameter_clearance, tolerance
+    ) + wall * 2
+);
 
 module speaker_capsule(
-    wall = ENCLOSURE_WALL * 1.5,
+    wall = SPEAKER_CAPSULE_WALL,
     floor_ceiling = SPEAKER_CAPSULE_FLOOR_CEILING,
 
     tolerance = .1,
-    speaker_diameter_clearance = .2,
+    speaker_diameter_clearance = SPEAKER_CAPSULE_DIAMETER_CLEARANCE,
     speaker_bottom_clearance = 1,
 
     wire_access_width = 3,
@@ -56,8 +78,9 @@ module speaker_capsule(
 ) {
     e = .0235;
 
-    speaker_cavity_diameter = speaker_diameter
-        + (tolerance + speaker_diameter_clearance) * 2;
+    speaker_cavity_diameter = get_speaker_capsule_speaker_cavity_diameter(
+        speaker_diameter, speaker_diameter_clearance, tolerance
+    );
     speaker_inner_brim_diameter = speaker_diameter
         - speaker_brim_depth * 2 + tolerance * 2;
     inner_total_height = test_print
@@ -69,7 +92,12 @@ module speaker_capsule(
     outer_cap_height = floor_ceiling + threaded_height;
     outer_middle_height = outer_height - outer_cap_height * 2;
 
-    outer_cap_diameter = speaker_cavity_diameter + wall * 2;
+    outer_cap_diameter = get_speaker_capsule_cap_diameter(
+        speaker_diameter = speaker_diameter,
+        speaker_diameter_clearance = speaker_diameter_clearance,
+        wall = wall,
+        tolerance = tolerance
+    );
 
     function get_threads_diameter(cavity) = (
         outer_cap_diameter
