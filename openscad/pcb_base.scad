@@ -50,6 +50,8 @@ module pcb_base(
     screw_positions = [],
     stool_positions = [],
 
+    show_posts_and_stools = true,
+
     fillet = ENCLOSURE_FILLET,
 
     tolerance = 0,
@@ -122,5 +124,8 @@ module pcb_base(
         rounded_xy_cube([width, length, base_height], fillet, $fn = 12);
         _screw_exits();
     }
-    _posts_and_stools();
+
+    if (show_posts_and_stools) {
+        _posts_and_stools();
+    }
 }
