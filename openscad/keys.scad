@@ -126,6 +126,7 @@ module keys(
     accidental_color = "#444",
     natural_color = "#fff",
     natural_color_cavity = "#eee",
+    mount_color = "#fff",
 
     quick_preview = $preview,
     debug = false
@@ -397,6 +398,8 @@ module keys(
     }
 
     if (include_mount) {
-        _mount();
+        color(mount_color) {
+            _mount();
+        }
     }
 }
