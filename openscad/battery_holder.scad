@@ -72,6 +72,14 @@ function get_battery_holder_dimensions(
     AAA_BATTERY_DIAMETER + floor + wall_height_extension
 ];
 
+function get_battery_holder_wire_relief_hitch_width(
+    tolerance = 0,
+    ribbon_cable_width = RIBBON_CABLE_WIDTH,
+    wall = BATTERY_HOLDER_DEFAULT_WALL
+) = (
+    ribbon_cable_width + tolerance * 2 + wall * 2
+);
+
 module battery_contact_fixture(
     height = KEYSTONE_181_HEIGHT,
     tolerance = 0,
@@ -411,7 +419,11 @@ module battery_holder(
                         translate([cylinder_x, 0, cylinder_z]) {
                             rotate([-90, 0, 0]) {
                                 cylinder(
-                                    d = hole_diameter + wall * 2,
+                                    d = get_battery_holder_wire_relief_hitch_width(
+                                        tolerance = tolerance,
+                                        ribbon_cable_width = RIBBON_CABLE_WIDTH,
+                                        wall = wall
+                                    ),
                                     h = _length
                                 );
                             }
