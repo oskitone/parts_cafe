@@ -17,6 +17,7 @@ KEY_FRONT_FILLET = 2;
 KEY_SIDES_FILLET = 1;
 
 KEYS_MOUNT_LENGTH = NUT_DIAMETER;
+KEYS_MOUNT_HEIGHT = 2;
 
 SCOUT_NATURAL_KEY_LENGTH = 50;
 SCOUT_NATURAL_KEY_HEIGHT = 7;
@@ -111,7 +112,7 @@ module keys(
 
     mount_width = undef,
     mount_length = KEYS_MOUNT_LENGTH,
-    mount_height = 2,
+    mount_height = KEYS_MOUNT_HEIGHT,
     mount_hole_xs = [],
     mount_hole_diameter = SCREW_DIAMETER,
     mount_screw_head_diameter = SCREW_HEAD_DIAMETER,
