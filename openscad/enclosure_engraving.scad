@@ -53,11 +53,11 @@ module enclosure_engraving_placard(
         flat_top_rectangular_pyramid(
             top_width = top_dimensions.x,
             top_length = chamfer_top
-                ? top_dimensions.y + dimensions.z / 2
+                ? top_dimensions.y + _depth / 2
                 : top_dimensions.y,
             bottom_width = dimensions.x,
             bottom_length = chamfer_top
-                ? dimensions.y - dimensions.z / 2
+                ? dimensions.y - _depth / 2
                 : dimensions.y,
             height = _depth + e,
             top_weight_y = chamfer_top ? 0 : .5
