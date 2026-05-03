@@ -2,8 +2,8 @@ include <nuts_and_bolts.scad>;
 
 // For securely mounting a PCB with nuts and bolts
 
-// TODO: fix this being too tight even with standard .1 tolerance
 // CONSIDER: simpler hardware setup w/o nuts
+// TODO: no bridge, use supportless_screw_cavity
 
 PCB_MOUNT_POST_CEILING = 2;
 PCB_MOUNT_NUT_Z_CLEARANCE = .2;

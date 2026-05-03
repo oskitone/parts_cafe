@@ -21,6 +21,8 @@ EXAMPLE_EDGE_CUTS = [
     [[0, 10], [0, 0]],
 ];
 
+// TODO: accept rectangle start,end
+
 function get_pcb_dimensions(
     edge_cuts = EXAMPLE_EDGE_CUTS,
     height = PCB_HEIGHT
@@ -90,6 +92,7 @@ module pcb(
         difference() {
             union() {
                 color(pcb_color) {
+                    // TODO: ues edge_cuts for polygon?
                     cube([width, length, height]);
                 }
 
