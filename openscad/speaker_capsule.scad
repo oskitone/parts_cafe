@@ -99,6 +99,8 @@ module speaker_capsule(
         tolerance = tolerance
     );
 
+    brim_z = outer_height - floor_ceiling - speaker_brim_height;
+
     function get_threads_diameter(cavity) = (
         outer_cap_diameter
             - (outer_cap_diameter - speaker_cavity_diameter) / 2
@@ -106,7 +108,6 @@ module speaker_capsule(
     );
 
     module _inner_cavities(cap = true) {
-        brim_z = outer_height - floor_ceiling - speaker_brim_height;
         chamfer = (speaker_cavity_diameter - speaker_inner_brim_diameter) / 2;
         bottom_cavity_height = inner_total_height - speaker_brim_height - chamfer;
 
@@ -301,22 +302,19 @@ module speaker_capsule(
                 );
             }
 
-            if ((top_cap || bottom_cap) && wire_access_height > 0) {
+            if (!top_cap && wire_access_height > 0) {
                 width = wire_access_width + tolerance * 2;
-                height = top_cap
-                    ? threaded_height + e
-                    : outer_cap_height + (floor_ceiling > 0 ? 0 : e * 2);
 
-                z = top_cap
-                    ? outer_height - floor_ceiling - height
-                    : floor_ceiling > 0 ? floor_ceiling : -e;
+                z = bottom_cap
+                    ? floor_ceiling > 0 ? floor_ceiling : -e
+                    : brim_z;
 
                 rotate([0, 0, wire_access_rotation]) {
                     translate([width / -2, 0, z]) {
                         cube([
                             width,
                             outer_cap_diameter * 2,
-                            height
+                            outer_cap_height + (floor_ceiling > 0 ? 0 : e * 2)
                         ]);
                     }
                 }
