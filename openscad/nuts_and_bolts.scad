@@ -70,7 +70,7 @@ module screw(
 }
 
 module screws(
-    positions = PCB_HOLE_POSITIONS,
+    positions = [],
     pcb_position = [],
     diameter = SCREW_DIAMETER,
     length = 3/4 * 25.4,
