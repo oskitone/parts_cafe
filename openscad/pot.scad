@@ -1,3 +1,9 @@
+// NOTE: Technically, the actuator is 5.5 from the top
+// and 7 from the bottom, making the total base length
+// 12.5 instead of 11.
+// However, it's conceptually simpler to deal with the
+// actuator centered against the smaller base length.
+
 PTV09A_POT_BASE_WIDTH = 10;
 PTV09A_POT_BASE_LENGTH = 11;
 PTV09A_POT_BASE_HEIGHT_FROM_PCB = 8.8; // ie, shaft_z
