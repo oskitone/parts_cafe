@@ -1,4 +1,5 @@
 include <rib_cavities.scad>;
+include <switch-OS102011MA1QN1.scad>;
 
 SWITCH_CLUTCH_GRIP_LENGTH = 10;
 SWITCH_CLUTCH_GRIP_HEIGHT = 7;
