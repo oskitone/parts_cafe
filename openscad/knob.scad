@@ -1,12 +1,14 @@
 include <wheel.scad>;
 
+KNOB_CEILING = 1.8;
+
 module knob(
     diameter = 20,
     height = 10,
 
     fillet = 2,
 
-    ceiling = 1.8,
+    ceiling = KNOB_CEILING,
     hub_diameter = PTV09A_POT_ACTUATOR_DIAMETER + 1.2 * 2,
 
     dimple_count = 1,
