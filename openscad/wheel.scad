@@ -82,7 +82,7 @@ module wheel(
                     donut(
                         diameter = diameter,
                         thickness = fillet,
-                        segments = $fn != undef ? $fn : 24
+                        segments = $preview ? undef : grip_count
                     );
                 }
             }
@@ -100,35 +100,37 @@ module wheel(
             _end(height - fillet / 2);
         }
 
-        difference() {
-            union() {
-                if (spokes_count > 0) {
-                    _ends();
-                } else {
-                    hull() {
-                        _ends();
-                    }
-                }
-
-                // TODO: tidy. Seems this is only used for round_bottom
-                translate([0, 0, round_bottom ? fillet / 2 : 0]) {
-                    ring(
-                        diameter = diameter,
-                        height = round_bottom ? height - fillet : height - fillet / 2,
-                        thickness = fillet
-                    );
-                }
+        if (spokes_count > 0) {
+            _ends();
+        } else {
+            hull() {
+                _ends();
             }
+        }
 
-            translate([0, 0, -e]) {
-                cylinder_grip(
-                    diameter = diameter,
-                    height = height + e * 2,
-                    count = grip_count,
-                    size = .8,
-                    $fn = 6
-                );
-            }
+        // TODO: tidy. Seems this is only used for round_bottom
+        translate([0, 0, round_bottom ? fillet / 2 : 0]) {
+            ring(
+                diameter = diameter,
+                height = round_bottom ? height - fillet : height - fillet / 2,
+                thickness = fillet
+            );
+        }
+    }
+
+    module _outer_grip() {
+        z = brim_height > 0
+            ? brim_height + e
+            : -e;
+
+        translate([0, 0, z]) {
+            cylinder_grip(
+                diameter = diameter,
+                height = height + e * 2,
+                count = grip_count,
+                size = .8,
+                $fn = 6
+            );
         }
     }
 
@@ -145,7 +147,7 @@ module wheel(
             }
         }
 
-        module _grips() {
+        module _pot_grips() {
             _height = height - ceiling;
             z = shaft_type == POT_SHAFT_TYPE_SPLINED
                 ? _height - PTV09A_POT_ACTUATOR_SPLINED_SHAFT_HEIGHT
@@ -185,7 +187,7 @@ module wheel(
 
         difference() {
             _pot(tolerance);
-            _grips();
+            _pot_grips();
         }
     }
 
@@ -246,10 +248,11 @@ module wheel(
             rotation = i * (360 / dimple_count);
 
             rotate([0, 0, rotation]) {
-                translate([0, y, height - dimple_depth]) {
+                translate([0, y, height - dimple_depth + e]) {
                     cylinder(
-                        h = dimple_depth + e,
-                        d = dimple_diameter
+                        h = dimple_depth,
+                        d = dimple_diameter,
+                        $fn = $preview ? undef : grip_count
                     );
                 }
             }
@@ -260,7 +263,7 @@ module wheel(
         cylinder(
             d = brim_diameter,
             h = brim_height,
-            $fn = $fn
+            $fn = $preview ? undef : grip_count
         );
     }
 
@@ -291,6 +294,7 @@ module wheel(
 
         color(cavity_color) {
             _pot_cavity();
+            _outer_grip();
 
             if (dimple_count > 0) {
                 _dimple_cavities();
