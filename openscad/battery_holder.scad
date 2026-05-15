@@ -438,7 +438,7 @@ module battery_holder(
             cylinder_x = wall + hole_diameter / 2;
             cylinder_z = floor + center_z;
 
-            connection_x = flip_horizontally ? 0 : wall_xy - x + e;
+            connection_x = flip_horizontally ? -wall_xy - e : wall_xy - x + e;
 
             translate([x, y, -floor]) {
                 difference() {
