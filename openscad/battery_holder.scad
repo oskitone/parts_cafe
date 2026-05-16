@@ -62,7 +62,8 @@ function get_battery_holder_length(
     tolerance = 0,
     count = 1,
     inline = false,
-    wall = BATTERY_HOLDER_DEFAULT_WALL
+    wall = BATTERY_HOLDER_DEFAULT_WALL,
+    gutter = KEYSTONE_181_GUTTER
 ) = (
     get_battery_holder_cavity_length(tolerance, count, inline, gutter)
     + wall * 2
@@ -74,11 +75,12 @@ function get_battery_holder_dimensions(
     count = 1,
     inline = false,
     wall = BATTERY_HOLDER_DEFAULT_WALL,
+    gutter = KEYSTONE_181_GUTTER,
     floor = BATTERY_HOLDER_DEFAULT_FLOOR,
     wall_height_extension = 0
 ) = [
     get_battery_holder_width(tolerance, count, inline, wall),
-    get_battery_holder_length(tolerance, count, inline, wall),
+    get_battery_holder_length(tolerance, count, inline, wall, gutter),
     AAA_BATTERY_DIAMETER + floor + wall_height_extension
 ];
 
