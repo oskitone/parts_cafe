@@ -9,6 +9,8 @@ LED_BASE_DIAMETER = 6;
 
 LED_LEADS_DIAMETER = .5;
 
+RGB_PCB_Z_OFF_PCB = 3.5;
+
 module led(
     diameter = LED_DIAMETER,
     height = LED_HEIGHT,
