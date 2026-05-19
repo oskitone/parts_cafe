@@ -26,6 +26,8 @@ BATTERY_HOLDER_FILLET = 1.25; // ENCLOSURE_INNER_FILLET
 RIBBON_CABLE_WIDTH = 2.6;
 RIBBON_CABLE_HEIGHT = 1;
 
+INTENTIONAL_LOOSENESS = .1;
+
 function get_battery_holder_cavity_width(
     tolerance = 0,
     count = 1,
@@ -212,7 +214,7 @@ module battery_direction_engravings(
             y = row_i * (AAA_BATTERY_DIAMETER + gutter) - tolerance
                 + AAA_BATTERY_DIAMETER / 2;
 
-            translate([x, y, -(z + e)]) {
+            translate([x - tolerance, y + tolerance, -(z + e)]) {
                 enclosure_engraving(
                     string = get_label(row_i, contact_i),
                     size = AAA_BATTERY_DIAMETER * .75,
@@ -255,7 +257,7 @@ module battery_contact_fixtures(
                 floor_cavity_height = floor_cavity_height,
                 diameter = KEYSTONE_5204_5226_WIDTH,
                 wall = tab_contact_fixture_wall,
-                tolerance = tolerance * 2, // intentionally loose
+                tolerance = tolerance + INTENTIONAL_LOOSENESS,
                 contact_z = 0,
                 height = height - e
             );
@@ -402,6 +404,25 @@ module battery_holder(
         ]) {
             translate([xy.x, xy.y - _length / 2, -(e + floor)]) {
                 cube([_width, _length, _height]);
+            }
+        }
+    }
+
+    module _inline_wire_relief_cavities(
+        diameter = RIBBON_CABLE_WIDTH + tolerance * 2
+    ) {
+        for (x = [
+            KEYSTONE_181_SPRING_LENGTH,
+            cavity_width - KEYSTONE_181_SPRING_LENGTH
+        ]) {
+            translate([x, AAA_BATTERY_DIAMETER + tolerance - diameter / 2, diameter]) {
+                rotate([180 + 45, 0, 0]) {
+                    cylinder(
+                        d = diameter,
+                        h = wall + 100, // NOTE: arbitrarily big
+                        $fn = 12
+                    );
+                }
             }
         }
     }
@@ -580,7 +601,7 @@ module battery_holder(
                 }
 
                 if (include_wire_relief_hitches) {
-                    _wire_relief_hitches();
+                    _wire_relief_hitches(wall = wall);
                 }
             }
         }
@@ -608,6 +629,10 @@ module battery_holder(
                 );
             }
 
+            if (inline) {
+                _inline_wire_relief_cavities();
+            }
+
             if (include_nub_fixture_cavities) {
                 _nub_fixture_cavities();
             }
@@ -629,8 +654,12 @@ translate([-10, -50, -10]) cube([20, 50, 30]);
 }
 
 * battery_holder(
-    inline = ($t >= .5),
+    inline = true,
+    tolerance = .1,
+    wall = ENCLOSURE_WALL,
+    include_wire_channel = false,
     use_wire_channel_as_relief = true,
+    include_wire_relief_hitches = true,
     count = 3,
-    quick_preview = false
+    quick_preview = $preview
 );
