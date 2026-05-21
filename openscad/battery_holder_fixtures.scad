@@ -225,7 +225,7 @@ module battery_holder_enclosure_fixtures(
             battery_holder_hitch(
                 tolerance = tolerance,
 
-                z = battery_holder_position.z - e,
+                z = ENCLOSURE_FLOOR_CEILING - e,
 
                 width = hitch_width,
                 length = hitch_length,
