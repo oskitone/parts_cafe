@@ -56,6 +56,8 @@ module switch_clutch_angled(
     dfm_support_x = -web_width - exposed_grip_width + fillet;
     dfm_support_y = (web_length - grip_length) / 2;
 
+    chamfer = quick_preview ? 0 : chamfer;
+
     module _exposed_grip() {
         x = -web_width - exposed_grip_width;
         y = (web_length - grip_length) / 2;
@@ -125,8 +127,8 @@ module switch_clutch_angled(
         width = switch_actuator_width - web_x_gap + tolerance;
         length = switch_actuator_length + tolerance * 2;
 
-        translate([-width, (web_length - length) / 2, -e]) {
-            cube([width + e, length, web_height + e * 2]);
+        translate([-width, (web_length - length) / 2, -e * 2]) {
+            cube([width + e, length, web_height + e * 4]);
         }
     }
 

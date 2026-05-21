@@ -25,23 +25,25 @@ module flat_top_rectangular_pyramid(
         ? max_difference / 2
         : height;
 
-    polyhedron(
-        [
-            [0, 0, 0],
-            [bottom_width, 0, 0],
-            [bottom_width, bottom_length, 0],
-            [0, bottom_length, 0],
-            [top_x, top_y, height],
-            [top_width + top_x, top_y, height],
-            [top_width + top_x, top_length + top_y, height],
-            [top_x, top_length + top_y, height]
-        ], [
-            [0, 1, 2, 3],
-            [4, 5, 1, 0],
-            [7, 6, 5, 4],
-            [5, 6, 2, 1],
-            [6, 7, 3, 2],
-            [7, 4, 0, 3]
-        ]
-    );
+    if (height > 0) {
+        polyhedron(
+            [
+                [0, 0, 0],
+                [bottom_width, 0, 0],
+                [bottom_width, bottom_length, 0],
+                [0, bottom_length, 0],
+                [top_x, top_y, height],
+                [top_width + top_x, top_y, height],
+                [top_width + top_x, top_length + top_y, height],
+                [top_x, top_length + top_y, height]
+            ], [
+                [0, 1, 2, 3],
+                [4, 5, 1, 0],
+                [7, 6, 5, 4],
+                [5, 6, 2, 1],
+                [6, 7, 3, 2],
+                [7, 4, 0, 3]
+            ]
+        );
+    }
 }
