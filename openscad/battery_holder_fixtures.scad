@@ -135,6 +135,8 @@ module battery_holder_enclosure_fixtures(
     battery_holder_dimensions = undef,
     battery_count = 3,
 
+    inline = false,
+
     include_left_side_aligner = true,
     include_right_side_aligner = true,
     include_back_hitch = true,
@@ -162,8 +164,9 @@ module battery_holder_enclosure_fixtures(
     battery_holder_dimensions = battery_holder_dimensions
         ? battery_holder_dimensions
         : get_battery_holder_dimensions(
-            count = battery_count,
             tolerance = tolerance,
+            count = battery_count,
+            inline = inline,
             wall = battery_holder_wall,
             floor = battery_holder_floor
         );
