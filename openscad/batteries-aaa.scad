@@ -46,15 +46,22 @@ module battery_array(
     positive_x = KEYSTONE_181_BUTTON_LENGTH,
     negative_x = KEYSTONE_181_SPRING_COMPRESSED_LENGTH,
 
+    inline = false,
+
     $fn = 24
 ) {
-    plot = AAA_BATTERY_DIAMETER + gutter;
-
     for (i = [0 : count - 1]) {
         is_odd = i % 2 == 1;
 
-        translate([is_odd ? positive_x : negative_x, i * plot, 0]) {
-            battery(reverse = is_odd);
+        x = inline
+            ? i * AAA_BATTERY_TOTAL_LENGTH
+            : is_odd ? positive_x : negative_x;
+        y = inline
+            ? 0
+            : i * (AAA_BATTERY_DIAMETER + gutter);
+
+        translate([x, y, 0]) {
+            battery(reverse = !inline && is_odd);
         }
     }
 }
