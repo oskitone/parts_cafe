@@ -427,6 +427,40 @@ module battery_holder(
         }
     }
 
+    module _inline_top_closures(size = 1.25) {
+        _width = AAA_BATTERY_LENGTH / 2;
+
+        x = wall_xy + (width - _width) / 2;
+        z = height - floor - size * 2;
+
+        for (
+            x_i = [0 : count - 1],
+            y_i = [0 : 1]
+        ) {
+            x = wall_xy + (width - _width) / 2
+                + AAA_BATTERY_LENGTH * (x_i - 1);
+            y = [
+                -e * 2,
+                length + wall_xy * 2 + e * 2
+            ][y_i];
+
+            translate([x, y, z]) hull() {
+                flat_top_rectangular_pyramid(
+                    top_width = _width,
+                    top_length = size,
+                    bottom_width = _width,
+                    bottom_length = 0,
+                    height = size,
+                    top_weight_y = y_i == 0 ? 0 : 1
+                );
+
+                translate([0, y_i == 0 ? 0 : -e, size * 2 - e]) {
+                    cube([_width, e, e]);
+                }
+            }
+        }
+    }
+
     module _nub_fixture_cavities(clearance = .1) {
         _width = BATTERY_HOLDER_NUB_FIXTURE_WIDTH + (clearance + tolerance) * 2;
         _length = wall + e * 2;
@@ -435,17 +469,19 @@ module battery_holder(
 
         x = wall_xy + (width - _width) / 2;
 
-        for (
-            y = [wall_xy - e, wall_xy + length - _length],
-            z = [
-                -floor - e,
-                BATTERY_HOLDER_NUB_FIXTURE_Z - (clearance + tolerance) - floor
-            ]
-        ) {
-            translate([x, y, z]) {
+        for (y = [wall_xy - e, wall_xy + length - _length]) {
+            translate([x, y, -floor - e]) {
                 cube([_width, _length + e, _height + e]);
             }
         }
+
+            translate([
+                x,
+                wall_xy - e,
+                BATTERY_HOLDER_NUB_FIXTURE_Z - (clearance + tolerance) - floor
+            ]) {
+                cube([_width, length + e * 2, _height + e]);
+            }
     }
 
     module _wire_relief_hitches(
@@ -596,7 +632,9 @@ module battery_holder(
                     }
                 }
 
-                if (!inline) {
+                if (inline) {
+                    _inline_top_closures();
+                } else {
                     _alignment_rails();
                 }
 
