@@ -14,10 +14,9 @@ def get_footprints_from_pcb(kicad_pcb_path):
 
     for footprint in board.GetFootprints():
         ref = footprint.GetReference()
-        value = footprint.GetValue()
         position = footprint.GetPosition()
 
-        data[ref] = {"x": position.x, "y": position.y, "value": value}
+        data[ref] = {"x": position.x / 1000000, "y": position.y / 1000000}
     
     return data
 
@@ -33,8 +32,7 @@ def get_footprints_from_csv(csv_path):
 
                 data[row[0]] = {
                     "x": float(row[1]),
-                    "y": float(row[2]),
-                    "value": row[3]
+                    "y": float(row[2])
                 }
 
     except FileNotFoundError:
@@ -49,28 +47,34 @@ def update_pcb_from_csv(kicad_pcb_path, input_csv_path):
     board = get_board(kicad_pcb_path)
 
     for ref,props  in footprints_from_csv.items():
-        footprint = board.FindFootprintByReference(ref)
-        old = footprint.GetPosition()
+        print(f"Updating {ref}")
 
-        new_x = int(props["x"])
-        new_y = int(props["y"])
+        footprint = board.FindFootprintByReference(ref)
 
         if footprint:
-            print(f"Updating {ref} from {old.x},{old.y} to {new_x},{new_y}")
-            footprint.SetPosition(pcbnew.VECTOR2I(new_x, new_y))
+            old = footprint.GetPosition()
+
+            new_x = int(props["x"] * 1000000)
+            new_y = int(props["y"] * 1000000)
+
+            if (old.x != new_x or old.y != new_y):
+                print(f"  {old.x},{old.y} to {new_x},{new_y}")
+                footprint.SetPosition(pcbnew.VECTOR2I(new_x, new_y))
+            else:
+                print(f"  No change")
         else:
-            print(f"{ref} not found")
+            print(f"  Not found!")
 
     board.Save(kicad_pcb_path)
 
 # kicad-python python/kicad_tinker.py > input.csv
 # footprints_from_kicad = get_footprints_from_pcb("../guts/kicad/chordo/chordo.kicad_pcb")
 # for ref,props  in footprints_from_kicad.items():
-#     print(f"{ref},{props['x']},{props['y']},{props['value']}")
+#     print(f"{ref},{props['x']},{props['y']}")
 
 # footprints_from_csv = get_footprints_from_csv("input.csv")
 # for ref,props  in footprints_from_csv.items():
-#     print(f"{ref},{props['x']},{props['y']},{props['value']}")
+#     print(f"{ref},{props['x']},{props['y']}")
 
 update_pcb_from_csv(
     "../guts/kicad/chordo/chordo.kicad_pcb",
