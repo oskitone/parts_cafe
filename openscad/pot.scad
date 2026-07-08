@@ -21,6 +21,7 @@ POT_SHAFT_TYPE_DEFAULT = POT_SHAFT_TYPE_SPLINED;
 
 // Distance from pin 1 to shaft center
 PTV09A_POT_ORIGIN = [2.5, -7.5];
+PTV09A_POT_KICAD_FOOTPRINT_ORIGIN_TO_CENTER = [6.136, -3.444];
 
 module pot(
     show_base = true,

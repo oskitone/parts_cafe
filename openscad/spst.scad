@@ -12,6 +12,7 @@ SPST_PLOT = 2.54 * 3;
 
 // Distance from pin 1 to actuator center
 SPST_ORIGIN = [4.5 / 2, 6 / 2];
+SPST_KICAD_FOOTPRINT_ORIGIN_TO_CENTER = [3.25, 2.25];
 
 module spst(
     base_dimensions = SPST_BASE_DIMENSIONS,

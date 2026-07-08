@@ -11,6 +11,8 @@ LED_LEADS_DIAMETER = .5;
 
 RGB_PCB_Z_OFF_PCB = 3.5;
 
+LED_5MM_KICAD_FOOTPRINT_ORIGIN_TO_CENTER = [1.27, 0];
+
 module led(
     diameter = LED_DIAMETER,
     height = LED_HEIGHT,
