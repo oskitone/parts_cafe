@@ -22,7 +22,7 @@ ENCLOSURE_ENGRAVING_CHAMFER = .4;
 ENCLOSURE_ENGRAVING_WORDMARK_POSITION_TOP = 0;
 ENCLOSURE_ENGRAVING_WORDMARK_POSITION_LEFT = 1;
 
-BRANDING_SVG = "../../parts_cafe/images/branding.svg";
+BRANDING_SVG = "../../parts_cafe/images/branding-full_height.svg";
 
 function get_branding_model_length(
     gutter = 0,
