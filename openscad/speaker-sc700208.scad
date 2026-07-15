@@ -1,3 +1,7 @@
+include <nuts_and_bolts.scad>;
+include <pcb_mount_post.scad>;
+include <rounded_xy_cube.scad>;
+
 SPEAKER_DIAMETER = 41.1;
 SPEAKER_HEIGHT = 25;
 SPEAKER_LENGTH = 71;
@@ -9,6 +13,13 @@ SPEAKER_RIM_HEIGHT = 1.4;
 SPEAKER_CONE_DIAMETER = 38;
 SPEAKER_MAGNET_DIAMETER = 22;
 SPEAKER_MAGNET_HEIGHT = 7.5;
+
+SPEAKER_PLATE_HOLE_POSITIONS = [
+    [SPEAKER_PLATE_HOLE_XY, SPEAKER_PLATE_HOLE_XY],
+    [SPEAKER_DIAMETER - SPEAKER_PLATE_HOLE_XY, SPEAKER_PLATE_HOLE_XY],
+    [SPEAKER_PLATE_HOLE_XY, SPEAKER_LENGTH - SPEAKER_PLATE_HOLE_XY],
+    [SPEAKER_DIAMETER - SPEAKER_PLATE_HOLE_XY, SPEAKER_LENGTH - SPEAKER_PLATE_HOLE_XY],
+];
 
 module _speaker_face(
     diameter = SPEAKER_DIAMETER,
@@ -43,12 +54,7 @@ module speaker_plate_screw_cavities(
     diameter = SPEAKER_PLATE_HOLE_DIAMETER,
     z = 0
 ) {
-    for (xy = [
-        [SPEAKER_PLATE_HOLE_XY, SPEAKER_PLATE_HOLE_XY],
-        [SPEAKER_DIAMETER - SPEAKER_PLATE_HOLE_XY, SPEAKER_PLATE_HOLE_XY],
-        [SPEAKER_PLATE_HOLE_XY, SPEAKER_LENGTH - SPEAKER_PLATE_HOLE_XY],
-        [SPEAKER_DIAMETER - SPEAKER_PLATE_HOLE_XY, SPEAKER_LENGTH - SPEAKER_PLATE_HOLE_XY],
-    ]) {
+    for (xy = SPEAKER_PLATE_HOLE_POSITIONS) {
         translate([xy.x, xy.y, z]) {
             cylinder(
                 d = diameter,
@@ -98,7 +104,7 @@ module speaker() {
                 d1 = SPEAKER_CONE_DIAMETER,
                 d2 = SPEAKER_DIAMETER,
                 height = e,
-                z = SPEAKER_HEIGHT - SPEAKER_RIM_HEIGHT - SPEAKER_PLATE_HEIGHT - e
+                z = SPEAKER_HEIGHT - SPEAKER_RIM_HEIGHT - SPEAKER_PLATE_HEIGHT
             );
 
             translate([0, 0, SPEAKER_MAGNET_HEIGHT]) {
@@ -119,3 +125,85 @@ module speaker() {
     _cone();
     _magnet();
 }
+
+module speaker_mount_fixture(
+    dimensions = [
+        SPEAKER_DIAMETER,
+        SPEAKER_LENGTH,
+        NUT_HEIGHT + PCB_MOUNT_POST_CEILING
+    ],
+    height = undef,
+    nut_z = PCB_MOUNT_POST_CEILING,
+    hole_diameter = SCREW_DIAMETER,
+    tolerance = 0
+) {
+    e = .0234;
+
+    dimensions = [
+        dimensions.x,
+        dimensions.y,
+        height != undef ? height : dimensions.z
+    ];
+
+    cavity_dimensions = [
+        NUT_DIAMETER + SPEAKER_DIAMETER / 2,
+        NUT_DIAMETER + tolerance * 2,
+        NUT_HEIGHT + e
+    ];
+
+    difference() {
+        translate([dimensions.x / -2, dimensions.y / -2, 0]) {
+            rounded_xy_cube(
+                dimensions,
+                radius = SPEAKER_PLATE_HOLE_XY,
+                $fn = 4
+            );
+        }
+
+        _speaker_face(
+            diameter = SPEAKER_DIAMETER + tolerance * 2,
+            height = SPEAKER_RIM_HEIGHT + e,
+            z = -e
+        );
+
+        translate([0, 0, -e]) {
+            _speaker_face(
+                diameter = SPEAKER_DIAMETER - SPEAKER_RIM_DEPTH,
+                height = dimensions.z + e * 2
+            );
+        }
+
+        for (i = [0 : len(SPEAKER_PLATE_HOLE_POSITIONS) - 1]) {
+            xy = SPEAKER_PLATE_HOLE_POSITIONS[i];
+
+            translate([
+                xy.x - SPEAKER_DIAMETER / 2,
+                xy.y - SPEAKER_LENGTH / 2,
+                0
+            ]) {
+                translate([0, 0, -e]) {
+                    cylinder(
+                        d = hole_diameter + tolerance * 2,
+                        h = dimensions.z + e * 2
+                    );
+                }
+
+                rotate([0, 0, (i == 0 || i == 3) ? 45 : -45]) {
+                    translate([
+                        cavity_dimensions.x / -2,
+                        cavity_dimensions.y / -2,
+                        nut_z
+                    ]) {
+                        cube(cavity_dimensions);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// speaker_mount_fixture(
+//     dimensions = [50, 100, 20], nut_z = 20 - NUT_HEIGHT,
+//     tolerance = .1
+// );
+// translate([0,0,-SPEAKER_HEIGHT + SPEAKER_RIM_HEIGHT]) speaker();
