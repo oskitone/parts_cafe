@@ -147,7 +147,11 @@ module enclosure_engraving(
                 ? [_size / OSKITONE_LENGTH_WIDTH_RATIO, _size]
                 : resize;
 
-        translate([0, y, placard ? -e : 0]) {
+        gutter = placard && !center
+            ? (placard.y - inner_length) / 2
+            : 0;
+
+        translate([gutter, y + gutter, placard ? -e : 0]) {
             engraving(
                 string = _string,
                 svg = svg, svg_rotation = svg_rotation,
@@ -171,8 +175,8 @@ module enclosure_engraving(
             difference() {
                 if (placard) {
                     translate([
-                        placard.x / (center ? -2 : 1),
-                        placard.y / (center ? -2 : 1)
+                        center ? placard.x / -2 : 0,
+                        center ? placard.y / -2 : 0
                     ]) {
                         enclosure_engraving_placard(
                             placard,
