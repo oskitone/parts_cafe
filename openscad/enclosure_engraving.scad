@@ -18,10 +18,6 @@ ENCLOSURE_ENGRAVING_BOTTOM_BRANDING_SIZE = 6;
 ENCLOSURE_ENGRAVING_BLEED = -.1;
 ENCLOSURE_ENGRAVING_CHAMFER = .4;
 
-// enum
-ENCLOSURE_ENGRAVING_WORDMARK_POSITION_TOP = 0;
-ENCLOSURE_ENGRAVING_WORDMARK_POSITION_LEFT = 1;
-
 BRANDING_SVG = "../../parts_cafe/images/branding-full_height.svg";
 
 function get_branding_model_length(
@@ -105,7 +101,6 @@ module enclosure_engraving(
     chamfer_placard_top = false,
 
     include_wordmark = false,
-    wordmark_position = ENCLOSURE_ENGRAVING_WORDMARK_POSITION_TOP,
     wordmark_gutter = [ENCLOSURE_ENGRAVING_GUTTER * 2, ENCLOSURE_ENGRAVING_GUTTER * 2],
 
     rotation = 0,
@@ -137,40 +132,22 @@ module enclosure_engraving(
     lines = string ? split(string, "\n") : [undef];
     line_height = size + line_gutter;
 
-    top_wordmark = wordmark_position == ENCLOSURE_ENGRAVING_WORDMARK_POSITION_TOP;
-    left_wordmark = wordmark_position == ENCLOSURE_ENGRAVING_WORDMARK_POSITION_LEFT;
-
     wordmark_length = placard
-        ? (top_wordmark
-            ? (placard.x - wordmark_gutter.x * 2) * OSKITONE_LENGTH_WIDTH_RATIO
-            : (placard.y - wordmark_gutter.y * 2))
+        ? (placard.x - wordmark_gutter.x * 2) * OSKITONE_LENGTH_WIDTH_RATIO
         : size;
-    wordmark_width = wordmark_length / OSKITONE_LENGTH_WIDTH_RATIO;
 
     inner_length =
-        (include_wordmark && top_wordmark
-            ? wordmark_length + wordmark_gutter.y
-            : 0)
+        (include_wordmark ? wordmark_length + wordmark_gutter.y : 0)
         + line_height * len(lines) - line_gutter;
 
-    wordmark_x = left_wordmark
-        ? -wordmark_width / 2 - wordmark_gutter.x
-        : 0;
-    wordmark_y =
-        wordmark_position == ENCLOSURE_ENGRAVING_WORDMARK_POSITION_TOP
-            ? inner_length / 2 - wordmark_length / 2
-            : 0;
-
-    string_x = -wordmark_x;
-
-    module _engraving(_string, _size, x = 0, y = 0) {
+    module _engraving(_string, _size, y = 0) {
         resize = _string
             ? undef
             : svg == BRANDING_SVG
                 ? [_size / OSKITONE_LENGTH_WIDTH_RATIO, _size]
                 : resize;
 
-        translate([x, y, placard ? -e : 0]) {
+        translate([0, y, placard ? -e : 0]) {
             engraving(
                 string = _string,
                 svg = svg, svg_rotation = svg_rotation,
@@ -211,8 +188,7 @@ module enclosure_engraving(
                         _engraving(
                             undef,
                             wordmark_length,
-                            wordmark_x,
-                            wordmark_y
+                            inner_length / 2 - wordmark_length / 2
                         );
                     }
 
@@ -220,7 +196,6 @@ module enclosure_engraving(
                         _engraving(
                             lines[i],
                             size,
-                            string_x,
                             inner_length / -2 + size / 2
                                 + line_height * (len(lines) - 1)
                                 + i * -line_height
@@ -270,35 +245,3 @@ difference() {
         }
     }
 } */
-
-/*
-IS_TOP = $t >= .5;
-dimensions = [80, 80, 10];
-difference() {
-cube(dimensions);
-enclosure_engraving(
-    "ABCD12",
-    resize = undef,
-    size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
-    line_gutter = ENCLOSURE_ENGRAVING_LINE_GUTTER,
-    bleed = ENCLOSURE_ENGRAVING_BLEED,
-    chamfer = ENCLOSURE_ENGRAVING_CHAMFER,
-    center = true,
-    position = [dimensions.x / 2, dimensions.y / 2],
-    depth = ENCLOSURE_ENGRAVING_DEPTH,
-    placard = IS_TOP
-        ? [dimensions.x - 10, dimensions.y - 10]
-        : [dimensions.x - 10, ENCLOSURE_ENGRAVING_LENGTH],
-    include_wordmark = true,
-    wordmark_position = IS_TOP
-        ? ENCLOSURE_ENGRAVING_WORDMARK_POSITION_TOP
-        : ENCLOSURE_ENGRAVING_WORDMARK_POSITION_LEFT,
-    wordmark_gutter = IS_TOP
-        ? [ENCLOSURE_ENGRAVING_GUTTER * 2, ENCLOSURE_ENGRAVING_GUTTER * 2]
-        : [ENCLOSURE_ENGRAVING_GUTTER, ENCLOSURE_ENGRAVING_GUTTER],
-    bottom = false,
-    quick_preview = true,
-    enclosure_height = 10
-);
-}
-*/
