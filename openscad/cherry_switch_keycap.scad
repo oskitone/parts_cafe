@@ -35,6 +35,14 @@ module cherry_switch_keycap(
 
     brim_dimensions = [0,0,0],
 
+    engraving = undef,
+    engraving_size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
+
+    outer_color = undef,
+    cavity_color = undef,
+
+    quick_preview = true,
+
     debug = false
 ) {
     e = .0418;
@@ -95,22 +103,37 @@ module cherry_switch_keycap(
 
     translate([0, 0, switch_position * -cherry_switch_travel]) {
         difference() {
-            cap_blank(
-                dimensions = dimensions,
-                contact_dimensions = [contact_width, contact_length, exposed_height],
-                fillet = fillet,
-                brim_dimensions = brim_dimensions
-            );
+            color(outer_color) {
+                cap_blank(
+                    dimensions = dimensions,
+                    contact_dimensions = [contact_width, contact_length, exposed_height],
+                    fillet = fillet,
+                    brim_dimensions = brim_dimensions
+                );
+            }
 
-            _cavity();
+            color(cavity_color) {
+                if (engraving) {
+                    enclosure_engraving(
+                        engraving,
+                        size = engraving_size,
+                        position = [dimensions.x / 2, dimensions.y / 2],
+                        bottom = false,
+                        quick_preview = quick_preview,
+                        enclosure_height = dimensions.z
+                    );
+                }
 
-            if (debug) {
-                translate([dimensions.x / 2, -e, -e]) {
-                    cube([
-                        dimensions.x / 2 + e,
-                        dimensions.y + e * 2,
-                        dimensions.z + e * 2
-                    ]);
+                _cavity();
+
+                if (debug) {
+                    translate([dimensions.x / 2, -e, -e]) {
+                        cube([
+                            dimensions.x / 2 + e,
+                            dimensions.y + e * 2,
+                            dimensions.z + e * 2
+                        ]);
+                    }
                 }
             }
         }
