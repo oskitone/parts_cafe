@@ -67,6 +67,8 @@ def update_pcb_from_csv(kicad_pcb_path, input_csv_path):
 
     board.Save(kicad_pcb_path)
 
+# alias kicad_python=/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
+
 # kicad-python python/kicad_tinker.py > input.csv
 # footprints_from_kicad = get_footprints_from_pcb("../guts/kicad/chordo/chordo.kicad_pcb")
 # for ref,props  in footprints_from_kicad.items():
@@ -77,6 +79,6 @@ def update_pcb_from_csv(kicad_pcb_path, input_csv_path):
 #     print(f"{ref},{props['x']},{props['y']}")
 
 update_pcb_from_csv(
-    "../guts/kicad/chordo/chordo.kicad_pcb",
-    "input.csv"
+    "../chordo/kicad/chordo.kicad_pcb",
+    "../chordo/kicad/footprint_positions.csv"
 )
