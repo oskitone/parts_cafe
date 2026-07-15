@@ -10,29 +10,56 @@ SPEAKER_CONE_DIAMETER = 38;
 SPEAKER_MAGNET_DIAMETER = 22;
 SPEAKER_MAGNET_HEIGHT = 7.5;
 
-module speaker() {
-    e = .01;
+module _speaker_face(
+    diameter = SPEAKER_DIAMETER,
+    d1, d2,
+    height,
+    z = 0
+) {
+    d1 = d1 != undef ? d1 : diameter;
+    d2 = d2 != undef ? d2 : diameter;
 
-    module _speaker_face(
-        diameter = SPEAKER_DIAMETER,
-        d1, d2,
-        height,
-        z = 0
-    ) {
-        d1 = d1 != undef ? d1 : diameter;
-        d2 = d2 != undef ? d2 : diameter;
-
-        hull() {
-            for (y = [
-                SPEAKER_LENGTH / 2 - SPEAKER_DIAMETER / 2,
-                SPEAKER_LENGTH / -2 + SPEAKER_DIAMETER / 2,
-            ]) {
-                translate([0, y, z]) {
-                    cylinder(d1 = d1, d2 = d2, h = height);
-                }
+    hull() {
+        for (y = [
+            SPEAKER_LENGTH / 2 - SPEAKER_DIAMETER / 2,
+            SPEAKER_LENGTH / -2 + SPEAKER_DIAMETER / 2,
+        ]) {
+            translate([0, y, z]) {
+                cylinder(d1 = d1, d2 = d2, h = height);
             }
         }
     }
+}
+
+module speaker_inner_rim_cavity(height = SPEAKER_RIM_HEIGHT) {
+    _speaker_face(
+        diameter = SPEAKER_DIAMETER - SPEAKER_RIM_DEPTH,
+        height = height
+    );
+}
+
+module speaker_plate_screw_cavities(
+    height = SPEAKER_PLATE_HEIGHT,
+    diameter = SPEAKER_PLATE_HOLE_DIAMETER,
+    z = 0
+) {
+    for (xy = [
+        [SPEAKER_PLATE_HOLE_XY, SPEAKER_PLATE_HOLE_XY],
+        [SPEAKER_DIAMETER - SPEAKER_PLATE_HOLE_XY, SPEAKER_PLATE_HOLE_XY],
+        [SPEAKER_PLATE_HOLE_XY, SPEAKER_LENGTH - SPEAKER_PLATE_HOLE_XY],
+        [SPEAKER_DIAMETER - SPEAKER_PLATE_HOLE_XY, SPEAKER_LENGTH - SPEAKER_PLATE_HOLE_XY],
+    ]) {
+        translate([xy.x, xy.y, z]) {
+            cylinder(
+                d = diameter,
+                h = height
+            );
+        }
+    }
+}
+
+module speaker() {
+    e = .01;
 
     module _rim() {
         z = SPEAKER_HEIGHT - SPEAKER_RIM_HEIGHT;
@@ -43,11 +70,9 @@ module speaker() {
                 z = z
             );
 
-            _speaker_face(
-                diameter = SPEAKER_DIAMETER - SPEAKER_RIM_DEPTH,
-                height = SPEAKER_RIM_HEIGHT + e * 2,
-                z = z - e
-            );
+            translate([0, 0, z - e]) {
+                speaker_inner_rim_cavity(height = SPEAKER_RIM_HEIGHT + e * 2);
+            }
         }
     }
 
@@ -59,20 +84,10 @@ module speaker() {
         ]) {
             difference() {
                 cube([SPEAKER_DIAMETER, SPEAKER_LENGTH, SPEAKER_PLATE_HEIGHT]);
-
-                for (xy = [
-                    [SPEAKER_PLATE_HOLE_XY, SPEAKER_PLATE_HOLE_XY],
-                    [SPEAKER_DIAMETER - SPEAKER_PLATE_HOLE_XY, SPEAKER_PLATE_HOLE_XY],
-                    [SPEAKER_PLATE_HOLE_XY, SPEAKER_LENGTH - SPEAKER_PLATE_HOLE_XY],
-                    [SPEAKER_DIAMETER - SPEAKER_PLATE_HOLE_XY, SPEAKER_LENGTH - SPEAKER_PLATE_HOLE_XY],
-                ]) {
-                    translate([xy.x, xy.y, -e]) {
-                        cylinder(
-                            d = SPEAKER_PLATE_HOLE_DIAMETER,
-                            h = SPEAKER_PLATE_HEIGHT + e * 2
-                        );
-                    }
-                }
+                speaker_plate_screw_cavities(
+                    height = SPEAKER_PLATE_HEIGHT + e * 2,
+                    z = -e
+                );
             }
         }
     }
