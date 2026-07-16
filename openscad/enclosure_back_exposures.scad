@@ -3,11 +3,7 @@ include <enclosure.scad>;
 include <flat_top_rectangular_pyramid.scad>;
 include <headphone_jack.scad>;
 include <pcb.scad>;
-
-// TODO: extract
-// https://www.digikey.com/en/products/detail/adam-tech/PH1RB-06-UA/9830592
-PCB_UART_HEADER_WIDTH = 2.54 * 6;
-PCB_UART_HEADER_HEIGHT = 2.5;
+include <uart_header.scad>;
 
 ENCLOSURE_BACK_EXPOSURE_X_BLEED = 1;
 ENCLOSURE_BACK_EXPOSURE_LABEL_MIN_WIDTH = 16;
@@ -60,8 +56,8 @@ module enclosure_back_header_exposure(
     pcb_z = 0,
 
     center_x = 0,
-    component_width = PCB_UART_HEADER_WIDTH,
-    component_height = PCB_UART_HEADER_HEIGHT,
+    component_width = UART_HEADER_BLOCK_DIMENSIONS.x,
+    component_height = UART_HEADER_BLOCK_DIMENSIONS.z,
 
     clearance_chamfer = ENCLOSURE_ENGRAVING_DEPTH / 2,
 
