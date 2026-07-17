@@ -127,10 +127,20 @@ module cherry_switch_keycap(
                 _cavity();
 
                 if (debug) {
-                    translate([dimensions.x / 2, -e, -e]) {
+                    cutoff_dimensions = [
+                        max(dimensions.x, brim_dimensions.x),
+                        max(dimensions.y, brim_dimensions.y),
+                        dimensions.z
+                    ];
+
+                    translate([
+                        dimensions.x / 2,
+                        (cutoff_dimensions.y - dimensions.y) / -2 - e,
+                        -e
+                    ]) {
                         cube([
-                            dimensions.x / 2 + e,
-                            dimensions.y + e * 2,
+                            cutoff_dimensions.x / 2 + e,
+                            cutoff_dimensions.y + e * 2,
                             dimensions.z + e * 2
                         ]);
                     }
