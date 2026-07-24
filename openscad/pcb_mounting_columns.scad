@@ -1,7 +1,12 @@
 include <nuts_and_bolts.scad>;
 include <pcb_stool.scad>;
 
-// For PCB registration/mounting on both screw and post holes
+// For PCB registration/mounting on both screw and post holes...
+// Confusingly, it assumes screws insert through the bottom and
+// only does the columns and not the screw cavities.
+// For mounting from the top with a nut lock on bottom,
+// use pcb_mount_post.
+// TODO: rename to self-document difference
 
 module pcb_mounting_columns(
     pcb_position = [0,0,0],
