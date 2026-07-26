@@ -9,15 +9,15 @@ BATTERY_HOLDER_FIXTURE_HITCH_WEB_LENGTH = AAA_BATTERY_DIAMETER;
 BATTERY_HOLDER_FIXTURE_HITCH_WEB_HEIGHT = 0;
 
 function get_battery_holder_back_hitch_position(
-    battery_holder_position = [0,0,0],
+    batteries_position = [0,0,0],
     battery_holder_dimensions = [0,0,0],
 
     hitch_width = BATTERY_HOLDER_FIXTURE_HITCH_WIDTH,
     tolerance = 0
 ) = [
-    battery_holder_position.x
+    batteries_position.x
         + (battery_holder_dimensions.x - hitch_width) / 2,
-    battery_holder_position.y
+    batteries_position.y
         + tolerance * 2
         + battery_holder_dimensions.y
 ];
@@ -79,7 +79,7 @@ module battery_holder_hitch(
 module battery_holder_hitches(
     tolerance = 0,
 
-    battery_holder_position = [0,0,0],
+    batteries_position = [0,0,0],
     battery_holder_dimensions = [0,0,0],
 
     hitch_width = BATTERY_HOLDER_FIXTURE_HITCH_WIDTH,
@@ -96,7 +96,7 @@ module battery_holder_hitches(
         battery_holder_hitch(
             tolerance = tolerance,
 
-            z = battery_holder_position.z - e,
+            z = batteries_position.z - e,
 
             width = hitch_width,
             length = hitch_length,
@@ -109,9 +109,9 @@ module battery_holder_hitches(
     }
 
     translate([
-        battery_holder_position.x
+        batteries_position.x
             + (battery_holder_dimensions.x - hitch_width) / 2,
-        battery_holder_position.y - hitch_length - tolerance * 2,
+        batteries_position.y - hitch_length - tolerance * 2,
         0
     ]) {
         mirror([0, 1, 0]) translate([0, -hitch_length, 0]) {
@@ -121,7 +121,7 @@ module battery_holder_hitches(
 
     translate(
         get_battery_holder_back_hitch_position(
-            battery_holder_position = battery_holder_position,
+            batteries_position = batteries_position,
             battery_holder_dimensions = battery_holder_dimensions,
             hitch_width = hitch_width,
             tolerance = tolerance
@@ -155,7 +155,7 @@ module battery_holder_enclosure_fixtures(
     battery_holder_wall = ENCLOSURE_INNER_WALL,
     battery_holder_floor = BATTERY_HOLDER_DEFAULT_FLOOR,
 
-    battery_holder_position = [0,0,0],
+    batteries_position = [0,0,0],
 
     tolerance = 0
 ) {
@@ -177,7 +177,7 @@ module battery_holder_enclosure_fixtures(
         height = length;
 
         translate([
-            x + battery_holder_position.x,
+            x + batteries_position.x,
             ENCLOSURE_WALL - e,
             ENCLOSURE_FLOOR_CEILING - e
         ]) {
@@ -195,12 +195,12 @@ module battery_holder_enclosure_fixtures(
     if (include_front_nub) {
         _width = BATTERY_HOLDER_NUB_FIXTURE_WIDTH - tolerance * 2;
 
-        x = battery_holder_position.x
+        x = batteries_position.x
             + (battery_holder_dimensions.x - _width) / 2;
         z = ENCLOSURE_FLOOR_CEILING + BATTERY_HOLDER_NUB_FIXTURE_Z
             + tolerance;
 
-        translate([x, battery_holder_position.y - tolerance * 2 - e, z]) {
+        translate([x, batteries_position.y - tolerance * 2 - e, z]) {
             battery_holder_fixture_nub(tolerance);
         }
     }
@@ -216,7 +216,7 @@ module battery_holder_enclosure_fixtures(
     if (include_back_hitch) {
         translate(
             get_battery_holder_back_hitch_position(
-                battery_holder_position = battery_holder_position,
+                batteries_position = batteries_position,
                 battery_holder_dimensions = battery_holder_dimensions,
                 hitch_width = hitch_width,
                 tolerance = tolerance
