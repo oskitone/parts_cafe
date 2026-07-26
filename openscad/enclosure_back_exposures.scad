@@ -148,6 +148,7 @@ module enclosure_back_headphone_jack_exposure(
     clearance_chamfer = ENCLOSURE_ENGRAVING_DEPTH / 2,
 
     label_text_size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
+    label_width = undef,
     label_height = ENCLOSURE_ENGRAVING_LENGTH,
 
     tolerance = 0,
@@ -161,7 +162,9 @@ module enclosure_back_headphone_jack_exposure(
     e = .0124;
 
     cavity_diameter = component_barrel_diameter + x_bleed * 2 + tolerance * 2;
-    label_width = max(min_width, cavity_diameter);
+    label_width = label_width != undef
+        ? label_width
+        : max(min_width, cavity_diameter);
 
     translate([
         center_x,
