@@ -132,11 +132,19 @@ module speaker_mount_fixture(
         SPEAKER_LENGTH,
         NUT_HEIGHT + PCB_MOUNT_POST_CEILING
     ],
-    height = undef,
+    height = undef, // if specified, replaces dimensions.z
     nut_z = PCB_MOUNT_POST_CEILING,
     hole_diameter = SCREW_DIAMETER,
-    tolerance = 0
+
+    show_dfm = true,
+    dfm_cavity_height = .3,
+
+    tolerance = 0,
+
+    debug = false
 ) {
+    screw_cavity_diameter = hole_diameter + tolerance * 2;
+
     e = .0234;
 
     dimensions = [
@@ -183,12 +191,33 @@ module speaker_mount_fixture(
             ]) {
                 translate([0, 0, -e]) {
                     cylinder(
-                        d = hole_diameter + tolerance * 2,
-                        h = dimensions.z + e * 2
+                        d = screw_cavity_diameter,
+                        h = dimensions.z + e * 2,
+                        $fn = 12
                     );
                 }
 
                 rotate([0, 0, (i == 0 || i == 3) ? 45 : -45]) {
+                    if (show_dfm) {
+                        translate([
+                            screw_cavity_diameter / -2,
+                            cavity_dimensions.y / -2,
+                            nut_z - dfm_cavity_height + e
+                        ]) {
+                            cube([
+                                screw_cavity_diameter,
+                                cavity_dimensions.y,
+                                dfm_cavity_height + e
+                            ]);
+                        }
+                    }
+
+                    if (debug) {
+                        translate([0, 0, nut_z]) {
+                            % nut();
+                        }
+                    }
+
                     translate([
                         cavity_dimensions.x / -2,
                         cavity_dimensions.y / -2,
@@ -204,6 +233,8 @@ module speaker_mount_fixture(
 
 // speaker_mount_fixture(
 //     dimensions = [50, 100, 20], nut_z = 20 - NUT_HEIGHT,
+//     show_dfm = true,
+//     debug = true,
 //     tolerance = .1
 // );
 // translate([0,0,-SPEAKER_HEIGHT + SPEAKER_RIM_HEIGHT]) speaker();
