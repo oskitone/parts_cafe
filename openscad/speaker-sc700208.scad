@@ -134,10 +134,11 @@ module speaker_mount_fixture(
     ],
     height = undef, // if specified, replaces dimensions.z
     nut_z = PCB_MOUNT_POST_CEILING,
+    nut_z_clearance = PCB_MOUNT_NUT_Z_CLEARANCE,
     hole_diameter = SCREW_DIAMETER,
 
-    show_dfm = true,
-    dfm_cavity_height = .3,
+    include_sacrificial_bridge = true,
+    bridge_height = .3,
 
     tolerance = 0,
 
@@ -147,16 +148,18 @@ module speaker_mount_fixture(
 
     e = .0234;
 
+    nut_z = nut_z - nut_z_clearance;
+
     dimensions = [
         dimensions.x,
         dimensions.y,
         height != undef ? height : dimensions.z
     ];
 
-    cavity_dimensions = [
+    nut_lock_dimensions = [
         NUT_DIAMETER + SPEAKER_DIAMETER / 2,
         NUT_DIAMETER + tolerance * 2,
-        NUT_HEIGHT + e
+        NUT_HEIGHT + nut_z_clearance + e
     ];
 
     difference() {
@@ -189,29 +192,33 @@ module speaker_mount_fixture(
                 xy.y - SPEAKER_LENGTH / 2,
                 0
             ]) {
-                translate([0, 0, -e]) {
-                    cylinder(
-                        d = screw_cavity_diameter,
-                        h = dimensions.z + e * 2,
-                        $fn = 12
-                    );
+                difference() {
+                    translate([0, 0, -e]) {
+                        cylinder(
+                            d = screw_cavity_diameter,
+                            h = dimensions.z + e * 2,
+                            $fn = 12
+                        );
+                    }
+
+                    if (include_sacrificial_bridge) {
+                        rotate([0, 0, (i == 0 || i == 3) ? 45 : -45]) {
+                            translate([
+                                screw_cavity_diameter / -2,
+                                nut_lock_dimensions.y / -2,
+                                nut_z - bridge_height + e
+                            ]) {
+                                cube([
+                                    screw_cavity_diameter,
+                                    nut_lock_dimensions.y,
+                                    bridge_height + e
+                                ]);
+                            }
+                        }
+                    }
                 }
 
                 rotate([0, 0, (i == 0 || i == 3) ? 45 : -45]) {
-                    if (show_dfm) {
-                        translate([
-                            screw_cavity_diameter / -2,
-                            cavity_dimensions.y / -2,
-                            nut_z - dfm_cavity_height + e
-                        ]) {
-                            cube([
-                                screw_cavity_diameter,
-                                cavity_dimensions.y,
-                                dfm_cavity_height + e
-                            ]);
-                        }
-                    }
-
                     if (debug) {
                         translate([0, 0, nut_z]) {
                             % nut();
@@ -219,11 +226,11 @@ module speaker_mount_fixture(
                     }
 
                     translate([
-                        cavity_dimensions.x / -2,
-                        cavity_dimensions.y / -2,
+                        nut_lock_dimensions.x / -2,
+                        nut_lock_dimensions.y / -2,
                         nut_z
                     ]) {
-                        cube(cavity_dimensions);
+                        cube(nut_lock_dimensions);
                     }
                 }
             }
@@ -233,7 +240,7 @@ module speaker_mount_fixture(
 
 // speaker_mount_fixture(
 //     dimensions = [50, 100, 20], nut_z = 20 - NUT_HEIGHT,
-//     show_dfm = true,
+//     include_sacrificial_bridge = true,
 //     debug = true,
 //     tolerance = .1
 // );
