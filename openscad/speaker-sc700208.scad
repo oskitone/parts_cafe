@@ -1,4 +1,5 @@
 include <nuts_and_bolts.scad>;
+include <enclosure.scad>;
 include <pcb_mount_post.scad>;
 include <rounded_xy_cube.scad>;
 
@@ -128,8 +129,8 @@ module speaker() {
 
 module speaker_mount_fixture(
     dimensions = [
-        SPEAKER_DIAMETER,
-        SPEAKER_LENGTH,
+        SPEAKER_DIAMETER + ENCLOSURE_INNER_WALL * 2,
+        SPEAKER_LENGTH + ENCLOSURE_INNER_WALL * 2,
         NUT_HEIGHT + PCB_MOUNT_POST_CEILING
     ],
     height = undef, // if specified, replaces dimensions.z
@@ -244,4 +245,4 @@ module speaker_mount_fixture(
 //     debug = true,
 //     tolerance = .1
 // );
-// translate([0,0,-SPEAKER_HEIGHT + SPEAKER_RIM_HEIGHT]) speaker();
+// % translate([0,0,-SPEAKER_HEIGHT + SPEAKER_RIM_HEIGHT]) speaker();
