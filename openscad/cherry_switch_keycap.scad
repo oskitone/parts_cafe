@@ -38,6 +38,11 @@ module cherry_switch_keycap(
     engraving = undef,
     engraving_size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
 
+    // The small attachment fixture is sensitive to rotational skew when printing.
+    // (At least, on my printer.)
+    // A cheap hack is to rotate it arbitrarily back into position. Yikes!
+    fixture_rotation_compensation = 0,
+
     outer_color = undef,
     cavity_color = undef,
 
@@ -86,19 +91,53 @@ module cherry_switch_keycap(
     }
 
     module _cavity() {
-        _cherry_switch(
-            z = -cherry_switch_base_height + cherry_switch_travel,
-            base_bleed = cavity_clearance + tolerance,
-            plate_bleed = -(cavity_clearance + tolerance),
-            show_stem = false
-        );
+        cavity_dimensions = [
+            cherry_switch_base_width
+                + (cavity_clearance + tolerance) * 2,
+            cherry_switch_base_length
+                + (cavity_clearance + tolerance) * 2,
+            cherry_switch_travel + e
+        ];
 
-        // TODO: DFM chamfer
-        _cherry_switch(
-            z = -cherry_switch_base_height,
-            stem_bleed = stem_fit_tolerance,
-            show_base = false
-        );
+        translate([
+            (dimensions.x - cavity_dimensions.x) / 2,
+            (dimensions.y - cavity_dimensions.y) / 2,
+            -e
+        ]) {
+            cube(cavity_dimensions);
+        }
+    }
+
+    module _attachment_fixture() {
+        plate_dimensions = [
+            cherry_switch_actuator_plate_width
+                - (cavity_clearance + tolerance) * 2,
+            cherry_switch_actuator_plate_length
+                - (cavity_clearance + tolerance) * 2,
+            cherry_switch_travel + e
+        ];
+
+        translate([dimensions.x / 2, dimensions.y / 2, 0]) {
+            rotate([0, 0, fixture_rotation_compensation]) {
+                translate([dimensions.x / -2, dimensions.y / -2, 0]) {
+                    difference() {
+                        translate([
+                            (dimensions.x - plate_dimensions.x) / 2,
+                            (dimensions.y - plate_dimensions.y) / 2,
+                            0
+                        ]) {
+                            cube(plate_dimensions);
+                        }
+
+                        _cherry_switch(
+                            z = -cherry_switch_base_height,
+                            stem_bleed = stem_fit_tolerance,
+                            show_base = false
+                        );
+                    }
+                }
+            }
+        }
     }
 
     translate([0, 0, switch_position * -cherry_switch_travel]) {
@@ -147,6 +186,8 @@ module cherry_switch_keycap(
                 }
             }
         }
+
+        _attachment_fixture();
     }
 
     if (debug) {
