@@ -127,12 +127,14 @@ module speaker() {
     _magnet();
 }
 
+SPEAKER_MOUNT_FIXTURE_DEFAULT_DIMENSIONS = [
+    SPEAKER_DIAMETER + ENCLOSURE_INNER_WALL * 2,
+    SPEAKER_LENGTH + ENCLOSURE_INNER_WALL * 2,
+    NUT_HEIGHT + PCB_MOUNT_POST_CEILING
+];
+
 module speaker_mount_fixture(
-    dimensions = [
-        SPEAKER_DIAMETER + ENCLOSURE_INNER_WALL * 2,
-        SPEAKER_LENGTH + ENCLOSURE_INNER_WALL * 2,
-        NUT_HEIGHT + PCB_MOUNT_POST_CEILING
-    ],
+    dimensions = SPEAKER_MOUNT_FIXTURE_DEFAULT_DIMENSIONS,
     height = undef, // if specified, replaces dimensions.z
     nut_z = PCB_MOUNT_POST_CEILING,
     nut_z_clearance = PCB_MOUNT_NUT_Z_CLEARANCE,
@@ -157,8 +159,13 @@ module speaker_mount_fixture(
         height != undef ? height : dimensions.z
     ];
 
+    has_default_xy_dimensions = (
+        dimensions.x == SPEAKER_MOUNT_FIXTURE_DEFAULT_DIMENSIONS.x
+        && dimensions.y == SPEAKER_MOUNT_FIXTURE_DEFAULT_DIMENSIONS.y
+    );
+
     nut_lock_dimensions = [
-        NUT_DIAMETER + SPEAKER_DIAMETER / 2,
+        NUT_DIAMETER + SPEAKER_DIAMETER * 2, // arbitrarily big
         NUT_DIAMETER + tolerance * 2,
         NUT_HEIGHT + nut_z_clearance + e
     ];
@@ -167,7 +174,10 @@ module speaker_mount_fixture(
         translate([dimensions.x / -2, dimensions.y / -2, 0]) {
             rounded_xy_cube(
                 dimensions,
-                radius = SPEAKER_PLATE_HOLE_XY,
+                radius = has_default_xy_dimensions
+                    ? sqrt(2 * pow(SPEAKER_PLATE_HOLE_XY, 2))
+                        + tolerance * 2
+                    : 0,
                 $fn = 4
             );
         }
@@ -239,10 +249,15 @@ module speaker_mount_fixture(
     }
 }
 
-// speaker_mount_fixture(
-//     dimensions = [50, 100, 20], nut_z = 20 - NUT_HEIGHT,
-//     include_sacrificial_bridge = true,
-//     debug = true,
-//     tolerance = .1
-// );
-// % translate([0,0,-SPEAKER_HEIGHT + SPEAKER_RIM_HEIGHT]) speaker();
+// translate([
+//     SPEAKER_MOUNT_FIXTURE_DEFAULT_DIMENSIONS.x / 2,
+//     SPEAKER_MOUNT_FIXTURE_DEFAULT_DIMENSIONS.y / 2
+// ]) {
+//     speaker_mount_fixture(
+//         dimensions = [50, 100, 20], nut_z = 20 - NUT_HEIGHT,
+//         include_sacrificial_bridge = true,
+//         debug = true,
+//         tolerance = .1
+//     );
+//     % translate([0,0,-SPEAKER_HEIGHT + SPEAKER_RIM_HEIGHT]) speaker();
+// }
