@@ -4,6 +4,8 @@ include <rounded_xy_cube.scad>;
 include <spst.scad>;
 
 STOCK_SPST_CAP_DIMENSIONS = [18, 18, 10];
+SPST_CAP_Z_CLEARANCE = .2 +
+    (SPST_ACTUATOR_GENEROUS_HEIGHT_OFF_PCB - SPST_ACTUATOR_HEIGHT_OFF_PCB);
 
 module spst_cap(
     dimensions = STOCK_SPST_CAP_DIMENSIONS,
@@ -15,10 +17,8 @@ module spst_cap(
 
     fillet = 1,
 
-    cavity_clearance = .4,
-
-    base_fit_tolerance = 0, // 0 to .1 seems good!
-    actuator_fit_tolerance = 0, // 0 to .1 seems good!
+    xy_clearance = .2,
+    z_clearance = SPST_CAP_Z_CLEARANCE,
 
     spst_base_dimensions = SPST_BASE_DIMENSIONS,
     spst_actuator_diameter = SPST_ACTUATOR_DIAMETER,
@@ -35,8 +35,7 @@ module spst_cap(
     outer_color = undef,
     cavity_color = undef,
 
-    dfm_cavity_height = .3,
-    show_dfm = true,
+    tolerance = 0,
 
     quick_preview = true,
 
@@ -51,38 +50,8 @@ module spst_cap(
     ];
 
     bottom_height_extension = extend_towards_pcb
-        ? spst_base_dimensions.z - spst_travel
+        ? spst_base_dimensions.z - spst_travel - z_clearance
         : 0;
-
-    module _spst(
-        z = 0,
-        base_bleed = [0, 0, 0],
-        actuator_bleed = 0,
-        show_base = true,
-        show_actuator = true,
-        position = 0
-    ) {
-        translate([
-            dimensions.x / 2,
-            dimensions.y / 2,
-            z
-        ]) {
-            spst(
-                base_dimensions = [
-                    spst_base_dimensions.x + base_bleed.x * 2,
-                    spst_base_dimensions.y + base_bleed.y * 2,
-                    spst_base_dimensions.z + base_bleed.z
-                ],
-                actuator_diameter = spst_actuator_diameter
-                    + actuator_bleed * 2,
-                actuator_height_including_base = spst_actuator_height_including_base,
-                travel = spst_travel,
-                position = position,
-                show_base = show_base,
-                show_actuator = show_actuator
-            );
-        }
-    }
 
     module _outer_hull() {
         extension_position = brim_dimensions.z > 0
@@ -99,15 +68,27 @@ module spst_cap(
                 -bottom_height_extension
             ];
 
-        hull() {
-            cap_blank(
-                dimensions = dimensions,
-                contact_dimensions = [contact_width, contact_length, exposed_height],
-                fillet = fillet,
-                brim_dimensions = brim_dimensions
-            );
+        cap_blank(
+            dimensions = dimensions,
+            contact_dimensions = [contact_width, contact_length, exposed_height],
+            fillet = fillet,
+            brim_dimensions = brim_dimensions
+        );
 
-            if (bottom_height_extension > 0) {
+        if (bottom_height_extension > 0) {
+            hull() {
+                translate([
+                    (brim_dimensions.x - dimensions.x) / -2,
+                    (brim_dimensions.y - dimensions.y) / -2,
+                    0
+                ]) {
+                    rounded_xy_cube([
+                        brim_dimensions.x,
+                        brim_dimensions.y,
+                        e
+                    ], brim_dimensions.z > 0 ? 0 : fillet);
+                }
+
                 translate(extension_position) {
                     rounded_xy_cube([
                         max(dimensions.x, brim_dimensions.x)
@@ -122,38 +103,20 @@ module spst_cap(
     }
 
     module _cavity() {
-        dfm_cavity_dimensions = [
+        cavity_dimensions = [
             spst_base_dimensions.x
-                + (cavity_clearance + base_fit_tolerance) * 2,
-            spst_actuator_diameter + actuator_fit_tolerance * 2,
-            dfm_cavity_height + e
+                + (xy_clearance + tolerance) * 2,
+            spst_base_dimensions.y
+                + (xy_clearance + tolerance) * 2,
+            spst_actuator_height_including_base - spst_travel + e
         ];
 
-        _spst(
-            z = -spst_base_dimensions.z + spst_travel - e,
-            base_bleed = [
-                cavity_clearance + base_fit_tolerance,
-                cavity_clearance + base_fit_tolerance,
-                e
-            ],
-            show_actuator = false
-        );
-
-        _spst(
-            z = -spst_base_dimensions.z,
-            actuator_bleed = actuator_fit_tolerance,
-            show_base = false,
-            $fn = 12
-        );
-
-        if (show_dfm) {
-            translate([
-                (dimensions.x - dfm_cavity_dimensions.x) / 2,
-                (dimensions.y - dfm_cavity_dimensions.y) / 2,
-                spst_travel - e
-            ]) {
-                cube(dfm_cavity_dimensions);
-            }
+        translate([
+            (dimensions.x - cavity_dimensions.x) / 2,
+            (dimensions.y - cavity_dimensions.y) / 2,
+            -(spst_base_dimensions.z - spst_travel) - e
+        ]) {
+            cube(cavity_dimensions);
         }
     }
 
@@ -202,22 +165,31 @@ module spst_cap(
     }
 
     if (debug) {
-        % _spst(
-            -spst_base_dimensions.z,
-            position = spst_position
-        );
+        translate([
+            dimensions.x / 2,
+            dimensions.y / 2,
+            -spst_base_dimensions.z
+        ]) {
+            % spst(
+                base_dimensions = spst_base_dimensions,
+                actuator_diameter = spst_actuator_diameter,
+                actuator_height_including_base = spst_actuator_height_including_base,
+                travel = spst_travel,
+                position = spst_position
+            );
+        }
     }
 }
 
-// module __tolerance_goldilocks_spst_cap(
-//     tolerances = [-.1, 0, .1, .2, .3],
+// module __clearance_goldilocks_spst_cap(
+//     clearances = [0, .2, .4, .6],
 
 //     dimensions = [20, 20, 5],
-//     exposed_height = 5,
+//     exposed_height = 4,
 //     overlap = 2,
 //     fillet = 1
 // ) {
-//     for (i = [0 : len(tolerances) - 1]) {
+//     for (i = [0 : len(clearances) - 1]) {
 //         translate([(dimensions.x - overlap) * i, 0, 0]) {
 //             difference() {
 //                 spst_cap(
@@ -226,14 +198,25 @@ module spst_cap(
 //                     contact_length = dimensions.y - fillet * 2,
 //                     exposed_height = exposed_height,
 //                     fillet = fillet,
-//                     base_fit_tolerance = tolerances[i],
-//                     actuator_fit_tolerance = tolerances[i],
-//                     engraving = str(tolerances[i] * 10),
-//                     engraving_size = 10
+//                     xy_clearance = clearances[i],
+//                     engraving = str(clearances[i] * 10),
+//                     engraving_size = 10,
+//                     spst_position = 0
 //                 );
 //             }
 //         }
 //     }
 // }
 
-// __tolerance_goldilocks_spst_cap();
+// __clearance_goldilocks_spst_cap();
+
+// * translate([0, 25, 0]) spst_cap(
+//     debug = 1,
+//     tolerance = .1,
+//     brim_dimensions = [
+//         STOCK_SPST_CAP_DIMENSIONS.x + 4,
+//         STOCK_SPST_CAP_DIMENSIONS.y + 4,
+//         2
+//     ],
+//     spst_position = 0
+// );
