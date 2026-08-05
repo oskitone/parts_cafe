@@ -3,31 +3,35 @@ include <enclosure_engraving.scad>;
 include <rounded_xy_cube.scad>;
 include <spst.scad>;
 
-STOCK_SPST_CAP_DIMENSIONS = [18, 18, 10];
-SPST_CAP_Z_CLEARANCE = .2 +
-    (SPST_ACTUATOR_GENEROUS_HEIGHT_OFF_PCB - SPST_ACTUATOR_HEIGHT_OFF_PCB);
+STOCK_SPST_CAP_DIMENSIONS = [12, 12, 16];
+SPST_CAP_MIN_PCB_CONTACT_DIMENSIONS = [
+    SPST_BASE_DIMENSIONS.x + 4,
+    SPST_BASE_DIMENSIONS.y + 4
+];
+
+SPST_CAP_Z_FROM_PCB = .2 + SPST_MAX_TRAVEL
+    + (SPST_ACTUATOR_GENEROUS_HEIGHT_OFF_PCB - SPST_ACTUATOR_HEIGHT_OFF_PCB);
 
 module spst_cap(
     dimensions = STOCK_SPST_CAP_DIMENSIONS,
-
-    exposed_height = 5,
-
-    contact_width = 14,
-    contact_length = 14,
+    contact_dimensions = [10, 10, 2],
+    brim_dimensions = [14, 14, 1],
+    stilt_dimensions = [
+        SPST_CAP_MIN_PCB_CONTACT_DIMENSIONS.x,
+        SPST_CAP_MIN_PCB_CONTACT_DIMENSIONS.y,
+        8
+    ],
 
     fillet = 1,
 
     xy_clearance = .2,
-    z_clearance = SPST_CAP_Z_CLEARANCE,
+    z_clearance = SPST_CAP_Z_FROM_PCB,
 
     spst_base_dimensions = SPST_BASE_DIMENSIONS,
     spst_actuator_diameter = SPST_ACTUATOR_DIAMETER,
     spst_actuator_height_including_base = SPST_ACTUATOR_HEIGHT_OFF_PCB,
-    spst_travel = SPST_CONSERVATIVE_TRAVEL,
+    spst_travel = SPST_MAX_TRAVEL,
     spst_position = 0,
-
-    brim_dimensions = [0,0,0],
-    extend_towards_pcb = true,
 
     engraving = undef,
     engraving_size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
@@ -43,78 +47,19 @@ module spst_cap(
 ) {
     e = .0418;
 
-    brim_dimensions = [
-        max(brim_dimensions.x, dimensions.x),
-        max(brim_dimensions.y, dimensions.y),
-        brim_dimensions.z,
-    ];
-
-    bottom_height_extension = extend_towards_pcb
-        ? spst_base_dimensions.z - spst_travel - z_clearance
-        : 0;
-
-    module _outer_hull() {
-        extension_position = brim_dimensions.z > 0
-            ? [
-                (brim_dimensions.x - dimensions.x) / -2
-                    + bottom_height_extension,
-                (brim_dimensions.y - dimensions.y) / -2
-                    + bottom_height_extension,
-                -bottom_height_extension
-            ]
-            : [
-                bottom_height_extension,
-                bottom_height_extension,
-                -bottom_height_extension
-            ];
-
-        cap_blank(
-            dimensions = dimensions,
-            contact_dimensions = [contact_width, contact_length, exposed_height],
-            fillet = fillet,
-            brim_dimensions = brim_dimensions
-        );
-
-        if (bottom_height_extension > 0) {
-            hull() {
-                translate([
-                    (brim_dimensions.x - dimensions.x) / -2,
-                    (brim_dimensions.y - dimensions.y) / -2,
-                    0
-                ]) {
-                    rounded_xy_cube([
-                        brim_dimensions.x,
-                        brim_dimensions.y,
-                        e
-                    ], brim_dimensions.z > 0 ? 0 : fillet);
-                }
-
-                translate(extension_position) {
-                    rounded_xy_cube([
-                        max(dimensions.x, brim_dimensions.x)
-                            - bottom_height_extension * 2,
-                        max(dimensions.y, brim_dimensions.y)
-                            - bottom_height_extension * 2,
-                        e
-                    ], fillet);
-                }
-            }
-        }
-    }
-
     module _cavity() {
         cavity_dimensions = [
             spst_base_dimensions.x
                 + (xy_clearance + tolerance) * 2,
             spst_base_dimensions.y
                 + (xy_clearance + tolerance) * 2,
-            spst_actuator_height_including_base - spst_travel + e
+            spst_actuator_height_including_base - z_clearance + e
         ];
 
         translate([
             (dimensions.x - cavity_dimensions.x) / 2,
             (dimensions.y - cavity_dimensions.y) / 2,
-            -(spst_base_dimensions.z - spst_travel) - e
+            -e
         ]) {
             cube(cavity_dimensions);
         }
@@ -123,7 +68,17 @@ module spst_cap(
     translate([0, 0, spst_position * -spst_travel]) {
         difference() {
             color(outer_color) {
-                _outer_hull();
+                cap_blank(
+                    dimensions = [
+                        dimensions.x,
+                        dimensions.y,
+                        dimensions.z
+                    ],
+                    contact_dimensions = contact_dimensions,
+                    brim_dimensions = brim_dimensions,
+                    stilt_dimensions = stilt_dimensions,
+                    fillet = fillet
+                );
             }
 
             color(cavity_color) {
@@ -142,22 +97,17 @@ module spst_cap(
 
                 if (debug) {
                     cutoff_dimensions = [
-                        max(dimensions.x, brim_dimensions.x),
-                        max(dimensions.y, brim_dimensions.y),
-                        dimensions.z + bottom_height_extension
-                            + 100 // haha
+                        max(dimensions.x, brim_dimensions.x) / 2 + e,
+                        max(dimensions.y, brim_dimensions.y) + e * 2,
+                        dimensions.z + e
                     ];
 
                     translate([
                         dimensions.x / 2,
                         (cutoff_dimensions.y - dimensions.y) / -2 - e,
-                        -(bottom_height_extension + e)
+                        -e
                     ]) {
-                        cube([
-                            cutoff_dimensions.x / 2 + e,
-                            cutoff_dimensions.y + e * 2,
-                            cutoff_dimensions.z + e * 2
-                        ]);
+                        cube(cutoff_dimensions);
                     }
                 }
             }
@@ -168,7 +118,7 @@ module spst_cap(
         translate([
             dimensions.x / 2,
             dimensions.y / 2,
-            -spst_base_dimensions.z
+            -z_clearance
         ]) {
             % spst(
                 base_dimensions = spst_base_dimensions,
@@ -181,42 +131,8 @@ module spst_cap(
     }
 }
 
-// module __clearance_goldilocks_spst_cap(
-//     clearances = [0, .2, .4, .6],
-
-//     dimensions = [20, 20, 5],
-//     exposed_height = 4,
-//     overlap = 2,
-//     fillet = 1
-// ) {
-//     for (i = [0 : len(clearances) - 1]) {
-//         translate([(dimensions.x - overlap) * i, 0, 0]) {
-//             difference() {
-//                 spst_cap(
-//                     dimensions = dimensions,
-//                     contact_width = dimensions.x,
-//                     contact_length = dimensions.y - fillet * 2,
-//                     exposed_height = exposed_height,
-//                     fillet = fillet,
-//                     xy_clearance = clearances[i],
-//                     engraving = str(clearances[i] * 10),
-//                     engraving_size = 10,
-//                     spst_position = 0
-//                 );
-//             }
-//         }
-//     }
-// }
-
-// __clearance_goldilocks_spst_cap();
-
-// * translate([0, 25, 0]) spst_cap(
+// translate([0, 25, SPST_CAP_Z_FROM_PCB]) spst_cap(
 //     debug = 1,
 //     tolerance = .1,
-//     brim_dimensions = [
-//         STOCK_SPST_CAP_DIMENSIONS.x + 4,
-//         STOCK_SPST_CAP_DIMENSIONS.y + 4,
-//         2
-//     ],
-//     spst_position = 0
+//     spst_position = round($t)
 // );

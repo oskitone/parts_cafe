@@ -6,11 +6,8 @@ STOCK_CHERRY_SWITCH_KEYCAP_DIMENSIONS = [18, 18, 10];
 
 module cherry_switch_keycap(
     dimensions = STOCK_CHERRY_SWITCH_KEYCAP_DIMENSIONS,
-
-    exposed_height = 5,
-
-    contact_width = 14,
-    contact_length = 14,
+    contact_dimensions = [14, 14, 5],
+    brim_dimensions = [20, 20, 2],
 
     fillet = 1,
 
@@ -32,8 +29,6 @@ module cherry_switch_keycap(
     cherry_switch_stem_vertical_web_depth = CHERRY_SWITCH_STEM_VERTICAL_WEB_DEPTH,
 
     cherry_switch_travel = CHERRY_SWITCH_TRAVEL,
-
-    brim_dimensions = [0,0,0],
 
     engraving = undef,
     engraving_size = ENCLOSURE_ENGRAVING_TEXT_SIZE,
@@ -142,52 +137,58 @@ module cherry_switch_keycap(
 
     translate([0, 0, switch_position * -cherry_switch_travel]) {
         difference() {
-            color(outer_color) {
-                cap_blank(
-                    dimensions = dimensions,
-                    contact_dimensions = [contact_width, contact_length, exposed_height],
-                    fillet = fillet,
-                    brim_dimensions = brim_dimensions
-                );
-            }
+            union() {
+                difference() {
+                    color(outer_color) {
+                        cap_blank(
+                            dimensions = dimensions,
+                            contact_dimensions = contact_dimensions,
+                            brim_dimensions = brim_dimensions,
+                            fillet = fillet
+                        );
+                    }
 
-            color(cavity_color) {
-                if (engraving) {
-                    enclosure_engraving(
-                        engraving,
-                        size = engraving_size,
-                        position = [dimensions.x / 2, dimensions.y / 2],
-                        bottom = false,
-                        quick_preview = quick_preview,
-                        enclosure_height = dimensions.z
-                    );
+                    color(cavity_color) {
+                        if (engraving) {
+                            enclosure_engraving(
+                                engraving,
+                                size = engraving_size,
+                                position = [dimensions.x / 2, dimensions.y / 2],
+                                bottom = false,
+                                quick_preview = quick_preview,
+                                enclosure_height = dimensions.z
+                            );
+                        }
+
+                        _cavity();
+                    }
                 }
 
-                _cavity();
+                color (outer_color) {
+                    _attachment_fixture();
+                }
+            }
 
-                if (debug) {
-                    cutoff_dimensions = [
-                        max(dimensions.x, brim_dimensions.x),
-                        max(dimensions.y, brim_dimensions.y),
-                        dimensions.z
-                    ];
+            if (debug) {
+                cutoff_dimensions = [
+                    max(dimensions.x, brim_dimensions.x),
+                    max(dimensions.y, brim_dimensions.y),
+                    dimensions.z
+                ];
 
-                    translate([
-                        dimensions.x / 2,
-                        (cutoff_dimensions.y - dimensions.y) / -2 - e,
-                        -e
-                    ]) {
-                        cube([
-                            cutoff_dimensions.x / 2 + e,
-                            cutoff_dimensions.y + e * 2,
-                            dimensions.z + e * 2
-                        ]);
-                    }
+                translate([
+                    dimensions.x / 2,
+                    (cutoff_dimensions.y - dimensions.y) / -2 - e,
+                    -e
+                ]) {
+                    cube([
+                        cutoff_dimensions.x / 2 + e,
+                        cutoff_dimensions.y + e * 2,
+                        dimensions.z + e * 2
+                    ]);
                 }
             }
         }
-
-        _attachment_fixture();
     }
 
     if (debug) {
@@ -231,3 +232,9 @@ module cherry_switch_keycap(
 }
 
 __tolerance_goldilocks_cherry_switch_keycap(); */
+
+// cherry_switch_keycap(
+//     debug = 1,
+//     fixture_rotation_compensation = $t * 180,
+//     switch_position = round($t)
+// );
