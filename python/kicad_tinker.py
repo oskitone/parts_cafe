@@ -67,7 +67,7 @@ def update_pcb_from_csv(kicad_pcb_path, input_csv_path):
 
     board.Save(kicad_pcb_path)
 
-# alias kicad_python=/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
+# alias kicad-python=/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
 
 # kicad-python python/kicad_tinker.py > input.csv
 # footprints_from_kicad = get_footprints_from_pcb("../guts/kicad/chordo/chordo.kicad_pcb")
