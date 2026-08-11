@@ -43,9 +43,12 @@ module _speaker_face(
     }
 }
 
-module speaker_inner_rim_cavity(height = SPEAKER_RIM_HEIGHT) {
+module speaker_inner_rim_cavity(
+    height = SPEAKER_RIM_HEIGHT,
+    bleed = 0
+) {
     _speaker_face(
-        diameter = SPEAKER_DIAMETER - SPEAKER_RIM_DEPTH,
+        diameter = SPEAKER_DIAMETER - SPEAKER_RIM_DEPTH + bleed * 2,
         height = height
     );
 }
