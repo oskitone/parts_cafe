@@ -19,7 +19,7 @@ module spst_cap(
     stilt_dimensions = [
         SPST_CAP_MIN_PCB_CONTACT_DIMENSIONS.x,
         SPST_CAP_MIN_PCB_CONTACT_DIMENSIONS.y,
-        8
+        0
     ],
 
     fillet = 1,
@@ -69,11 +69,7 @@ module spst_cap(
         difference() {
             color(outer_color) {
                 cap_blank(
-                    dimensions = [
-                        dimensions.x,
-                        dimensions.y,
-                        dimensions.z
-                    ],
+                    dimensions = dimensions,
                     contact_dimensions = contact_dimensions,
                     brim_dimensions = brim_dimensions,
                     stilt_dimensions = stilt_dimensions,
