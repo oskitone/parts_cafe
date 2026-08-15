@@ -162,11 +162,6 @@ module speaker_mount_fixture(
         height != undef ? height : dimensions.z
     ];
 
-    has_default_xy_dimensions = (
-        dimensions.x == SPEAKER_MOUNT_FIXTURE_DEFAULT_DIMENSIONS.x
-        && dimensions.y == SPEAKER_MOUNT_FIXTURE_DEFAULT_DIMENSIONS.y
-    );
-
     nut_lock_dimensions = [
         NUT_DIAMETER + SPEAKER_DIAMETER * 2, // arbitrarily big
         NUT_DIAMETER + tolerance * 2,
@@ -175,14 +170,7 @@ module speaker_mount_fixture(
 
     difference() {
         translate([dimensions.x / -2, dimensions.y / -2, 0]) {
-            rounded_xy_cube(
-                dimensions,
-                radius = has_default_xy_dimensions
-                    ? sqrt(2 * pow(SPEAKER_PLATE_HOLE_XY, 2))
-                        + tolerance * 2
-                    : 0,
-                $fn = 4
-            );
+            cube(dimensions);
         }
 
         _speaker_face(
@@ -216,23 +204,17 @@ module speaker_mount_fixture(
                     }
 
                     if (include_sacrificial_bridge) {
-                        rotate([0, 0, (i == 0 || i == 3) ? 45 : -45]) {
-                            translate([
-                                screw_cavity_diameter / -2,
-                                nut_lock_dimensions.y / -2,
-                                nut_z - bridge_height + e
-                            ]) {
-                                cube([
-                                    screw_cavity_diameter,
-                                    nut_lock_dimensions.y,
-                                    bridge_height + e
-                                ]);
-                            }
+                        translate([0, 0, nut_z - bridge_height + e]) {
+                            cylinder(
+                                d = screw_cavity_diameter + e * 2,
+                                h = bridge_height + e,
+                                $fn = 12
+                            );
                         }
                     }
                 }
 
-                rotate([0, 0, (i == 0 || i == 3) ? 45 : -45]) {
+                rotate([0, 0, (i == 0 || i == 3) ? -45 : 45]) {
                     if (debug) {
                         translate([0, 0, nut_z]) {
                             % nut();
