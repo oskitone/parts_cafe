@@ -20,6 +20,7 @@ module wheel(
     dimple_count = 0,
     dimple_depth = 1,
     dimple_y = undef,
+    dimple_diameter = undef,
 
     spokes_hub_diameter = PTV09A_POT_ACTUATOR_DIAMETER + 1.2 * 2, // ENCLOSURE_INNER_WALL
     spokes_count = 6,
@@ -49,6 +50,16 @@ module wheel(
     tolerance = 0
 ) {
     e = 0.043;
+
+    has_brim = brim_diameter > 0 && brim_height > 0;
+    flat_bottom = !round_bottom;
+
+    dimple_diameter = dimple_diameter != undef
+        ? dimple_diameter
+        : diameter / 3;
+    dimple_y = dimple_y != undef
+        ? dimple_y
+        : diameter / 2 - dimple_diameter / 2 - fillet / 2;
 
     grip_count = grip_count != undef
         ? grip_count
@@ -87,14 +98,16 @@ module wheel(
                 }
             }
 
-            if (round_bottom) {
-                _end(fillet / 2);
+            if (flat_bottom || has_brim) {
+                translate([0, 0, has_brim ? e : 0]) {
+                    ring(
+                        diameter = diameter,
+                        height = e,
+                        thickness = fillet
+                    );
+                }
             } else {
-                ring(
-                    diameter = diameter,
-                    height = e,
-                    thickness = fillet
-                );
+                _end(fillet / 2);
             }
 
             _end(height - fillet / 2);
@@ -102,24 +115,23 @@ module wheel(
 
         if (spokes_count > 0) {
             _ends();
+
+            translate([0, 0, round_bottom ? fillet / 2 : 0]) {
+                ring(
+                    diameter = diameter,
+                    height = round_bottom ? height - fillet : height - fillet / 2,
+                    thickness = fillet
+                );
+            }
         } else {
             hull() {
                 _ends();
             }
         }
-
-        // TODO: tidy. Seems this is only used for round_bottom
-        translate([0, 0, round_bottom ? fillet / 2 : 0]) {
-            ring(
-                diameter = diameter,
-                height = round_bottom ? height - fillet : height - fillet / 2,
-                thickness = fillet
-            );
-        }
     }
 
     module _outer_grip() {
-        z = brim_height > 0
+        z = has_brim
             ? brim_height + e
             : -e;
 
@@ -230,7 +242,7 @@ module wheel(
         }
     }
 
-    module _dimple_cavities(dimple_diameter = diameter / 3) {
+    module _dimple_cavities() {
         assert(
             brodie_knob_count == 0,
             "Dimples and brodie knobs can't be used together. Set brodie_knob_count to 0."
@@ -242,13 +254,8 @@ module wheel(
         );
 
         for (i = [0 : dimple_count - 1]) {
-            y = dimple_y != undef
-                ? dimple_y
-                : diameter / 2 - dimple_diameter / 2 - fillet / 2;
-            rotation = i * (360 / dimple_count);
-
-            rotate([0, 0, rotation]) {
-                translate([0, y, height - dimple_depth + e]) {
+            rotate([0, 0, i * (360 / dimple_count)]) {
+                translate([0, dimple_y, height - dimple_depth + e]) {
                     cylinder(
                         h = dimple_depth,
                         d = dimple_diameter,
@@ -274,7 +281,7 @@ module wheel(
                     _spokes_hub();
                 }
 
-                if (brim_diameter > 0 && brim_height > 0) {
+                if (has_brim) {
                     _brim();
                 }
 
