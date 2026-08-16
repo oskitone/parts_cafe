@@ -22,6 +22,10 @@ module wheel(
     dimple_y = undef,
     dimple_diameter = undef,
 
+    line_marker_count = 0,
+    line_marker_depth = 1,
+    line_marker_width = 2,
+
     spokes_hub_diameter = PTV09A_POT_ACTUATOR_DIAMETER + 1.2 * 2, // ENCLOSURE_INNER_WALL
     spokes_count = 6,
     spokes_width = 2,
@@ -243,16 +247,6 @@ module wheel(
     }
 
     module _dimple_cavities() {
-        assert(
-            brodie_knob_count == 0,
-            "Dimples and brodie knobs can't be used together. Set brodie_knob_count to 0."
-        );
-
-        assert(
-            spokes_count == 0,
-            "Dimples and spokes can't be used together. Set spokes_count to 0."
-        );
-
         for (i = [0 : dimple_count - 1]) {
             rotate([0, 0, i * (360 / dimple_count)]) {
                 translate([0, dimple_y, height - dimple_depth + e]) {
@@ -261,6 +255,32 @@ module wheel(
                         d = dimple_diameter,
                         $fn = $preview ? undef : grip_count
                     );
+                }
+            }
+        }
+    }
+
+    module _line_marker_cavities() {
+        for (i = [0 : line_marker_count - 1]) {
+            rotate([0, 0, i * (360 / line_marker_count)]) {
+                translate([
+                    0,
+                    0,
+                    height - line_marker_depth + e
+                ]) {
+                    cylinder(
+                        h = line_marker_depth,
+                        d = line_marker_width,
+                        $fn = 12
+                    );
+
+                    translate([line_marker_width / -2, 0, 0]) {
+                        cube([
+                            line_marker_width,
+                            diameter,
+                            line_marker_depth
+                        ]);
+                    }
                 }
             }
         }
@@ -305,6 +325,10 @@ module wheel(
 
             if (dimple_count > 0) {
                 _dimple_cavities();
+            }
+
+            if (line_marker_count > 0) {
+                _line_marker_cavities();
             }
         }
 

@@ -15,6 +15,10 @@ module knob(
     dimple_depth = 1,
     dimple_y = 20 / 2 / 2,
 
+    line_marker_count = 0,
+    line_marker_depth = 1,
+    line_marker_width = 2,
+
     chamfer = 1.2 - .5,
     shim_size = .6,
     shim_count = 5,
@@ -50,6 +54,10 @@ module knob(
         dimple_count = dimple_count,
         dimple_depth = dimple_depth,
         dimple_y = dimple_y,
+
+        line_marker_count = line_marker_count,
+        line_marker_depth = line_marker_depth,
+        line_marker_width = line_marker_width,
 
         spokes_count = 0,
 
