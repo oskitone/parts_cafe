@@ -9,6 +9,18 @@ SLIDER_POT_KICAD_FOOTPRINT_ORIGIN_TO_CENTER = [
     SLIDER_POT_BASE_DIMENSIONS.y / -2
 ];
 
+function get_slider_pot_actuator_y(
+    base_dimensions = SLIDER_POT_BASE_DIMENSIONS,
+    actuator_dimensions = SLIDER_POT_ACTUATOR_DIMENSIONS,
+    travel = SLIDER_POT_TRAVEL,
+
+    actuator_position = 0
+) = (
+    (base_dimensions.y - actuator_dimensions.y) / 2
+        + travel * actuator_position
+        - travel / 2
+);
+
 module slider_pot(
     base_dimensions = SLIDER_POT_BASE_DIMENSIONS,
     actuator_dimensions = SLIDER_POT_ACTUATOR_DIMENSIONS,
@@ -22,9 +34,12 @@ module slider_pot(
 
     translate([
         (base_dimensions.x - actuator_dimensions.x) / 2,
-        (base_dimensions.y - actuator_dimensions.y) / 2
-            + travel * actuator_position
-            - travel / 2,
+        get_slider_pot_actuator_y(
+            base_dimensions = base_dimensions,
+            actuator_dimensions = actuator_dimensions,
+            travel = travel,
+            actuator_position = actuator_position
+        ),
         base_dimensions.z - e
     ]) {
         cube([
