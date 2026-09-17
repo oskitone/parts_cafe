@@ -54,7 +54,7 @@ module battery_holder_hitch(
     translate([
         tolerance + (width - BATTERY_HOLDER_NUB_FIXTURE_WIDTH) / 2,
         -BATTERY_HOLDER_NUB_FIXTURE_DEPTH,
-        z + BATTERY_HOLDER_NUB_FIXTURE_Z + tolerance
+        z + height - BATTERY_HOLDER_NUB_FIXTURE_HEIGHT + tolerance * 2
     ]) {
         battery_holder_fixture_nub(tolerance);
     }
@@ -197,8 +197,8 @@ module battery_holder_enclosure_fixtures(
 
         x = batteries_position.x
             + (battery_holder_dimensions.x - _width) / 2;
-        z = ENCLOSURE_FLOOR_CEILING + BATTERY_HOLDER_NUB_FIXTURE_Z
-            + tolerance;
+        z = batteries_position.z - battery_holder_floor
+            + BATTERY_HOLDER_NUB_FIXTURE_Z;
 
         translate([x, batteries_position.y - tolerance * 2 - e, z]) {
             battery_holder_fixture_nub(tolerance);
@@ -229,7 +229,8 @@ module battery_holder_enclosure_fixtures(
 
                 width = hitch_width,
                 length = hitch_length,
-                height = battery_holder_floor + AAA_BATTERY_DIAMETER,
+                height = batteries_position.z + AAA_BATTERY_DIAMETER
+                    - ENCLOSURE_FLOOR_CEILING,
 
                 web_width = web_width,
                 web_length = web_length,
