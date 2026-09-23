@@ -1,11 +1,10 @@
 include <slider_pot.scad>;
 
-SLIDER_POT_SADDLE_Z_CLEARANCE = .2;
 
 module slider_pot_saddle(
     dimensions = [14, 40, 8],
 
-    z_clearance = SLIDER_POT_SADDLE_Z_CLEARANCE,
+    z_from_pcb = 0,
     actuator_clearance = .4,
 
     slider_pot_base_dimensions = SLIDER_POT_BASE_DIMENSIONS,
@@ -25,7 +24,7 @@ module slider_pot_saddle(
     cavity_dimensions = [
         slider_pot_base_dimensions.x + tolerance * 2,
         slider_pot_base_dimensions.y + tolerance * 2,
-        slider_pot_base_dimensions.z + z_clearance
+        slider_pot_base_dimensions.z
     ];
 
     actuator_cavity_dimensions = [
@@ -52,7 +51,9 @@ module slider_pot_saddle(
     ]) {
         difference() {
             color(outer_color) {
-                cube(dimensions);
+                translate([0, 0, z_from_pcb]) {
+                    cube(dimensions);
+                }
             }
 
             color(cavity_color) {
@@ -64,7 +65,7 @@ module slider_pot_saddle(
                     ]);
                 }
 
-                _center(actuator_cavity_dimensions) {
+                _center(actuator_cavity_dimensions, z_from_pcb) {
                     cube([
                         actuator_cavity_dimensions.x,
                         actuator_cavity_dimensions.y,
@@ -73,7 +74,11 @@ module slider_pot_saddle(
                 }
 
                 if (debug) {
-                    translate([dimensions.x / 2, -e, -e]) {
+                    translate([
+                        dimensions.x / 2,
+                        -e,
+                        z_from_pcb - e
+                    ]) {
                         cube([
                             dimensions.x / 2 + e,
                             dimensions.y + e * 2,
@@ -96,6 +101,8 @@ module slider_pot_saddle(
 }
 
 * slider_pot_saddle(
+    dimensions = [20, 40, 2],
+    z_from_pcb = SLIDER_POT_BASE_DIMENSIONS.z - 1,
     tolerance = .1,
     slider_pot_actuator_position = $t,
     debug = 1
