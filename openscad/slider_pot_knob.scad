@@ -1,5 +1,6 @@
 include <enclosure.scad>;
 include <flat_top_rectangular_pyramid.scad>;
+include <knob.scad>;
 include <rib_cavities.scad>;
 include <rounded_cube.scad>;
 include <slider_pot.scad>;
@@ -13,8 +14,10 @@ module slider_pot_knob(
 
     fillet = 1,
 
-    xy_clearance = .2,
-    z_clearance = 0,
+    ceiling = KNOB_CEILING,
+    xy_clearance = 0,
+
+    chamfer = .6,
 
     slider_pot_base_dimensions = SLIDER_POT_BASE_DIMENSIONS,
     slider_pot_actuator_dimensions = SLIDER_POT_ACTUATOR_DIMENSIONS,
@@ -34,7 +37,12 @@ module slider_pot_knob(
     actuator_cavity_dimensions = [
         slider_pot_actuator_dimensions.x + (tolerance + xy_clearance) * 2,
         slider_pot_actuator_dimensions.y + (tolerance + xy_clearance) * 2,
-        slider_pot_actuator_dimensions.z + z_clearance + e
+        dimensions.z - ceiling + e
+    ];
+    chamfer_dimensions = [
+        actuator_cavity_dimensions.x + chamfer * 2,
+        actuator_cavity_dimensions.y + chamfer * 2,
+        chamfer + e
     ];
 
     module _output() {
@@ -61,6 +69,20 @@ module slider_pot_knob(
                     cube(actuator_cavity_dimensions);
                 }
 
+                translate([
+                    (dimensions.x - chamfer_dimensions.x) / 2,
+                    (dimensions.y - chamfer_dimensions.y) / 2,
+                    -e
+                ]) {
+                    flat_top_rectangular_pyramid(
+                        top_width = chamfer_dimensions.x - chamfer * 2 - e,
+                        top_length = chamfer_dimensions.y - chamfer * 2 - e,
+                        bottom_width = chamfer_dimensions.x,
+                        bottom_length = chamfer_dimensions.y,
+                        height = chamfer_dimensions.z + e * 2
+                    );
+                }
+
                 if (debug) {
                     translate([
                         dimensions.x / 2,
@@ -74,27 +96,6 @@ module slider_pot_knob(
                         ]);
                     }
                 }
-            }
-        }
-
-        if (debug) {
-            translate([
-                (dimensions.x - slider_pot_base_dimensions.x) / 2,
-                (dimensions.y - slider_pot_actuator_dimensions.y) / 2
-                    - get_slider_pot_actuator_y(
-                        base_dimensions = slider_pot_base_dimensions,
-                        actuator_dimensions = slider_pot_actuator_dimensions,
-                        travel = slider_pot_travel,
-                        actuator_position = slider_pot_actuator_position
-                    ),
-                -slider_pot_base_dimensions.z
-            ]) {
-                % slider_pot(
-                    base_dimensions = slider_pot_base_dimensions,
-                    actuator_dimensions = slider_pot_actuator_dimensions,
-                    travel = slider_pot_travel,
-                    actuator_position = slider_pot_actuator_position
-                );
             }
         }
     }
