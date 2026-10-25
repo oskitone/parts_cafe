@@ -1,5 +1,7 @@
+include <enclosure.scad>;
 include <slider_pot.scad>;
 
+SLIDER_POT_SADDLE_WALL = ENCLOSURE_INNER_WALL;
 
 module slider_pot_saddle(
     dimensions = [14, 40, 8],
@@ -12,6 +14,8 @@ module slider_pot_saddle(
     slider_pot_travel = SLIDER_POT_TRAVEL,
     slider_pot_actuator_position = 0,
 
+    well_dimensions = [0, 0, 0],
+
     outer_color = undef,
     cavity_color = undef,
 
@@ -21,7 +25,7 @@ module slider_pot_saddle(
 ) {
     e = .0124;
 
-    cavity_dimensions = [
+    base_cavity_dimensions = [
         slider_pot_base_dimensions.x + tolerance * 2,
         slider_pot_base_dimensions.y + tolerance * 2,
         slider_pot_base_dimensions.z
@@ -57,12 +61,22 @@ module slider_pot_saddle(
             }
 
             color(cavity_color) {
-                _center(cavity_dimensions) {
+                _center(base_cavity_dimensions) {
                     cube([
-                        cavity_dimensions.x,
-                        cavity_dimensions.y,
-                        cavity_dimensions.z + e * 2
+                        base_cavity_dimensions.x,
+                        base_cavity_dimensions.y,
+                        base_cavity_dimensions.z + e * 2
                     ]);
+                }
+
+                if (well_dimensions.z > 0) {
+                    _center(well_dimensions, z_from_pcb + dimensions.z - well_dimensions.z) {
+                        cube([
+                            well_dimensions.x,
+                            well_dimensions.y,
+                            well_dimensions.z + e
+                        ]);
+                    }
                 }
 
                 _center(actuator_cavity_dimensions, z_from_pcb) {
