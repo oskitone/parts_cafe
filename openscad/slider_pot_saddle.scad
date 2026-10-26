@@ -1,3 +1,4 @@
+include <breakaway_support.scad>;
 include <enclosure.scad>;
 include <slider_pot.scad>;
 
@@ -21,6 +22,9 @@ module slider_pot_saddle(
 
     tolerance = 0,
 
+    show_dfm = true,
+    dfm_layer_height = DEFAULT_DFM_LAYER_HEIGHT,
+
     debug = false
 ) {
     e = .0124;
@@ -36,6 +40,12 @@ module slider_pot_saddle(
         slider_pot_actuator_dimensions.y + (actuator_clearance + tolerance) * 2
             + slider_pot_travel,
         dimensions.z
+    ];
+
+    dfm_cavity_dimensions = [
+        base_cavity_dimensions.x,
+        actuator_cavity_dimensions.y,
+        dfm_layer_height
     ];
 
     module _center(_dimensions, z = -e) {
@@ -85,6 +95,16 @@ module slider_pot_saddle(
                         actuator_cavity_dimensions.y,
                         actuator_cavity_dimensions.z + e * 2
                     ]);
+                }
+
+                if (show_dfm) {
+                    _center(dfm_cavity_dimensions, slider_pot_base_dimensions.z - e) {
+                        cube([
+                            dfm_cavity_dimensions.x,
+                            dfm_cavity_dimensions.y,
+                            dfm_cavity_dimensions.z + e
+                        ]);
+                    }
                 }
 
                 if (debug) {
